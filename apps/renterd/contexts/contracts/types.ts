@@ -19,10 +19,12 @@ export type ContractData = {
   spendingUploads: BigNumber
   spendingDownloads: BigNumber
   spendingFundAccount: BigNumber
+  satellite: string
 }
 
 export type TableColumnId =
   | 'actions'
+  | 'satellite'
   | 'contractId'
   | 'hostIp'
   | 'hostKey'
@@ -46,3 +48,7 @@ export const columnsDefaultVisible: TableColumnId[] = [
 ]
 
 export const columnsDefaultSort = 'startTime'
+
+export type SatelliteData = {
+  contracts: Record<string, string>
+}

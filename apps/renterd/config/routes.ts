@@ -28,6 +28,9 @@ export const routes = {
   },
   lockscreen: '/login',
   syncscreen: '/sync',
+  satellite: {
+    index: '/satellite',
+  },
 }
 
 export const connectivityRoute = '/bus/consensus/state'

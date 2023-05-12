@@ -11,6 +11,7 @@ import {
   useConsensusState,
   useContracts as useContractsData,
 } from '@siafoundation/react-renterd'
+import { useSatellite } from './satellite'
 import { createContext, useContext, useMemo } from 'react'
 import BigNumber from 'bignumber.js'
 import {
@@ -29,6 +30,7 @@ function useContractsMain() {
   const consensus = useConsensusState()
   const currentHeight = consensus.data?.BlockHeight
   const response = useContractsData()
+  const satellite = useSatellite()
 
   const dataset = useMemo<ContractData[] | null>(() => {
     if (!response.data) {
@@ -62,10 +64,12 @@ function useContractsMain() {
           spendingUploads: new BigNumber(c.spending.uploads),
           spendingDownloads: new BigNumber(c.spending.downloads),
           spendingFundAccount: new BigNumber(c.spending.fundAccount),
+          satellite: satellite.data && satellite.data.contracts ?
+            satellite.data.contracts[c.id] : '',
         }
       }) || []
     return data
-  }, [response.data, currentHeight])
+  }, [response.data, currentHeight, satellite.data])
 
   const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
     useClientFilters<ContractData>()

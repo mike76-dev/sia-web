@@ -6,6 +6,7 @@ import {
   BarsProgressIcon,
   PlaneIcon,
 } from '@siafoundation/design-system'
+import { SatelliteIcon } from './Satellite/icon'
 import { routes } from '../config/routes'
 import { useRenterd } from '../contexts/renterd'
 
@@ -32,6 +33,9 @@ export function RenterdSidenav() {
       </SidenavItem>
       <SidenavItem title="Configuration" route={routes.config.index}>
         <BarsProgressIcon />
+      </SidenavItem>
+      <SidenavItem title="Satellite" route={routes.satellite.index}>
+        <SatelliteIcon />
       </SidenavItem>
     </>
   )

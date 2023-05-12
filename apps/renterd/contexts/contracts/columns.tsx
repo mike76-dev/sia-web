@@ -1,4 +1,5 @@
 import {
+  Button,
   Text,
   ValueSc,
   TableColumn,
@@ -11,6 +12,7 @@ import {
 import { humanDate } from '@siafoundation/sia-js'
 import { ContractData, TableColumnId } from './types'
 import { ContractDropdownMenu } from '../../components/Contracts/ContractDropdownMenu'
+import { Satellite16 } from '@carbon/icons-react'
 
 type Context = {
   currentHeight: number
@@ -37,6 +39,29 @@ export const columns: ContractsTableColumn[] = [
     cellClassName: 'w-[50px] !pl-2 !pr-4 [&+*]:!pl-0',
     render: ({ data: { hostIp, hostKey } }) => (
       <ContractDropdownMenu address={hostIp} publicKey={hostKey} />
+    ),
+  },
+  {
+    id: 'satellite',
+    label: '',
+    fixed: true,
+    cellClassName: 'w-[50px] !pl-2 !pr-4 [&+*]:!pl-0',
+    render: ({ data: { satellite } }) => (
+      <>
+        {satellite && satellite != '' &&
+          <Button
+            variant="ghost"
+            size="none"
+            className="ml-1"
+            tip={satellite}
+            tipAlign="start"
+          >
+            <Text color="subtle">
+              <Satellite16 className="scale-90"/>
+            </Text>
+          </Button>
+        }
+      </>
     ),
   },
   {
