@@ -5,7 +5,6 @@ import {
   usePostSwr,
   HookArgsSwr,
   HookArgsCallback,
-  Transaction,
   HookArgsWithPayloadSwr,
   FileContractID,
   PublicKey,
@@ -15,19 +14,21 @@ import {
   usePutSwr,
   useDeleteFunc,
   delay,
+  TransactionID,
 } from '@siafoundation/react-core'
 import useSWR from 'swr'
 import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
 
+// state
+
 export type StateHost = {
   publicKey: string
   walletAddress: string
-  buildState: {
-    network: string
-    version: string
-    commit: string
-    buildTime: string
-  }
+  network: string
+  version: string
+  commit: string
+  OS: string
+  buildTime: string
 }
 
 export function useStateHost(args?: HookArgsSwr<void, StateHost>) {
@@ -57,7 +58,7 @@ export function useNetworkBlockHeight(): number {
   const res = useSWR(
     state,
     () => {
-      if (state.data?.buildState.network === 'zen') {
+      if (state.data?.network === 'zen') {
         return getTestnetZenBlockHeight()
       }
       return getMainnetBlockHeight()
@@ -127,7 +128,9 @@ export function useWalletTransactions(
 }
 
 const walletPendingRoute = '/wallet/pending'
-export function useWalletPending(args?: HookArgsSwr<void, Transaction[]>) {
+export function useWalletPending(
+  args?: HookArgsSwr<void, WalletTransaction[]>
+) {
   return useGetSwr({
     ...args,
     route: walletPendingRoute,
@@ -140,15 +143,25 @@ type WalletSendRequest = {
 }
 
 export function useWalletSend(
-  args?: HookArgsCallback<void, WalletSendRequest, void>
+  args?: HookArgsCallback<void, WalletSendRequest, TransactionID>
 ) {
-  return usePostFunc({ ...args, route: '/wallet/send' }, (mutate) => {
+  return usePostFunc({ ...args, route: '/wallet/send' }, async (mutate) => {
+    await delay(2_000)
     mutate((key) => {
       return (
         // key.startsWith(txPoolTransactionsRoute) ||
         key.startsWith(walletPendingRoute)
       )
     })
+  })
+}
+
+// txpool
+
+export function useTxPoolFee(args?: HookArgsSwr<void, Currency>) {
+  return useGetSwr({
+    ...args,
+    route: '/tpool/fee',
   })
 }
 
@@ -508,5 +521,5 @@ type SystemDirResponse = {
 export function useSystemDirectory(
   args: HookArgsSwr<{ path: string }, SystemDirResponse>
 ) {
-  return useGetSwr({ ...args, route: '/system/dir/:path' })
+  return useGetSwr({ ...args, route: '/system/dir' })
 }

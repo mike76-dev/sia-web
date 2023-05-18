@@ -4,11 +4,11 @@ import {
   triggerSuccessToast,
   triggerErrorToast,
   Reset16,
-  Bullhorn16,
   Save16,
   Warning16,
   CheckmarkFilled16,
   ConfigurationPanel,
+  useOnInvalid,
 } from '@siafoundation/design-system'
 import { useCallback, useEffect, useMemo } from 'react'
 import { HostdSidenav } from '../HostdSidenav'
@@ -18,14 +18,13 @@ import { HostdAuthedLayout } from '../../components/HostdAuthedLayout'
 import {} from '@siafoundation/design-system'
 import {
   useSettings,
-  useSettingsAnnounce,
   useSettingsDynDNS,
   useSettingsUpdate,
 } from '@siafoundation/react-hostd'
 import { fields, initialValues } from './fields'
 import { transformDown, transformUp } from './transform'
-import { FieldErrors, useForm } from 'react-hook-form'
-import { entries } from 'lodash'
+import { useForm } from 'react-hook-form'
+import { AnnounceButton } from './AnnounceButton'
 
 export function Config() {
   const { openDialog } = useDialog()
@@ -38,7 +37,6 @@ export function Config() {
     },
   })
   const settingsUpdate = useSettingsUpdate()
-  const settingsAnnounce = useSettingsAnnounce()
   const dynDNSCheck = useSettingsDynDNS({
     disabled: !settings.data || !settings.data.dynDNS.provider,
     config: {
@@ -85,13 +83,7 @@ export function Config() {
     [form, settings, settingsUpdate, dynDNSCheck]
   )
 
-  const onInvalid = useCallback((errors: FieldErrors<typeof initialValues>) => {
-    triggerErrorToast(
-      entries(errors)
-        .map(([key, e]) => `${fields[key].title}: ${e.message}`)
-        .join(', ')
-    )
-  }, [])
+  const onInvalid = useOnInvalid(fields)
 
   const onSubmit = useMemo(
     () => form.handleSubmit(onValid, onInvalid),
@@ -175,14 +167,7 @@ export function Config() {
             <Save16 />
             Save changes
           </Button>
-          <Button
-            variant="accent"
-            tip="Announce host address"
-            onClick={() => settingsAnnounce.post({})}
-          >
-            <Bullhorn16 />
-            Announce
-          </Button>
+          <AnnounceButton />
         </div>
       }
       openSettings={() => openDialog('settings')}
@@ -219,7 +204,7 @@ export function Config() {
           form={form}
         />
         <ConfigurationPanel
-          title="RHP3"
+          title="Accounts"
           category="RHP3"
           fields={fields}
           form={form}

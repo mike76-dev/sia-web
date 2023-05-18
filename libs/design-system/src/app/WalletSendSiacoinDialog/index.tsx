@@ -7,7 +7,6 @@ import { useSendSiacoinGenerateForm } from './Generate'
 import { useSendSiacoinConfirmForm } from './Confirm'
 import { ProgressSteps } from '../ProgressSteps'
 import { WalletSendSiacoinComplete } from './Complete'
-import { Transaction } from '@siafoundation/react-core'
 import { FormSubmitButtonFormik } from '../../components/FormFormik'
 
 export type SendSiacoinFormData = {
@@ -34,7 +33,7 @@ type Props = {
   send: (params: {
     address: string
     sc: BigNumber
-  }) => Promise<{ transaction?: Transaction; error?: string }>
+  }) => Promise<{ transactionId?: string; error?: string }>
 }
 
 export function WalletSendSiacoinDialog({
@@ -45,8 +44,7 @@ export function WalletSendSiacoinDialog({
   send,
 }: Props) {
   const [step, setStep] = useState<Step>('setup')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [signedTxn, setSignedTxn] = useState<Transaction>()
+  const [signedTxnId, setSignedTxnId] = useState<string>()
   const [formData, setFormData] = useState<SendSiacoinFormData>(emptyFormData)
 
   // Form for each step
@@ -62,8 +60,8 @@ export function WalletSendSiacoinDialog({
     fee,
     formData,
     send,
-    onConfirm: ({ transaction }) => {
-      setSignedTxn(transaction)
+    onConfirm: ({ transactionId }) => {
+      setSignedTxnId(transactionId)
       setStep('done')
     },
   })
@@ -142,7 +140,7 @@ export function WalletSendSiacoinDialog({
           <WalletSendSiacoinComplete
             formData={formData}
             fee={fee}
-            // transactionId={'TODO'}
+            transactionId={signedTxnId}
           />
         )}
       </div>
