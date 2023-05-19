@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import {
   useConsensusState,
   useContracts as useContractsData,
+  useEstimatedNetworkBlockHeight,
 } from '@siafoundation/react-renterd'
 import { useSatellite } from './satellite'
 import { createContext, useContext, useMemo } from 'react'
@@ -27,10 +28,20 @@ function useContractsMain() {
   const router = useRouter()
   const limit = Number(router.query.limit || defaultLimit)
   const offset = Number(router.query.offset || 0)
-  const consensus = useConsensusState()
-  const currentHeight = consensus.data?.BlockHeight
   const response = useContractsData()
   const satellite = useSatellite()
+
+  const estimatedNetworkHeight = useEstimatedNetworkBlockHeight()
+  const network = useConsensusState({
+    config: {
+      swr: {
+        refreshInterval: 60_000,
+      },
+    },
+  })
+  const currentHeight = network.data?.Synced
+    ? network.data.BlockHeight
+    : estimatedNetworkHeight
 
   const dataset = useMemo<ContractData[] | null>(() => {
     if (!response.data) {
@@ -132,13 +143,14 @@ function useContractsMain() {
     dataState,
     limit,
     offset,
+    error: response.error,
     pageCount: datasetPage?.length || 0,
     datasetCount: datasetFiltered?.length || 0,
     columns: filteredTableColumns,
     dataset,
     datasetPage,
     cellContext: {
-      currentHeight,
+      currentHeight: estimatedNetworkHeight,
       contractsTimeRange,
     },
     configurableColumns,

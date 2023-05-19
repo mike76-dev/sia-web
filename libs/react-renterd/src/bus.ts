@@ -60,8 +60,14 @@ export function useConsensusNetwork(
   })
 }
 
-export function useNetworkBlockHeight(): number {
-  const network = useConsensusNetwork()
+export function useEstimatedNetworkBlockHeight(): number {
+  const network = useConsensusNetwork({
+    config: {
+      swr: {
+        revalidateOnFocus: false,
+      },
+    },
+  })
   const res = useSWR(
     network,
     () => {
@@ -71,7 +77,7 @@ export function useNetworkBlockHeight(): number {
       return getMainnetBlockHeight()
     },
     {
-      refreshInterval: 5_000,
+      refreshInterval: 60_000,
       keepPreviousData: true,
     }
   )

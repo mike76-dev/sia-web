@@ -27,7 +27,6 @@ export const routes = {
     index: '/node',
   },
   lockscreen: '/login',
-  syncscreen: '/sync',
   satellite: {
     index: '/satellite',
   },

@@ -12,16 +12,17 @@ type Props = {
   title?: string
   size?: React.ComponentProps<typeof Container>['size']
   navTitle?: string
+  profile: React.ReactNode
   nav?: React.ReactNode
   actions?: React.ReactNode
   sidenav?: React.ReactNode
   stats?: React.ReactNode
   children: React.ReactNode
   connectivityRoute: string
+  isSynced: boolean
   walletBalance?: BigNumber
   routes: {
     lockscreen: string
-    syncscreen: string
     home: string
     node: {
       index: string
@@ -37,6 +38,7 @@ export function AppAuthedLayout({
   appName,
   title,
   navTitle,
+  profile,
   size = '4',
   nav,
   actions,
@@ -44,6 +46,7 @@ export function AppAuthedLayout({
   children,
   sidenav,
   connectivityRoute,
+  isSynced,
   walletBalance,
   routes,
   openSettings,
@@ -59,8 +62,10 @@ export function AppAuthedLayout({
       <div className="flex h-full w-full">
         <Sidenav
           routes={routes}
+          profile={profile}
           openSettings={openSettings}
           walletBalance={walletBalance}
+          isSynced={isSynced}
         >
           {sidenav}
         </Sidenav>
