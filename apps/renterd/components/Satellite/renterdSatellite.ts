@@ -35,7 +35,7 @@ export function useSatelliteConfigUpdate(
 
 // struct2ts:github.com/mike76-dev/renterd-satellite/RenterSettings
 export interface RenterSettings {
-  autoRenewContracts: boolean
+  autoRenew: boolean
 }
 
 const renterSettingsKey = '/satellite/settings'

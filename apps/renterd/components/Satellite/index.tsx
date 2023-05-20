@@ -156,7 +156,7 @@ export function Satellite() {
         if (values.enabled) {
           await settingsUpdate.post({
             payload: {
-              autoRenewContracts: values.autoRenew,
+              autoRenew: values.autoRenew,
             },
           })
         }
@@ -191,7 +191,7 @@ export function Satellite() {
       address: config.data?.address,
       publicKey: decodePK(config.data?.publicKey),
       renterSeed: decodeSeed(config.data?.renterSeed),
-      autoRenew: settings.data?.autoRenewContracts,
+      autoRenew: settings.data?.autoRenew,
     })
   }, [form, config.data, settings.data])
 
