@@ -16,6 +16,8 @@ import { RenterdAuthedLayout } from '../RenterdAuthedLayout'
 import {
   useSatelliteConfig,
   useSatelliteConfigUpdate,
+  useRenterSettings,
+  useRenterSettingsUpdate,
 } from './renterdSatellite'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { entries } from 'lodash'
@@ -25,6 +27,7 @@ const initialValues = {
   address: '',
   publicKey: '',
   renterSeed: '',
+  autoRenew: false,
 }
 
 export function Satellite() {
@@ -33,17 +36,17 @@ export function Satellite() {
     defaultValues: initialValues,
   })
 
-  const fields: ConfigFields<typeof initialValues, 'satellite'> = {
+  const fields: ConfigFields<typeof initialValues, 'config' | 'settings'> = {
     enabled: {
       type: 'boolean',
-      category: 'satellite',
+      category: 'config',
       title: 'Enabled',
       description: <>Check if you want to connect to a satellite.</>,
       validation: {},
     },
     address: {
       type: 'text',
-      category: 'satellite',
+      category: 'config',
       title: 'Address',
       description: (
         <>The network address of the satellite.</>
@@ -63,7 +66,7 @@ export function Satellite() {
     },
     publicKey: {
       type: 'text',
-      category: 'satellite',
+      category: 'config',
       title: 'Public Key',
       description: (
         <>The public key of the satellite.</>
@@ -86,7 +89,7 @@ export function Satellite() {
     },
     renterSeed: {
       type: 'text',
-      category: 'satellite',
+      category: 'config',
       title: 'Renter Seed',
       description: (
         <>The seed provided by the satellite.</>
@@ -107,6 +110,13 @@ export function Satellite() {
         pattern: /^[a-f0-9]+$/,
       },
     },
+    autoRenew: {
+      type: 'boolean',
+      category: 'settings',
+      title: 'Auto Renew Contracts',
+      description: <>Contract renewals are handled automatically by the satellite.</>,
+      validation: {},
+    },
   }
 
   const { openDialog } = useDialog()
@@ -119,10 +129,19 @@ export function Satellite() {
       },
     },
   })
+  const settingsUpdate = useRenterSettingsUpdate()
+  const settings = useRenterSettings({
+    // Do not automatically refetch
+    config: {
+      swr: {
+        revalidateOnFocus: false,
+      },
+    },
+  })
 
   const onValid = useCallback(
     async (values: typeof initialValues) => {
-      if (!config.data) {
+      if (!config.data || !settings.data) {
         return
       }
       try {
@@ -134,13 +153,20 @@ export function Satellite() {
             renterSeed: encodeSeed(values.renterSeed),
           },
         })
+        if (values.enabled) {
+          await settingsUpdate.post({
+            payload: {
+              autoRenewContracts: values.autoRenew,
+            },
+          })
+        }
         triggerSuccessToast('Configuration has been saved.')
       } catch (e) {
         triggerErrorToast((e as Error).message)
         console.log(e)
       }
     },
-    [config.data, configUpdate]
+    [config.data, configUpdate, settings.data, settingsUpdate]
   )
 
   const onInvalid = useCallback((errors: FieldErrors<typeof initialValues>) => {
@@ -157,7 +183,7 @@ export function Satellite() {
   )
 
   const resetFormData = useCallback(() => {
-    if (!config.data) {
+    if (!config.data || !settings.data) {
       return
     }
     form.reset({
@@ -165,21 +191,23 @@ export function Satellite() {
       address: config.data?.address,
       publicKey: decodePK(config.data?.publicKey),
       renterSeed: decodeSeed(config.data?.renterSeed),
+      autoRenew: settings.data?.autoRenewContracts,
     })
-  }, [form, config.data])
+  }, [form, config.data, settings.data])
 
   const revalidateAndResetFormData = useCallback(async () => {
     await config.mutate()
+    await settings.mutate()
     // Theoretically mutate should trigger the init effect,
     // but for some reason it does not (maybe when the response is cached?)
     // therefore we manually call form.reset.
     resetFormData()
-  }, [resetFormData, config])
+  }, [resetFormData, config, settings])
 
   // init - when new config is fetched, reset the form with the values
   useEffect(() => {
     resetFormData()
-  }, [config.data])
+  }, [config.data, settings.data])
 
   const changeCount = Object.entries(form.formState.dirtyFields).filter(
     ([_, val]) => !!val
@@ -219,8 +247,14 @@ export function Satellite() {
     >
       <div className="px-5 py-6 flex flex-col gap-16 max-w-screen-xl">
         <ConfigurationPanel
-          title="Satellite Configuration"
-          category="satellite"
+          title="Configuration"
+          category="config"
+          fields={fields}
+          form={form}
+        />
+        <ConfigurationPanel
+          title="Opt-In Settings"
+          category="settings"
           fields={fields}
           form={form}
         />
