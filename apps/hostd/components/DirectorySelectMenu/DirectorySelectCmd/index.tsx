@@ -6,6 +6,7 @@ import { useSystemDirectory } from '@siafoundation/react-hostd'
 import { useHostOSPathSeparator } from '../../../hooks/useHostOSPathSeparator'
 import { getChildDirectoryPath, getParentDir } from '../../../lib/system'
 import { DirectorySelectError } from './DirectorySelectError'
+import { DirectoryCreate } from './DirectoryCreate'
 
 export const volumesDirectorySelectPage = {
   namespace: 'volumes/directorySelect',
@@ -42,6 +43,8 @@ export function DirectorySelectCmd({
   if (!dir.data) {
     return null
   }
+
+  const isRootOnWindows = dir.data?.path === '\\'
 
   return (
     <CommandGroup
@@ -114,6 +117,23 @@ export function DirectorySelectCmd({
             </CommandItemSearch>
           )
         })}
+      {!isRootOnWindows && (
+        <CommandItemSearch
+          commandPage={volumesDirectorySelectPage}
+          currentPage={currentPage}
+          value="create new directory"
+        >
+          <DirectoryCreate
+            path={dir.data?.path}
+            onCreate={(name) => {
+              dir.mutate((data) => ({
+                ...data,
+                directories: data.directories?.concat(name) || [name],
+              }))
+            }}
+          />
+        </CommandItemSearch>
+      )}
     </CommandGroup>
   )
 }
