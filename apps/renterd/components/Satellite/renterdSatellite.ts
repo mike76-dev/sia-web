@@ -28,7 +28,7 @@ export function useSatelliteConfig(args?: HookArgsSwr<void, SatelliteConfig>) {
 export function useSatelliteConfigUpdate(
   args?: HookArgsCallback<void, SatelliteConfig, void>
 ) {
-  return usePutFunc({ ...args, route: satelliteConfigKey }, (mutate) => {
+  return usePutFunc({ ...args, route: satelliteConfigKey }, async (mutate) => {
     mutate((key) => key === satelliteConfigKey)
   })
 }
@@ -50,7 +50,7 @@ export function useRenterSettings(args?: HookArgsSwr<void, RenterSettings>) {
 export function useRenterSettingsUpdate(
   args?: HookArgsCallback<void, RenterSettings, void>
 ) {
-  return usePostFunc({ ...args, route: renterSettingsKey }, (mutate) => {
+  return usePostFunc({ ...args, route: renterSettingsKey }, async (mutate) => {
     mutate((key) => key === renterSettingsKey)
   })
 }
