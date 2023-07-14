@@ -11,21 +11,29 @@ import {
   ConfigurationPanel,
   triggerErrorToast,
   useOnInvalid,
+  Switch,
+  ControlGroup,
+  Popover,
+  Label,
+  Paragraph,
+  Settings16,
 } from '@siafoundation/design-system'
 import BigNumber from 'bignumber.js'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RenterdSidenav } from '../RenterdSidenav'
 import { routes } from '../../config/routes'
 import { useDialog } from '../../contexts/dialog'
 import { RenterdAuthedLayout } from '../RenterdAuthedLayout'
 import {
+  AutopilotConfig,
   useAutopilotConfig,
   useAutopilotConfigUpdate,
 } from '@siafoundation/react-renterd'
 import { humanBytes, toHastings, toScale } from '@siafoundation/sia-js'
-import { initialValues, fields } from './fields'
+import { defaultValues, fields } from './fields'
 import { transformDown, transformUp } from './transform'
 import { useForm } from 'react-hook-form'
+import { useSyncContractSet } from './useSyncContractSet'
 
 export function Autopilot() {
   const { openDialog } = useDialog()
@@ -38,28 +46,64 @@ export function Autopilot() {
       },
     },
   })
+  const {
+    shouldSyncDefaultContractSet,
+    setShouldSyncDefaultContractSet,
+    syncDefaultContractSet,
+  } = useSyncContractSet()
 
   const form = useForm({
     mode: 'all',
-    defaultValues: initialValues,
+    defaultValues,
   })
 
+  const resetFormData = useCallback(
+    (data: AutopilotConfig) => {
+      form.reset(transformDown(data))
+    },
+    [form]
+  )
+
+  // init - when new config is fetched, set the form
+  const [hasInit, setHasInit] = useState(false)
+  useEffect(() => {
+    if (config.data && !hasInit) {
+      resetFormData(config.data)
+      setHasInit(true)
+      return
+    }
+    if (config.error?.status === 404 && !hasInit) {
+      form.reset(defaultValues)
+      setHasInit(true)
+      return
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.data, config.error])
+
+  const reset = useCallback(async () => {
+    const data = await config.mutate()
+    if (!data) {
+      triggerErrorToast('Error fetching config.')
+    } else {
+      resetFormData(data)
+    }
+  }, [config, resetFormData])
+
   const onValid = useCallback(
-    async (values: typeof initialValues) => {
-      if (!config.data) {
-        return
-      }
+    async (values: typeof defaultValues) => {
       try {
         await configUpdate.put({
           payload: transformUp(values, config.data),
         })
         triggerSuccessToast('Configuration has been saved.')
+        syncDefaultContractSet(values.set)
+        reset()
       } catch (e) {
         triggerErrorToast((e as Error).message)
         console.log(e)
       }
     },
-    [config.data, configUpdate]
+    [config.data, configUpdate, reset, syncDefaultContractSet]
   )
 
   const onInvalid = useOnInvalid(fields)
@@ -68,28 +112,6 @@ export function Autopilot() {
     () => form.handleSubmit(onValid, onInvalid),
     [form, onValid, onInvalid]
   )
-
-  const resetFormData = useCallback(() => {
-    if (!config.data) {
-      return
-    }
-    form.reset(transformDown(config.data))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, config])
-
-  const revalidateAndResetFormData = useCallback(async () => {
-    await config.mutate()
-    // Theoretically mutate should trigger the init effect,
-    // but for some reason it does not (maybe when the response is cached?)
-    // therefore we manually call form.reset.
-    resetFormData()
-  }, [resetFormData, config])
-
-  // init - when new config is fetched, reset the form with the values
-  useEffect(() => {
-    resetFormData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.data])
 
   const storage = form.watch('storage')
   const period = form.watch('period')
@@ -178,19 +200,49 @@ export function Autopilot() {
             tip="Reset all changes"
             icon="contrast"
             disabled={!changeCount}
-            onClick={() => revalidateAndResetFormData()}
+            onClick={reset}
           >
             <Reset16 />
           </Button>
-          <Button
-            tip="Save all changes"
-            variant="accent"
-            disabled={!form.formState.isDirty || form.formState.isSubmitting}
-            onClick={onSubmit}
-          >
-            <Save16 />
-            Save changes
-          </Button>
+          <ControlGroup>
+            <Button
+              tip="Save all changes"
+              variant="accent"
+              disabled={!form.formState.isDirty || form.formState.isSubmitting}
+              onClick={onSubmit}
+            >
+              <Save16 />
+              Save changes
+            </Button>
+            <Popover
+              contentProps={{
+                align: 'end',
+              }}
+              trigger={
+                <Button variant="accent" icon="hover">
+                  <Settings16 />
+                </Button>
+              }
+            >
+              <div className="px-1">
+                <Label>Options</Label>
+                <div>
+                  <Switch
+                    checked={shouldSyncDefaultContractSet}
+                    onCheckedChange={(val) =>
+                      setShouldSyncDefaultContractSet(val)
+                    }
+                  >
+                    sync default contract set
+                  </Switch>
+                  <Paragraph size="12">
+                    Automatically update the default contract set to be the same
+                    as the autopilot contract set when changes are saved.
+                  </Paragraph>
+                </div>
+              </div>
+            </Popover>
+          </ControlGroup>
         </div>
       }
       openSettings={() => openDialog('settings')}

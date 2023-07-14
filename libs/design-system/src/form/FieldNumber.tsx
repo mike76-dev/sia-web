@@ -2,20 +2,21 @@ import { NumberField } from '../core/NumberField'
 import BigNumber from 'bignumber.js'
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form'
 import { FieldGroup } from '../components/Form'
-import { ConfigField, useRegisterForm } from './configurationFields'
+import { ConfigFields, useRegisterForm } from './configurationFields'
 
 type Props<Values extends FieldValues, Categories extends string> = {
   name: Path<Values>
   form: UseFormReturn<Values>
-  field: ConfigField<Values, Categories>
+  fields: ConfigFields<Values, Categories>
 }
 
 export function FieldNumber<
   Values extends FieldValues,
   Categories extends string
->({ name, form, field }: Props<Values, Categories>) {
+>({ name, form, fields }: Props<Values, Categories>) {
+  const field = fields[name]
   const { placeholder, decimalsLimit = 2, units } = field
-  const { onChange, onBlur, error, value } = useRegisterForm({
+  const { setValue, error, value } = useRegisterForm({
     form,
     field,
     name,
@@ -23,6 +24,7 @@ export function FieldNumber<
   return (
     <FieldGroup title={field.title} name={name} form={form}>
       <NumberField
+        name={name}
         value={value}
         units={units}
         decimalsLimit={decimalsLimit}
@@ -36,11 +38,10 @@ export function FieldNumber<
         }
         onChange={(val) => {
           const v = val !== undefined ? new BigNumber(val) : undefined
-          onChange(v as PathValue<Values, Path<Values>>)
+          setValue(v as PathValue<Values, Path<Values>>, true)
         }}
-        onBlur={(e) => {
-          onBlur(e)
-          onChange(value)
+        onBlur={() => {
+          setValue(value, true)
         }}
       />
     </FieldGroup>

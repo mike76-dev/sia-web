@@ -5,7 +5,10 @@ import {
   UnlockConditions,
   SiacoinOutput,
 } from '@siafoundation/react-core'
-import { ContractStatus } from '@siafoundation/react-hostd'
+import {
+  ContractFilterSortField,
+  ContractStatus,
+} from '@siafoundation/react-hostd'
 import BigNumber from 'bignumber.js'
 
 export type ContractData = {
@@ -64,12 +67,9 @@ export type TableColumnId =
   | 'usageStorage'
   | 'lockedCollateral'
   | 'timeline'
-  | 'negotiationHeight'
-  | 'formationConfirmed'
-  | 'revisionConfirmed'
-  | 'resolutionConfirmed'
-  | 'renewedTo'
-  | 'renewedFrom'
+  | 'contractHeightStart'
+  | 'contractHeightEnd'
+  | 'payoutHeight'
 
 export const columnsDefaultVisible: TableColumnId[] = [
   'contractId',
@@ -77,12 +77,44 @@ export const columnsDefaultVisible: TableColumnId[] = [
   'usageTotal',
   'lockedCollateral',
   'timeline',
-  'negotiationHeight',
-  'formationConfirmed',
-  'revisionConfirmed',
-  'resolutionConfirmed',
-  'renewedTo',
-  'renewedFrom',
 ]
 
-export const columnsDefaultSort = 'contractId'
+export type SortField =
+  | 'status'
+  | 'timeline'
+  | 'contractHeightStart'
+  | 'contractHeightEnd'
+
+export const sortOptions: {
+  id: SortField
+  value: ContractFilterSortField
+  label: string
+  category: string
+}[] = [
+  {
+    id: 'status',
+    value: 'status',
+    label: 'status',
+    category: 'general',
+  },
+  {
+    id: 'timeline',
+    value: 'negotiationHeight',
+    label: 'timeline',
+    category: 'time',
+  },
+  {
+    id: 'contractHeightStart',
+    value: 'negotiationHeight',
+    label: 'start height',
+    category: 'time',
+  },
+  {
+    id: 'contractHeightEnd',
+    value: 'expirationHeight',
+    label: 'expiration height',
+    category: 'time',
+  },
+]
+
+export const defaultSortField: SortField = 'timeline'

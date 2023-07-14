@@ -29,9 +29,6 @@ export function useGetSwr<Params extends RequestParams, Result>(
     undefined
   )
   return useSWR<Result, SWRError>(
-    // TODO: add a config to app settings to set password protected app or not,
-    // renterd etc require password, explorer do not, disable hook fetching if
-    // password protected and password is missing.
     keyOrNull(
       reqRoute,
       hookArgs.disabled || (passwordProtectRequestHooks && !settings.password)
@@ -91,12 +88,14 @@ export function useGetFunc<Params extends RequestParams, Result>(
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
+        // If the network is disconnected then response.status will be 0 and
+        // data undefined, so return axios e.message error.
         const error =
-          e.response.data instanceof Blob
-            ? await e.response.data.text()
-            : e.response.data
+          e.response?.data instanceof Blob
+            ? await e.response?.data.text()
+            : e.response?.data || e.message
         return {
-          status: e.response.status,
+          status: e.response?.status,
           error,
         } as Response<Result>
       }

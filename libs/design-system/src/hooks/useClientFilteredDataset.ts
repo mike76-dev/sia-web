@@ -2,18 +2,18 @@ import BigNumber from 'bignumber.js'
 import { useMemo } from 'react'
 import { ClientFilterItem } from './useClientFilters'
 
-type Props<
-  Datum extends Record<string, BigNumber | string | boolean | number>
-> = {
+type DatumValue = BigNumber | string | boolean | number | (() => void)
+
+type Props<Datum extends Record<string, DatumValue>> = {
   dataset: Datum[] | null
   filters: ClientFilterItem<Datum>[]
-  sortColumn: string
+  sortField: string
   sortDirection: 'asc' | 'desc'
 }
 
 export function useClientFilteredDataset<
-  Datum extends Record<string, BigNumber | string | boolean | number>
->({ dataset, filters, sortColumn, sortDirection }: Props<Datum>) {
+  Datum extends Record<string, DatumValue>
+>({ dataset, filters, sortField, sortDirection }: Props<Datum>) {
   return useMemo<Datum[] | null>(() => {
     if (!dataset) {
       return null
@@ -30,8 +30,8 @@ export function useClientFilteredDataset<
         })
       : dataset
     data = data.sort((a, b) => {
-      const aVal = a[sortColumn]
-      const bVal = b[sortColumn]
+      const aVal = a[sortField]
+      const bVal = b[sortField]
       if (sortDirection === 'desc') {
         if (aVal instanceof BigNumber && bVal instanceof BigNumber) {
           return aVal.lte(bVal) ? 1 : -1
@@ -44,5 +44,5 @@ export function useClientFilteredDataset<
       return aVal >= bVal ? 1 : -1
     })
     return [...data]
-  }, [dataset, filters, sortColumn, sortDirection])
+  }, [dataset, filters, sortField, sortDirection])
 }

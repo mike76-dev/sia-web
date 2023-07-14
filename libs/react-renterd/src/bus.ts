@@ -107,7 +107,7 @@ export function useSyncerConnect(args?: HookArgsCallback<void, string, never>) {
       ...args,
       route: '/bus/syncer/connect',
     },
-    (mutate) => {
+    async (mutate) => {
       mutate((key) => key === syncerPeers)
     }
   )
@@ -199,19 +199,19 @@ export function useWalletRedistribute(
 }
 
 export function useWalletDiscard(
-  args: HookArgsCallback<void, Transaction, never>
+  args?: HookArgsCallback<void, Transaction, never>
 ) {
   return usePostFunc({ ...args, route: '/bus/wallet/discard' })
 }
 
 export function useWalletPrepareForm(
-  args: HookArgsCallback<void, WalletPrepareFormRequest, Transaction[]>
+  args?: HookArgsCallback<void, WalletPrepareFormRequest, Transaction[]>
 ) {
   return usePostFunc({ ...args, route: '/bus/wallet/prepare/form' })
 }
 
 export function useWalletPrepareRenew(
-  args: HookArgsCallback<
+  args?: HookArgsCallback<
     void,
     WalletPrepareRenewRequest,
     WalletPrepareRenewResponse
@@ -252,8 +252,10 @@ export function useHosts(args: HookArgsSwr<HostsParams, Host[]>) {
 }
 
 export type HostsSearchFilterMode = 'all' | 'allowed' | 'blocked'
+export type HostsUsabilityMode = 'all' | 'usable' | 'unusable'
 export type HostsSearchPayload = {
   filterMode: HostsSearchFilterMode
+  usabilityMode?: HostsUsabilityMode
   addressContains?: string
   keyIn?: string[]
   offset?: number
@@ -302,16 +304,19 @@ export function useHostsAllowlistUpdate(
     void
   >
 ) {
-  return usePutFunc({ ...args, route: '/bus/hosts/allowlist' }, (mutate) => {
-    mutate((key) => {
-      const matches = [
-        hostsSearchRoute,
-        hostsAllowlistRoute,
-        contractsActiveRoute,
-      ]
-      return !!matches.find((match) => key.startsWith(match))
-    })
-  })
+  return usePutFunc(
+    { ...args, route: '/bus/hosts/allowlist' },
+    async (mutate) => {
+      mutate((key) => {
+        const matches = [
+          hostsSearchRoute,
+          hostsAllowlistRoute,
+          contractsActiveRoute,
+        ]
+        return !!matches.find((match) => key.startsWith(match))
+      })
+    }
+  )
 }
 
 export function useHostsBlocklistUpdate(
@@ -324,16 +329,19 @@ export function useHostsBlocklistUpdate(
     void
   >
 ) {
-  return usePutFunc({ ...args, route: '/bus/hosts/blocklist' }, (mutate) => {
-    mutate((key) => {
-      const matches = [
-        hostsSearchRoute,
-        hostsBlocklistRoute,
-        contractsActiveRoute,
-      ]
-      return !!matches.find((match) => key.startsWith(match))
-    })
-  })
+  return usePutFunc(
+    { ...args, route: '/bus/hosts/blocklist' },
+    async (mutate) => {
+      mutate((key) => {
+        const matches = [
+          hostsSearchRoute,
+          hostsBlocklistRoute,
+          contractsActiveRoute,
+        ]
+        return !!matches.find((match) => key.startsWith(match))
+      })
+    }
+  )
 }
 
 // contracts
@@ -413,7 +421,7 @@ export function useObject(args: HookArgsSwr<{ key: string }, { object: Obj }>) {
 }
 
 export function useObjectSearch(
-  args: HookArgsSwr<{ key: string; skip: number; limit: number }, string[]>
+  args: HookArgsSwr<{ key: string; skip: number; limit: number }, ObjEntry[]>
 ) {
   return useGetSwr({ ...args, route: '/bus/search/objects' })
 }
@@ -427,9 +435,12 @@ export function useObjectAdd(
 export function useObjectDelete(
   args?: HookArgsCallback<{ key: string }, void, never>
 ) {
-  return useDeleteFunc({ ...args, route: '/bus/objects/:key' }, (mutate) => {
-    mutate((key) => key.startsWith('/bus/objects/'))
-  })
+  return useDeleteFunc(
+    { ...args, route: '/bus/objects/:key' },
+    async (mutate) => {
+      mutate((key) => key.startsWith('/bus/objects/'))
+    }
+  )
 }
 
 type ObjectsStats = {
@@ -461,7 +472,9 @@ export function useSettings(args?: HookArgsSwr<void, string[]>) {
   return useGetSwr({ ...args, route: '/bus/settings' })
 }
 
-export function useSetting(args: HookArgsSwr<{ key: string }, Setting>) {
+export function useSetting<T extends Setting>(
+  args: HookArgsSwr<{ key: string }, T>
+) {
   return useGetSwr({ ...args, route: '/bus/setting/:key' })
 }
 
@@ -473,7 +486,7 @@ export function useSettingUpdate(
       ...args,
       route: '/bus/setting/:key',
     },
-    (mutate, args) => {
+    async (mutate, args) => {
       mutate((key) => key.startsWith(`/bus/setting/${args.params.key}`))
     }
   )

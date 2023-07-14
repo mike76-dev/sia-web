@@ -1,5 +1,61 @@
 # renterd
 
+## 0.23.0
+
+### Minor Changes
+
+- be705b97: The files feature now prompts the user to configure the default contract set and autopilot before uploading.
+- be705b97: The autopilot settings feature now has an option to automatically sync the default contract set with changes to the autopilot contract set - this is enabled by default.
+- be705b97: The configuration settings now inlude a default contract set.
+- aa50389b: The login screen now has an option to show the custom API field.
+- be705b97: The files feature shows a warning if autopilot is enabled and the contract set does not match the default.
+- aa50389b: The login screen timeout for an unresponsive daemon is now 10 seconds.
+
+## 0.22.0
+
+### Minor Changes
+
+- 14554de8: Fixed an issue with the allowlist, removing public keys now works as expected.
+- 00c43ed3: The wallet now sends the correct amount when fee is included in amount.
+
+## 0.21.0
+
+### Minor Changes
+
+- dc23d8c0: The autopilot config no longer defaults, it now must be configured by the user.
+- 234a40a8: The autopilot status endpoint has been removed.
+
+## 0.20.0
+
+### Minor Changes
+
+- 40d856d6: The contracts table now includes a data size column.
+- dfc1129c: Fixed an issue where opening the file search feature would crash the UI.
+
+## 0.19.0
+
+### Minor Changes
+
+- 54b1b445: Wallet send flow now properly discards transaction if an error occurs during signing or broadcasting.
+- 04c8cd01: Files stats now show a breakdown of file size with and without redundancy and also with repairs.
+- 8c2a95da: The hosts explorer now supports filtering by usable and unusable.
+
+## 0.18.0
+
+### Minor Changes
+
+- 06e7e1c5: Numbers are now displayed and entered in localized format.
+- 000db6a6: Currency options now include CAD, AUS, RUB, and CNY.
+- 06e7e1c5: Dates and times are now displayed in a localized format.
+- 33cd3b54: The wallet now shows a balance evolution graph.
+- 33cd3b54: The transaction details dialog title is now based on the specific type.
+
+## 0.17.0
+
+### Minor Changes
+
+- 44d74f3: The copy authenticated URL toast is now properly formatted.
+
 ## 0.16.0
 
 ### Minor Changes

@@ -5,7 +5,7 @@ import React from 'react'
 
 export const scDecimalPlaces = 6
 
-export const initialValues = {
+export const defaultValues = {
   // contracts
   set: '',
   amount: undefined as BigNumber | undefined,
@@ -22,10 +22,10 @@ export const initialValues = {
   defragThreshold: undefined as BigNumber | undefined,
 }
 
-export type SettingsData = typeof initialValues
+export type SettingsData = typeof defaultValues
 
 export const fields: ConfigFields<
-  typeof initialValues,
+  typeof defaultValues,
   'contracts' | 'hosts' | 'wallet'
 > = {
   // contracts
@@ -122,13 +122,17 @@ export const fields: ConfigFields<
     type: 'text',
     category: 'contracts',
     title: 'Contract set',
-    description: <>The contract set that autopilot should use.</>,
+    description: (
+      <>
+        The contract set that autopilot should use. This should typically be the
+        same as the default contract set.
+      </>
+    ),
     placeholder: 'autopilot',
     suggestion: 'autopilot',
     suggestionTip: (
       <>
-        The default contract set is <Code>autopilot</Code>, only change this if
-        you understand the implications.
+        The default contract set is <Code>autopilot</Code>.
       </>
     ),
     validation: {

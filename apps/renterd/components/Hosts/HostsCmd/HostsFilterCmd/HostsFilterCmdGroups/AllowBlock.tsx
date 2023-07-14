@@ -11,12 +11,12 @@ const options = [
   {
     id: 'filterMode',
     value: 'allowed',
-    label: 'Host allowed',
+    label: 'allowed',
   },
   {
     id: 'filterMode',
     value: 'blocked',
-    label: 'Host blocked',
+    label: 'blocked',
   },
 ]
 

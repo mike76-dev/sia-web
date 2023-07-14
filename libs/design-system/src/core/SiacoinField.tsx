@@ -3,7 +3,14 @@ import {
   useAppSettings,
   useSiaCentralMarketExchangeRate,
 } from '@siafoundation/react-core'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  forwardRef,
+  Ref,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import BigNumber from 'bignumber.js'
 import { cx } from 'class-variance-authority'
 import { toFixedMax } from '../lib/numbers'
@@ -25,21 +32,25 @@ type Props = Omit<
 
 const zero = new BigNumber(0)
 
-export function SiacoinField({
-  sc: _externalSc,
-  placeholder = new BigNumber(100),
-  decimalsLimitFiat = 6,
-  decimalsLimitSc = 6,
-  onChange,
-  size = 'medium',
-  units = 'SC',
-  showFiat = true,
-  error,
-  changed,
-  onBlur,
-  onFocus,
-  ...props
-}: Props) {
+export const SiacoinField = forwardRef(function SiacoinField(
+  {
+    sc: _externalSc,
+    placeholder = new BigNumber(100),
+    decimalsLimitFiat = 6,
+    decimalsLimitSc = 6,
+    onChange,
+    size = 'medium',
+    units = 'SC',
+    showFiat = true,
+    error,
+    changed,
+    prefix,
+    onBlur,
+    onFocus,
+    ...props
+  }: Props,
+  ref: Ref<HTMLDivElement>
+) {
   const externalSc = useMemo(
     () => new BigNumber(_externalSc === undefined ? NaN : _externalSc),
     [_externalSc]
@@ -59,12 +70,15 @@ export function SiacoinField({
     return new BigNumber(rates.data?.rates.sc[settings.currency.id] || zero)
   }, [rates.data, settings])
   const [active, setActive] = useState<'sc' | 'fiat'>()
-  const [sc, setLocalSc] = useState<string>('')
-  const [fiat, setLocalFiat] = useState<string>('')
+  const [localSc, setLocalSc] = useState<string>('')
+  const [localFiat, setLocalFiat] = useState<string>('')
+  const sc = useMemo(() => normalizedNumberString(localSc), [localSc])
+  const fiat = useMemo(() => normalizedNumberString(localFiat), [localFiat])
 
   const updateExternalSc = useCallback(
     (sc: string) => {
       if (onChange) {
+        sc = normalizedNumberString(sc)
         onChange(sc && !isNaN(Number(sc)) ? new BigNumber(sc) : undefined)
       }
     },
@@ -149,6 +163,7 @@ export function SiacoinField({
 
   return (
     <div
+      ref={ref}
       className={cx(
         'flex flex-col bg-white dark:bg-graydark-50',
         'focus-within:ring ring-blue-500 dark:ring-blue-200',
@@ -169,10 +184,11 @@ export function SiacoinField({
         focus="none"
         placeholder={placeholder.toFixed(decimalsLimitSc)}
         units={units}
-        value={sc !== 'NaN' ? sc : ''}
+        value={localSc !== 'NaN' ? localSc : ''}
         decimalsLimit={decimalsLimitSc}
         allowNegativeValue={false}
         onBlur={(e) => {
+          setActive(undefined)
           if (onBlur) {
             onBlur(e)
           }
@@ -194,14 +210,14 @@ export function SiacoinField({
           size={size}
           variant="ghost"
           focus="none"
-          value={fiat !== 'NaN' ? fiat : ''}
+          value={localFiat !== 'NaN' ? localFiat : ''}
           units={settings.currency.label}
           decimalsLimit={decimalsLimitFiat}
           allowNegativeValue={false}
           placeholder={`${settings.currency.prefix}${
             rate ? rate.times(placeholder).toFixed(decimalsLimitFiat) : '0.42'
           }`}
-          prefix={settings.currency.prefix}
+          prefix={prefix || settings.currency.prefix}
           onFocus={(e) => {
             setActive('fiat')
             if (onFocus) {
@@ -209,6 +225,7 @@ export function SiacoinField({
             }
           }}
           onBlur={(e) => {
+            setActive(undefined)
             if (onBlur) {
               onBlur(e)
             }
@@ -220,4 +237,9 @@ export function SiacoinField({
       )}
     </div>
   )
+})
+
+function normalizedNumberString(v: string): string {
+  // normalize separators
+  return v?.replace(/,/g, '.') || ''
 }

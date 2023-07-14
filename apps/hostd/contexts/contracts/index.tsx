@@ -14,18 +14,15 @@ import {
 import { createContext, useContext, useMemo } from 'react'
 import {
   columnsDefaultVisible,
-  columnsDefaultSort,
+  defaultSortField,
+  SortField,
+  sortOptions,
   TableColumnId,
 } from './types'
 import { columns } from './columns'
 import { useDataset } from './dataset'
 
 const defaultLimit = 50
-
-const sortFieldMap = {
-  timeline: 'negotiationHeight',
-  status: 'status',
-}
 
 function useContractsMain() {
   const router = useRouter()
@@ -37,28 +34,28 @@ function useContractsMain() {
   const {
     configurableColumns,
     enabledColumns,
+    sortableColumns,
     toggleColumnVisibility,
     setColumnsVisible,
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
-  } = useTableState<TableColumnId>(
-    'hostd/v0/contracts',
+  } = useTableState<TableColumnId, SortField>('hostd/v0/contracts', {
     columns,
     columnsDefaultVisible,
-    columnsDefaultSort
-  )
+    sortOptions,
+    defaultSortField,
+  })
 
   const response = useContractsData({
     payload: {
       limit,
       offset,
-      sortField: sortFieldMap[sortColumn],
+      sortField: sortOptions.find((o) => o.id === sortField)?.value,
       sortDesc: sortDirection === 'desc',
       contractIDs: filters
         .filter((f) => f.id === 'filterContractId')
@@ -109,20 +106,19 @@ function useContractsMain() {
     },
     pageCount: dataset?.length || 0,
     totalCount: response.data?.count,
-    isLoading: response.isValidating,
     columns: filteredTableColumns,
     dataset,
     configurableColumns,
     enabledColumns,
+    sortableColumns,
     toggleColumnVisibility,
     setColumnsVisible,
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
     filters,
     setFilter,

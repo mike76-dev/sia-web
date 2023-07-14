@@ -5,17 +5,14 @@ import {
 } from '@siafoundation/design-system'
 import {
   HostsSearchFilterMode,
+  HostsUsabilityMode,
   useAutopilotHostsSearch,
   useHostsAllowlist,
   useHostsBlocklist,
   useHostsSearch,
 } from '@siafoundation/react-renterd'
 import { createContext, useContext, useMemo } from 'react'
-import {
-  TableColumnId,
-  columnsDefaultVisible,
-  columnsDefaultSort,
-} from './types'
+import { TableColumnId, columnsDefaultVisible } from './types'
 import { useRouter } from 'next/router'
 import { columns } from './columns'
 import { useContracts } from '../contracts'
@@ -42,6 +39,8 @@ function useHostsMain() {
     payload: {
       limit,
       offset,
+      usabilityMode: (filters.find((f) => f.id === 'usabilityMode')?.value ||
+        'all') as HostsUsabilityMode,
       filterMode: (filters.find((f) => f.id === 'filterMode')?.value ||
         'all') as HostsSearchFilterMode,
       addressContains: filters.find((f) => f.id === 'addressContains')?.value,
@@ -100,18 +99,15 @@ function useHostsMain() {
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
-  } = useTableState<TableColumnId>(
-    'renterd/v0/hosts',
+  } = useTableState<TableColumnId, never>('renterd/v0/hosts', {
     columns,
     columnsDefaultVisible,
-    columnsDefaultSort,
-    disabledCategories
-  )
+    disabledCategories,
+  })
 
   const filteredTableColumns = useMemo(
     () => columns.filter((column) => enabledColumns.includes(column.id)),
@@ -142,10 +138,9 @@ function useHostsMain() {
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
     filters,
     setFilter,

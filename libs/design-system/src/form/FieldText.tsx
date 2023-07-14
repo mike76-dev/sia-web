@@ -1,46 +1,67 @@
-import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form'
+import { FieldValues, Path, UseFormReturn } from 'react-hook-form'
 import { FieldGroup } from '../components/Form'
 import { TextField } from '../core/TextField'
-import { ConfigField, useRegisterForm } from './configurationFields'
+import { ConfigFields, useRegisterForm } from './configurationFields'
 
 type Props<Values extends FieldValues, Categories extends string> = {
   name: Path<Values>
   form: UseFormReturn<Values>
-  field: ConfigField<Values, Categories>
-  type?: 'password'
+  fields: ConfigFields<Values, Categories>
+  size?: React.ComponentProps<typeof TextField>['size']
+  autoComplete?: React.ComponentProps<typeof TextField>['autoComplete']
+  group?: boolean
 }
 
 export function FieldText<
   Values extends FieldValues,
   Categories extends string
->({ name, form, field, type }: Props<Values, Categories>) {
-  const { placeholder } = field
-  const { onChange, onBlur, value, error } = useRegisterForm({
+>({
+  name,
+  form,
+  fields,
+  size = 'small',
+  autoComplete,
+  group = true,
+}: Props<Values, Categories>) {
+  const field = fields[name]
+  const { ref, onChange, onBlur, error } = useRegisterForm({
     name,
     form,
     field,
   })
-  return (
-    <FieldGroup title={field.title} name={name} form={form}>
-      <TextField
-        placeholder={placeholder}
-        value={value}
-        type={type}
-        state={
-          error
-            ? 'invalid'
-            : form.formState.dirtyFields[name]
-            ? 'valid'
-            : 'default'
-        }
-        onChange={(e) => {
-          onChange(e.currentTarget.value as PathValue<Values, Path<Values>>)
-        }}
-        onBlur={(e) => {
-          onBlur(e)
-          onChange(value)
-        }}
-      />
-    </FieldGroup>
+  const el = (
+    <TextField
+      ref={ref}
+      name={name}
+      placeholder={field.placeholder}
+      size={size}
+      autoComplete={autoComplete}
+      type={field.type}
+      readOnly={field.readOnly}
+      onClick={field.onClick}
+      state={
+        error
+          ? 'invalid'
+          : form.formState.dirtyFields[name]
+          ? 'valid'
+          : 'default'
+      }
+      onChange={onChange}
+      onBlur={onBlur}
+    />
   )
+  if (group) {
+    return (
+      <FieldGroup
+        title={field.title}
+        actions={field.actions}
+        name={name}
+        form={form}
+      >
+        {el}
+      </FieldGroup>
+    )
+  } else {
+    return el
+  }
 }

@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.53.0
+
+### Minor Changes
+
+- be705b97: Toasts now accept a ReactNode but are still renterd inside Text.
+
+## 0.52.0
+
+### Minor Changes
+
+- 4fc8643f: PaginatorUnknownTotal now shows none instead of range if page is empty.
+- b1692517: Renamed ConfigurationPanel secret type to password.
+- b1692517: Fixed a cursor position issue with Text and TextArea form fields.
+- b1692517: Form and ConfigFields now accept a ReactNode actions to display next to the label.
+
+## 0.51.0
+
+### Minor Changes
+
+- 2e1e6662: Fixed an issue where flat lines were not showing up on graphs.
+
+## 0.50.0
+
+### Minor Changes
+
+- 198df6a6: Sorting fields no longer have to be table columns.
+- 33cd3b54: BalanceEvolution now has chartType and allowConfiguration props.
+- 06e7e1c5: NumberField and SiacoinField now intl/localize formatting.
+
 ## 0.49.0
 
 ### Minor Changes

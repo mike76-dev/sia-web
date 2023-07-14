@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js'
-import { format } from 'date-fns'
 
 export function humanSpeed(bps: number): string {
   if (!bps) return '0 bps'
@@ -116,8 +115,15 @@ export function humanNumber(
 }
 
 export function humanDate(
-  date: string | number | Date,
-  options: { time: boolean } = { time: false }
+  t: Date | string | number,
+  options?: Intl.DateTimeFormatOptions
 ) {
-  return date ? format(new Date(date), options.time ? 'Pp' : 'PP') : ''
+  let language = undefined
+  if (typeof window !== 'undefined') {
+    language = navigator.language
+  }
+  return new Intl.DateTimeFormat(language, {
+    dateStyle: 'short',
+    ...options,
+  }).format(new Date(t))
 }

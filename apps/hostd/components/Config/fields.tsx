@@ -37,12 +37,12 @@ export const initialValues = {
   baseRPCPrice: undefined as BigNumber | undefined,
   sectorAccessPrice: undefined as BigNumber | undefined,
 
-  collateral: undefined as BigNumber | undefined,
+  collateralMultiplier: undefined as BigNumber | undefined,
   maxCollateral: undefined as BigNumber | undefined,
 
-  minStoragePrice: undefined as BigNumber | undefined,
-  minEgressPrice: undefined as BigNumber | undefined,
-  minIngressPrice: undefined as BigNumber | undefined,
+  storagePrice: undefined as BigNumber | undefined,
+  egressPrice: undefined as BigNumber | undefined,
+  ingressPrice: undefined as BigNumber | undefined,
 
   priceTableValidity: undefined as BigNumber | undefined,
 
@@ -91,9 +91,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
     category: 'host',
     title: 'Accepting contracts',
     description: <>Whether or not the host is accepting contracts.</>,
-    validation: {
-      required: 'required',
-    },
+    validation: {},
   },
   netAddress: {
     type: 'text',
@@ -126,7 +124,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
   },
 
   // Pricing
-  minStoragePrice: {
+  storagePrice: {
     title: 'Storage price',
     type: 'siacoin',
     category: 'pricing',
@@ -140,7 +138,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
       required: 'required',
     },
   },
-  minEgressPrice: {
+  egressPrice: {
     title: 'Egress price',
     type: 'siacoin',
     category: 'pricing',
@@ -152,7 +150,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
       required: 'required',
     },
   },
-  minIngressPrice: {
+  ingressPrice: {
     title: 'Ingress price',
     type: 'siacoin',
     category: 'pricing',
@@ -164,13 +162,18 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
       required: 'required',
     },
   },
-  collateral: {
-    title: 'Collateral',
-    type: 'siacoin',
+  collateralMultiplier: {
+    title: 'Collateral multiplier',
+    type: 'number',
     category: 'pricing',
-    units: 'SC/month',
-    decimalsLimitSc: scDecimalPlaces,
-    description: <>{`The host's target collateral in siacoins per month.`}</>,
+    units: '* storage price',
+    placeholder: '2',
+    decimalsLimit: 1,
+    description: (
+      <>{`The host's target collateral as a multiple of storage price.`}</>
+    ),
+    suggestion: new BigNumber(2),
+    suggestionTip: 'The default multiplier is 2x the storage price.',
     validation: {
       required: 'required',
     },
@@ -379,7 +382,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
     },
   },
   dnsNoIpPassword: {
-    type: 'text',
+    type: 'password',
     title: 'Password',
     category: 'DNS',
     description: <>No-IP password.</>,
@@ -403,7 +406,7 @@ export const fields: ConfigFields<typeof initialValues, Categories> = {
     },
   },
   dnsAwsSecret: {
-    type: 'secret',
+    type: 'password',
     title: 'Secret',
     category: 'DNS',
     description: <>AWS Route53 secret.</>,

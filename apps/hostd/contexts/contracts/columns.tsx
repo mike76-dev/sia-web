@@ -11,9 +11,10 @@ import {
   ContractTimeline,
   Money16,
   ValueNum,
+  blockHeightToTime,
 } from '@siafoundation/design-system'
 import { ContractStatus } from '@siafoundation/react-hostd'
-import { humanBytes } from '@siafoundation/sia-js'
+import { humanBytes, humanDate } from '@siafoundation/sia-js'
 import { ContractData, TableColumnId } from './types'
 
 type Context = {
@@ -96,7 +97,6 @@ export const columns: ContractsTableColumn[] = (
       id: 'status',
       label: 'status',
       category: 'general',
-      sortable: true,
       render: ({ data: { status } }) => {
         return <Badge variant={getStatusColor(status)}>{status}</Badge>
       },
@@ -104,8 +104,7 @@ export const columns: ContractsTableColumn[] = (
     {
       id: 'timeline',
       label: 'timeline',
-      category: 'general',
-      sortable: true,
+      category: 'time',
       render: ({ data, context: { currentHeight, contractsTimeRange } }) => {
         const { contractHeightStart, contractHeightEnd, revision, status } =
           data
@@ -128,6 +127,42 @@ export const columns: ContractsTableColumn[] = (
           </div>
         )
       },
+    },
+    {
+      id: 'contractHeightStart',
+      label: 'start date',
+      category: 'time',
+      contentClassName: 'w-[120px] justify-end',
+      render: ({
+        data: { contractHeightStart },
+        context: { currentHeight },
+      }) => (
+        <Text size="12">
+          {humanDate(blockHeightToTime(currentHeight, contractHeightStart))}
+        </Text>
+      ),
+    },
+    {
+      id: 'contractHeightEnd',
+      label: 'expiration date',
+      category: 'time',
+      contentClassName: 'w-[120px] justify-end',
+      render: ({ data: { contractHeightEnd }, context: { currentHeight } }) => (
+        <Text size="12">
+          {humanDate(blockHeightToTime(currentHeight, contractHeightEnd))}
+        </Text>
+      ),
+    },
+    {
+      id: 'payoutHeight',
+      label: 'payout date',
+      category: 'time',
+      contentClassName: 'w-[120px] justify-end',
+      render: ({ data: { payoutHeight }, context: { currentHeight } }) => (
+        <Text size="12">
+          {humanDate(blockHeightToTime(currentHeight, payoutHeight))}
+        </Text>
+      ),
     },
     {
       id: 'filesize',

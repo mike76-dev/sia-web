@@ -13,8 +13,9 @@ import {
   MenuSectionLabelToggleAll,
   Option,
 } from '@siafoundation/design-system'
-import { TableColumnId } from '../../contexts/contracts/types'
+import { SortField, sortOptions } from '../../contexts/contracts/types'
 import { useContracts } from '../../contexts/contracts'
+import { groupBy } from 'lodash'
 
 export function ContractsViewDropdownMenu() {
   const {
@@ -23,9 +24,8 @@ export function ContractsViewDropdownMenu() {
     resetDefaultColumnVisibility,
     setColumnsVisible,
     setColumnsHidden,
-    sortOptions,
-    sortColumn,
-    setSortColumn,
+    sortField,
+    setSortField,
     sortDirection,
     setSortDirection,
     enabledColumns,
@@ -33,6 +33,12 @@ export function ContractsViewDropdownMenu() {
 
   const generalColumns = configurableColumns
     .filter((c) => c.category === 'general')
+    .map((column) => ({
+      label: column.label,
+      value: column.id,
+    }))
+  const timeColumns = configurableColumns
+    .filter((c) => c.category === 'time')
     .map((column) => ({
       label: column.label,
       value: column.id,
@@ -61,20 +67,22 @@ export function ContractsViewDropdownMenu() {
         <Label>Order by</Label>
         <MenuItemRightSlot>
           <Select
-            value={sortColumn}
+            value={sortField}
             onChange={(e) => {
-              setSortColumn(e.currentTarget.value as TableColumnId)
+              setSortField(e.currentTarget.value as SortField)
             }}
           >
-            {Object.entries(sortOptions).map(([category, options]) => (
-              <optgroup key={category} label={category}>
-                {options.map((column) => (
-                  <Option key={column.id} value={column.id}>
-                    {column.label}
-                  </Option>
-                ))}
-              </optgroup>
-            ))}
+            {Object.entries(groupBy(sortOptions, 'category')).map(
+              ([category, options]) => (
+                <optgroup key={category} label={category}>
+                  {options.map((column) => (
+                    <Option key={column.id} value={column.id}>
+                      {column.label}
+                    </Option>
+                  ))}
+                </optgroup>
+              )
+            )}
           </Select>
         </MenuItemRightSlot>
       </BaseMenuItem>
@@ -125,6 +133,20 @@ export function ContractsViewDropdownMenu() {
       <BaseMenuItem>
         <PoolCombo
           options={generalColumns}
+          values={enabledColumns}
+          onChange={(value) => toggleColumnVisibility(value)}
+        />
+      </BaseMenuItem>
+      <MenuSectionLabelToggleAll
+        label="Time"
+        columns={timeColumns.map((c) => c.value)}
+        enabled={enabledColumns}
+        setColumnsVisible={setColumnsVisible}
+        setColumnsHidden={setColumnsHidden}
+      />
+      <BaseMenuItem>
+        <PoolCombo
+          options={timeColumns}
           values={enabledColumns}
           onChange={(value) => toggleColumnVisibility(value)}
         />

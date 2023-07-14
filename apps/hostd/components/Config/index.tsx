@@ -10,15 +10,16 @@ import {
   ConfigurationPanel,
   useOnInvalid,
 } from '@siafoundation/design-system'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { HostdSidenav } from '../HostdSidenav'
 import { routes } from '../../config/routes'
 import { useDialog } from '../../contexts/dialog'
 import { HostdAuthedLayout } from '../../components/HostdAuthedLayout'
 import {} from '@siafoundation/design-system'
 import {
+  HostSettings,
   useSettings,
-  useSettingsDynDNS,
+  useSettingsDdns,
   useSettingsUpdate,
 } from '@siafoundation/react-hostd'
 import { fields, initialValues } from './fields'
@@ -37,8 +38,8 @@ export function Config() {
     },
   })
   const settingsUpdate = useSettingsUpdate()
-  const dynDNSCheck = useSettingsDynDNS({
-    disabled: !settings.data || !settings.data.dynDNS.provider,
+  const dynDNSCheck = useSettingsDdns({
+    disabled: !settings.data || !settings.data.ddns.provider,
     config: {
       swr: {
         revalidateOnFocus: false,
@@ -52,13 +53,41 @@ export function Config() {
     defaultValues: initialValues,
   })
 
+  const resetFormData = useCallback(
+    (data: HostSettings) => {
+      form.reset(transformDown(data))
+    },
+    [form]
+  )
+
+  // init - when new config is fetched, set the form
+  const [hasInit, setHasInit] = useState(false)
+  useEffect(() => {
+    if (settings.data && !hasInit) {
+      resetFormData(settings.data)
+      setHasInit(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.data])
+
+  const reset = useCallback(async () => {
+    const data = await settings.mutate()
+    if (!data) {
+      triggerErrorToast('Error fetching settings.')
+    } else {
+      resetFormData(data)
+      // also recheck dynamic dns
+      await dynDNSCheck.mutate()
+    }
+  }, [settings, resetFormData, dynDNSCheck])
+
   const onValid = useCallback(
     async (values: typeof initialValues) => {
       if (!settings.data) {
         return
       }
       try {
-        const response = await settingsUpdate.post({
+        const response = await settingsUpdate.patch({
           payload: transformUp(values, settings.data),
         })
         if (response.error) {
@@ -74,13 +103,15 @@ export function Config() {
         } else {
           triggerSuccessToast('Settings have been saved.')
         }
-        dynDNSCheck.mutate()
+        resetFormData(response.data)
+        // also recheck dynamic dns
+        await dynDNSCheck.mutate()
       } catch (e) {
         triggerErrorToast((e as Error).message)
         console.log(e)
       }
     },
-    [form, settings, settingsUpdate, dynDNSCheck]
+    [form, settings, settingsUpdate, resetFormData, dynDNSCheck]
   )
 
   const onInvalid = useOnInvalid(fields)
@@ -94,38 +125,13 @@ export function Config() {
     ([_, val]) => !!val
   ).length
 
-  const resetFormData = useCallback(() => {
-    if (!settings.data) {
-      return
-    }
-    const s = settings.data
-    form.reset(transformDown(s))
-  }, [form, settings])
-
-  const revalidateAndResetFormData = useCallback(async () => {
-    await settings.mutate()
-    // Theoretically mutate should trigger the init effect,
-    // but for some reason it does not (maybe when the response is cached?)
-    // therefore we manually call form.reset.
-    resetFormData()
-
-    // also recheck dynamic dns
-    await dynDNSCheck.mutate()
-  }, [resetFormData, settings, dynDNSCheck])
-
-  // init - when new config is fetched, reset the form
-  useEffect(() => {
-    resetFormData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.data])
-
   return (
     <HostdAuthedLayout
       title="Configuration"
       routes={routes}
       sidenav={<HostdSidenav />}
       stats={
-        settings.data?.dynDNS.provider && !dynDNSCheck.isValidating ? (
+        settings.data?.ddns.provider && !dynDNSCheck.isValidating ? (
           dynDNSCheck.error ? (
             <>
               <Text color="amber">
@@ -157,7 +163,7 @@ export function Config() {
             tip="Reset all changes"
             icon="contrast"
             disabled={!changeCount}
-            onClick={revalidateAndResetFormData}
+            onClick={reset}
           >
             <Reset16 />
           </Button>

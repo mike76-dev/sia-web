@@ -1,7 +1,7 @@
-import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form'
+import { FieldValues, Path, UseFormReturn } from 'react-hook-form'
 import { FieldGroup } from '../components/Form'
 import { Option, Select } from '../core/Select'
-import { ConfigField, useRegisterForm } from './configurationFields'
+import { ConfigFields, useRegisterForm } from './configurationFields'
 
 type Option = {
   value: string
@@ -11,15 +11,16 @@ type Option = {
 type Props<Values extends FieldValues, Categories extends string> = {
   name: Path<Values>
   form: UseFormReturn<Values>
-  field: ConfigField<Values, Categories>
+  fields: ConfigFields<Values, Categories>
 }
 
 export function FieldSelect<
   Values extends FieldValues,
   Categories extends string
->({ name, form, field }: Props<Values, Categories>) {
+>({ name, form, fields }: Props<Values, Categories>) {
+  const field = fields[name]
   const { options } = field
-  const { onChange, onBlur, value, error } = useRegisterForm({
+  const { ref, onChange, onBlur, error } = useRegisterForm({
     name,
     form,
     field,
@@ -27,8 +28,9 @@ export function FieldSelect<
   return (
     <FieldGroup title={field.title} name={name} form={form}>
       <Select
+        ref={ref}
+        name={name}
         size="small"
-        value={value}
         state={
           error
             ? 'invalid'
@@ -36,13 +38,8 @@ export function FieldSelect<
             ? 'valid'
             : 'default'
         }
-        onChange={(e) => {
-          onChange(e.currentTarget.value as PathValue<Values, Path<Values>>)
-        }}
-        onBlur={(e) => {
-          onBlur(e)
-          onChange(value)
-        }}
+        onChange={onChange}
+        onBlur={onBlur}
       >
         {options?.map((o) => (
           <Option key={o.value} value={o.value}>

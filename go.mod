@@ -1,3 +1,3 @@
 module github.com/mike76-dev/sia-web
 
-go 1.18
+go 1.20

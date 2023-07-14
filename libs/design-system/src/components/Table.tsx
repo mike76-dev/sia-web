@@ -8,6 +8,7 @@ import { times } from 'lodash'
 
 type Data = {
   id: string
+  onClick?: () => void
 }
 
 export type Row<Data, Context> = {
@@ -20,7 +21,6 @@ export type TableColumn<Columns, Data, Context> = {
   label: string
   icon?: React.ReactNode
   tip?: string
-  sortable?: boolean
   size?: number | string
   cellClassName?: string
   contentClassName?: string
@@ -28,13 +28,19 @@ export type TableColumn<Columns, Data, Context> = {
   summary?: () => React.ReactNode
 }
 
-type Props<Columns extends string, D extends Data, Context> = {
+type Props<
+  Columns extends string,
+  SortField extends string,
+  D extends Data,
+  Context
+> = {
   data?: D[]
   context?: Context
   columns: TableColumn<Columns, D, Context>[]
-  sortColumn?: Columns
+  sortField?: SortField
   sortDirection?: 'asc' | 'desc'
-  toggleSort?: (column: Columns) => void
+  toggleSort?: (field: SortField) => void
+  sortableColumns?: SortField[]
   summary?: boolean
   rowSize?: 'dense' | 'default'
   pageSize: number
@@ -42,19 +48,25 @@ type Props<Columns extends string, D extends Data, Context> = {
   emptyState?: React.ReactNode
 }
 
-export function Table<Columns extends string, D extends Data, Context>({
+export function Table<
+  Columns extends string,
+  SortField extends string,
+  D extends Data,
+  Context
+>({
   columns,
   data,
   context,
-  sortColumn,
+  sortField,
   sortDirection,
+  sortableColumns,
   toggleSort,
   summary,
   rowSize = 'default',
   pageSize,
   isLoading,
   emptyState,
-}: Props<Columns, D, Context>) {
+}: Props<Columns, SortField, D, Context>) {
   let show = 'emptyState'
 
   if (isLoading && !data?.length) {
@@ -87,58 +99,59 @@ export function Table<Columns extends string, D extends Data, Context>({
           <tr>
             {columns.map(
               (
-                {
-                  id,
-                  icon,
-                  label,
-                  tip,
-                  sortable,
-                  cellClassName,
-                  contentClassName,
-                },
+                { id, icon, label, tip, cellClassName, contentClassName },
                 i
-              ) => (
-                <th key={id} className={getCellClassNames(i, cellClassName)}>
-                  <div
-                    className={cx(
-                      getContentClassNames(i, contentClassName),
-                      'overflow-hidden',
-                      'py-3'
-                    )}
-                  >
-                    <Tooltip content={tip}>
-                      <Text
+              ) => {
+                const isSortable =
+                  sortableColumns?.includes(id as unknown as SortField) &&
+                  !!toggleSort
+                const isSortActive = (sortField as string) === id
+                return (
+                  <th key={id} className={getCellClassNames(i, cellClassName)}>
+                    <div className={cx('overflow-hidden', 'py-3')}>
+                      <div
                         onClick={() => {
-                          if (sortable && toggleSort) {
-                            toggleSort(id)
+                          if (isSortable) {
+                            toggleSort(id as unknown as SortField)
                           }
                         }}
-                        color="subtle"
                         className={cx(
-                          'relative flex gap-1',
-                          sortable && toggleSort ? 'cursor-pointer' : ''
+                          getContentClassNames(i, contentClassName),
+                          isSortable ? 'cursor-pointer' : ''
                         )}
-                        ellipsis
                       >
-                        {icon ? <div>{icon}</div> : null}
-                        <Text ellipsis size="12" weight="medium">
-                          {label}
-                        </Text>
-                      </Text>
-                    </Tooltip>
-                    {sortColumn === id ? (
-                      <Text color="subtle">
-                        {sortDirection === 'asc' ? (
-                          <CaretUp16 className="scale-75" />
-                        ) : (
-                          <CaretDown16 className="scale-75" />
+                        <Tooltip content={tip}>
+                          <Text
+                            color="subtle"
+                            className="relative flex gap-1"
+                            ellipsis
+                          >
+                            {icon ? <div>{icon}</div> : null}
+                            <Text ellipsis size="12" weight="medium">
+                              {label}
+                            </Text>
+                          </Text>
+                        </Tooltip>
+                        {isSortActive && (
+                          <Text color="contrast">
+                            {sortDirection === 'asc' ? (
+                              <CaretUp16 className="scale-75" />
+                            ) : (
+                              <CaretDown16 className="scale-75" />
+                            )}
+                          </Text>
                         )}
-                      </Text>
-                    ) : null}
-                    {/* {tip && <InfoTip>{tip}</InfoTip>} */}
-                  </div>
-                </th>
-              )
+                        {isSortable && !isSortActive && (
+                          <Text color="verySubtle">
+                            <CaretUp16 className="scale-75" />
+                          </Text>
+                        )}
+                        {/* {tip && <InfoTip>{tip}</InfoTip>} */}
+                      </div>
+                    </div>
+                  </th>
+                )
+              }
             )}
           </tr>
         </thead>
@@ -160,7 +173,11 @@ export function Table<Columns extends string, D extends Data, Context>({
             data?.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-gray-300 dark:border-graydark-300"
+                onClick={row.onClick}
+                className={cx(
+                  'border-b border-gray-300 dark:border-graydark-300',
+                  row.onClick ? 'cursor-pointer' : ''
+                )}
               >
                 {columns.map(
                   (

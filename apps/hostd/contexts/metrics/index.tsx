@@ -4,19 +4,14 @@ import {
   computeChartStats,
   formatChartData,
   getDataIntervalLabelFormatter,
+  getTimeRange,
   MiBToBytes,
-  monthsToBlocks,
-  TiBToBytes,
 } from '@siafoundation/design-system'
 import { humanBytes, humanNumber, humanSiacoin } from '@siafoundation/sia-js'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { chartConfigs } from '../../config/charts'
 import { useMetricsPeriod } from '@siafoundation/react-hostd'
-import {
-  getTimeRange,
-  configCategoryPattern,
-  configCategoryLabel,
-} from './utils'
+import { configCategoryPattern, configCategoryLabel } from './utils'
 import BigNumber from 'bignumber.js'
 import {
   DataInterval,
@@ -30,10 +25,18 @@ import {
   BandwidthCategories,
   StorageCategories,
   RevenueCategories,
-  getDataIntervalInMs,
   OperationsKeys,
 } from './types'
 import { formatISO } from 'date-fns'
+import {
+  humanBaseRpcPrice,
+  humanCollateralPrice,
+  humanEgressPrice,
+  humanIngressPrice,
+  humanSectorAccessPrice,
+  humanStoragePrice,
+} from '../../lib/humanUnits'
+import useLocalStorageState from 'use-local-storage-state'
 
 type TimeRange = {
   start: number
@@ -43,24 +46,34 @@ type TimeRange = {
 const defaultTimeSpan = dataTimeSpanOptions.find((o) => o.value === '7')
 const disableAnimations = true
 
-function getPeriods(timeRange: TimeRange, dataInterval: DataInterval) {
-  const intervalMs = getDataIntervalInMs(dataInterval)
-  if (!intervalMs) {
-    return 0
-  }
-  return Math.round((timeRange.end - timeRange.start) / intervalMs)
-}
+// TODO: does not reach current time
+// function getPeriods(timeRange: TimeRange, dataInterval: DataInterval) {
+//   const intervalMs = getDataIntervalInMs(dataInterval)
+//   if (!intervalMs) {
+//     return 0
+//   }
+//   return Math.ceil((timeRange.end - timeRange.start) / intervalMs) + 1
+// }
 
 function useMetricsMain() {
-  const [dataTimeSpan, _setDataTimeSpan] = useState<DataTimeSpan>(
-    defaultTimeSpan.value
+  const [dataTimeSpan, _setDataTimeSpan] = useLocalStorageState<DataTimeSpan>(
+    'v0/metrics/dataTimeSpan',
+    {
+      defaultValue: defaultTimeSpan.value,
+    }
   )
-  const [dataInterval, setDataInterval] = useState<DataInterval>(
-    defaultTimeSpan.interval
+  const [dataInterval, setDataInterval] = useLocalStorageState<DataInterval>(
+    'v0/metrics/dataInterval',
+    {
+      defaultValue: defaultTimeSpan.interval,
+    }
   )
 
-  const [timeRange, setTimeRange] = useState<TimeRange>(
-    getTimeRange(defaultTimeSpan.value)
+  const [timeRange, setTimeRange] = useLocalStorageState<TimeRange>(
+    'v0/metrics/timeRange',
+    {
+      defaultValue: getTimeRange(dataTimeSpan),
+    }
   )
 
   const setDataTimeSpan = useCallback(
@@ -80,9 +93,9 @@ function useMetricsMain() {
 
   const metricsPeriod = useMetricsPeriod({
     params: {
-      period: dataInterval,
+      interval: dataInterval,
       start: formatISO(new Date(timeRange.start)),
-      periods: getPeriods(timeRange, dataInterval),
+      // periods: getPeriods(timeRange, dataInterval),
     },
     config: {
       swr: {
@@ -238,16 +251,15 @@ function useMetricsMain() {
   const pricing = useMemo<Chart<PricingKeys, never>>(() => {
     const data = formatChartData(
       metricsPeriod.data?.map((m) => ({
-        baseRPC: Number(m.pricing.baseRPCPrice),
-        collateral: Number(m.pricing.collateral),
+        baseRPC: humanBaseRpcPrice(m.pricing.baseRPCPrice).toNumber(),
+        collateral: humanCollateralPrice(m.pricing.collateral).toNumber(),
         contract: Number(m.pricing.contractPrice),
-        egress: Number(m.pricing.egressPrice),
-        ingress: Number(m.pricing.ingressPrice),
-        sectorAccess: Number(m.pricing.sectorAccessPrice),
-        storage: new BigNumber(m.pricing.storagePrice) // bytes/block
-          .times(monthsToBlocks(1)) // bytes/month
-          .times(TiBToBytes(1))
-          .toNumber(),
+        egress: humanEgressPrice(m.pricing.egressPrice).toNumber(),
+        ingress: humanIngressPrice(m.pricing.ingressPrice).toNumber(),
+        sectorAccess: humanSectorAccessPrice(
+          m.pricing.sectorAccessPrice
+        ).toNumber(),
+        storage: humanStoragePrice(m.pricing.storagePrice).toNumber(),
         timestamp: new Date(m.timestamp).getTime(),
       })),
       'none'

@@ -1,5 +1,24 @@
 # @siafoundation/react-hostd
 
+## 0.7.0
+
+### Minor Changes
+
+- 024ff2cf: Add useAlerts and useAlertsDismiss APIs.
+
+## 0.6.0
+
+### Minor Changes
+
+- 1a75c14b: Hooks updated to use latest API changes around settings and ddns.
+- ae32be10: Added useLogSearch.
+
+## 0.5.0
+
+### Minor Changes
+
+- 2994f8f: Added useSystemDirectoryCreate.
+
 ## 0.4.0
 
 ### Minor Changes

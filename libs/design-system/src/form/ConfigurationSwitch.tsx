@@ -2,20 +2,21 @@ import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form'
 import { FieldLabelAndError } from '../components/Form'
 import { Switch } from '../core/Switch'
 import { ConfigurationTipText } from './ConfigurationTipText'
-import { ConfigField, useRegisterForm } from './configurationFields'
+import { ConfigFields, useRegisterForm } from './configurationFields'
 
 type Props<Values extends FieldValues, Categories extends string> = {
   name: Path<Values>
   form: UseFormReturn<Values>
-  field: ConfigField<Values, Categories>
+  fields: ConfigFields<Values, Categories>
 }
 
 export function ConfigurationSwitch<
   Values extends FieldValues,
   Categories extends string
->({ name, form, field }: Props<Values, Categories>) {
+>({ name, form, fields }: Props<Values, Categories>) {
+  const field = fields[name]
   const { suggestion, suggestionTip } = field
-  const { onChange, onBlur, value, error } = useRegisterForm({
+  const { setValue, value, error } = useRegisterForm({
     name,
     field,
     form,
@@ -25,6 +26,7 @@ export function ConfigurationSwitch<
       <div className="flex flex-col gap-3 w-[220px]">
         <div className="flex justify-end w-full">
           <Switch
+            name={name}
             size="medium"
             checked={value}
             state={
@@ -35,11 +37,10 @@ export function ConfigurationSwitch<
                 : 'default'
             }
             onCheckedChange={(val) => {
-              onChange(val as PathValue<Values, Path<Values>>)
+              setValue(val as PathValue<Values, Path<Values>>, true)
             }}
-            onBlur={(e) => {
-              onBlur(e)
-              onChange(value)
+            onBlur={() => {
+              setValue(value, true)
             }}
           />
         </div>
@@ -50,7 +51,7 @@ export function ConfigurationSwitch<
               tip={suggestionTip}
               value={suggestion ? 'on' : 'off'}
               onClick={() => {
-                onChange(suggestion as PathValue<Values, Path<Values>>)
+                setValue(suggestion as PathValue<Values, Path<Values>>, true)
               }}
             />
           )}

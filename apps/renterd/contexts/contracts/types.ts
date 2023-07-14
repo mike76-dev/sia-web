@@ -20,6 +20,7 @@ export type ContractData = {
   spendingDownloads: BigNumber
   spendingFundAccount: BigNumber
   satellite: string
+  size: BigNumber
 }
 
 export type TableColumnId =
@@ -31,6 +32,7 @@ export type TableColumnId =
   | 'timeline'
   | 'startTime'
   | 'endTime'
+  | 'size'
   | 'totalCost'
   | 'spendingUploads'
   | 'spendingDownloads'
@@ -41,14 +43,90 @@ export const columnsDefaultVisible: TableColumnId[] = [
   'hostIp',
   'hostKey',
   'timeline',
+  'size',
   'totalCost',
   'spendingUploads',
   'spendingDownloads',
   'spendingFundAccount',
 ]
 
-export const columnsDefaultSort = 'startTime'
-
 export type SatelliteData = {
   contracts: Record<string, string>
 }
+
+export type SortField =
+  | 'contractId'
+  | 'hostIp'
+  | 'hostKey'
+  | 'timeline'
+  | 'startTime'
+  | 'endTime'
+  | 'size'
+  | 'totalCost'
+  | 'spendingUploads'
+  | 'spendingDownloads'
+  | 'spendingFundAccount'
+
+export const defaultSortField: SortField = 'startTime'
+
+export const sortOptions: {
+  id: SortField
+  label: string
+  category: string
+}[] = [
+  {
+    id: 'contractId',
+    label: 'contract ID',
+    category: 'general',
+  },
+  {
+    id: 'hostIp',
+    label: 'host address',
+    category: 'general',
+  },
+  {
+    id: 'hostKey',
+    label: 'host public key',
+    category: 'general',
+  },
+  {
+    id: 'timeline',
+    label: 'timeline',
+    category: 'time',
+  },
+  {
+    id: 'startTime',
+    label: 'start date',
+    category: 'time',
+  },
+  {
+    id: 'endTime',
+    label: 'end date',
+    category: 'time',
+  },
+  {
+    id: 'size',
+    label: 'size',
+    category: 'general',
+  },
+  {
+    id: 'totalCost',
+    label: 'total cost',
+    category: 'financial',
+  },
+  {
+    id: 'spendingUploads',
+    label: 'uploads spending',
+    category: 'financial',
+  },
+  {
+    id: 'spendingDownloads',
+    label: 'downloads spending',
+    category: 'financial',
+  },
+  {
+    id: 'spendingFundAccount',
+    label: 'fund account spending',
+    category: 'financial',
+  },
+]

@@ -2,7 +2,6 @@ import {
   bytesToMB,
   MBToBytes,
   monthsToBlocks,
-  TBToBytes,
 } from '@siafoundation/design-system'
 import {
   DNSAWSOptions,
@@ -12,6 +11,13 @@ import {
   HostSettings,
 } from '@siafoundation/react-hostd'
 import { toHastings, toSiacoins } from '@siafoundation/sia-js'
+import {
+  humanBaseRpcPrice,
+  humanEgressPrice,
+  humanIngressPrice,
+  humanSectorAccessPrice,
+  humanStoragePrice,
+} from '../../lib/humanUnits'
 import BigNumber from 'bignumber.js'
 import { scDecimalPlaces, SettingsData } from './fields'
 
@@ -64,23 +70,25 @@ export function transformUp(
 
     // Pricing
     contractPrice: toHastings(values.contractPrice).toString(),
-    baseRPCPrice: toHastings(values.baseRPCPrice).div(1e7).toString(),
-    sectorAccessPrice: toHastings(values.sectorAccessPrice).div(1e7).toString(),
+    baseRPCPrice: values.baseRPCPrice
+      .div(toSiacoins(humanBaseRpcPrice(1)))
+      .toFixed(0),
+    sectorAccessPrice: values.sectorAccessPrice
+      .div(toSiacoins(humanSectorAccessPrice(1)))
+      .toFixed(0),
 
-    collateral: toHastings(
-      values.collateral.div(TBToBytes(1)).div(monthsToBlocks(1))
-    ).toString(),
+    collateralMultiplier: values.collateralMultiplier.toNumber(),
     maxCollateral: toHastings(values.maxCollateral).toString(),
 
-    minStoragePrice: toHastings(
-      values.minStoragePrice.div(TBToBytes(1)).div(monthsToBlocks(1))
-    ).toString(),
-    minEgressPrice: toHastings(
-      values.minEgressPrice.div(TBToBytes(1))
-    ).toString(),
-    minIngressPrice: toHastings(
-      values.minIngressPrice.div(TBToBytes(1))
-    ).toString(),
+    storagePrice: values.storagePrice
+      .div(toSiacoins(humanStoragePrice(1)))
+      .toFixed(0),
+    egressPrice: values.egressPrice
+      .div(toSiacoins(humanEgressPrice(1)))
+      .toFixed(0),
+    ingressPrice: values.ingressPrice
+      .div(toSiacoins(humanIngressPrice(1)))
+      .toFixed(0),
 
     priceTableValidity: Number(
       values.priceTableValidity
@@ -106,8 +114,8 @@ export function transformUp(
     egressLimit: Number(MBToBytes(values.egressLimit).toFixed(0)),
 
     // DNS settings
-    dynDNS: {
-      ...existingValues?.dynDNS,
+    ddns: {
+      ...existingValues?.ddns,
       provider: values.dnsProvider,
       ipv4: values.dnsIpv4,
       ipv6: values.dnsIpv6,
@@ -119,34 +127,34 @@ export function transformUp(
 export function transformDown(s: HostSettings): SettingsData {
   let dnsOptions = null
   // DNS DuckDNS
-  if (s.dynDNS.provider === 'duckdns') {
+  if (s.ddns.provider === 'duckdns') {
     dnsOptions = {
-      dnsDuckDnsToken: s.dynDNS.options['token'],
+      dnsDuckDnsToken: s.ddns.options['token'],
     }
   }
 
   // DNS No-IP
-  if (s.dynDNS.provider === 'noip') {
+  if (s.ddns.provider === 'noip') {
     dnsOptions = {
-      dnsNoIpEmail: s.dynDNS.options['email'],
-      dnsNoIpPassword: s.dynDNS.options['password'],
+      dnsNoIpEmail: s.ddns.options['email'],
+      dnsNoIpPassword: s.ddns.options['password'],
     }
   }
 
   // DNS AWS
-  if (s.dynDNS.provider === 'route53') {
+  if (s.ddns.provider === 'route53') {
     dnsOptions = {
-      dnsAwsId: s.dynDNS.options['ID'],
-      dnsAwsSecret: s.dynDNS.options['secret'],
-      dnsAwsZoneId: s.dynDNS.options['zoneID'],
+      dnsAwsId: s.ddns.options['ID'],
+      dnsAwsSecret: s.ddns.options['secret'],
+      dnsAwsZoneId: s.ddns.options['zoneID'],
     }
   }
 
   // DNS Cloudflare
-  if (s.dynDNS.provider === 'cloudflare') {
+  if (s.ddns.provider === 'cloudflare') {
     dnsOptions = {
-      dnsCloudflareToken: s.dynDNS.options['token'],
-      dnsCloudflareZoneId: s.dynDNS.options['zoneID'],
+      dnsCloudflareToken: s.ddns.options['token'],
+      dnsCloudflareZoneId: s.ddns.options['zoneID'],
     }
   }
 
@@ -161,32 +169,24 @@ export function transformDown(s: HostSettings): SettingsData {
     // Pricing
     contractPrice: toSiacoins(s.contractPrice, scDecimalPlaces),
     baseRPCPrice: toSiacoins(
-      new BigNumber(s.baseRPCPrice).times(1e7), // per PRC to per million RPCs
+      humanBaseRpcPrice(s.baseRPCPrice),
       scDecimalPlaces
     ),
     sectorAccessPrice: toSiacoins(
-      new BigNumber(s.sectorAccessPrice).times(1e7), // per 1 access to per million access
+      humanSectorAccessPrice(s.sectorAccessPrice),
       scDecimalPlaces
     ),
 
-    collateral: toSiacoins(
-      new BigNumber(s.collateral).times(TBToBytes(1)).times(monthsToBlocks(1)),
-      scDecimalPlaces
-    ),
+    collateralMultiplier: new BigNumber(s.collateralMultiplier),
     maxCollateral: toSiacoins(s.maxCollateral, scDecimalPlaces),
 
-    minStoragePrice: toSiacoins(
-      new BigNumber(s.minStoragePrice)
-        .times(TBToBytes(1))
-        .times(monthsToBlocks(1)),
+    storagePrice: toSiacoins(
+      humanStoragePrice(s.storagePrice),
       scDecimalPlaces
     ),
-    minEgressPrice: toSiacoins(
-      new BigNumber(s.minEgressPrice).times(TBToBytes(1)),
-      scDecimalPlaces
-    ),
-    minIngressPrice: toSiacoins(
-      new BigNumber(s.minIngressPrice).times(TBToBytes(1)),
+    egressPrice: toSiacoins(humanEgressPrice(s.egressPrice), scDecimalPlaces),
+    ingressPrice: toSiacoins(
+      humanIngressPrice(s.ingressPrice),
       scDecimalPlaces
     ),
 
@@ -208,9 +208,9 @@ export function transformDown(s: HostSettings): SettingsData {
     egressLimit: bytesToMB(new BigNumber(s.egressLimit)),
 
     // DNS settings
-    dnsProvider: s.dynDNS.provider,
-    dnsIpv4: s.dynDNS.ipv4,
-    dnsIpv6: s.dynDNS.ipv6,
+    dnsProvider: s.ddns.provider,
+    dnsIpv4: s.ddns.ipv4,
+    dnsIpv6: s.ddns.ipv6,
 
     // DNS options
     ...dnsOptions,

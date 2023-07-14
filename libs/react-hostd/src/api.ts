@@ -15,6 +15,7 @@ import {
   useDeleteFunc,
   delay,
   TransactionID,
+  usePatchFunc,
 } from '@siafoundation/react-core'
 import useSWR from 'swr'
 import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
@@ -101,7 +102,7 @@ export function useSyncerConnect(
       ...args,
       route: '/syncer/peers',
     },
-    (mutate) => {
+    async (mutate) => {
       mutate((key) => key === syncerPeers)
     }
   )
@@ -173,6 +174,11 @@ export function useTxPoolFee(args?: HookArgsSwr<void, Currency>) {
 
 // contracts
 
+export type ContractFilterSortField =
+  | 'status'
+  | 'negotiationHeight'
+  | 'expirationHeight'
+
 export type ContractFilterRequest = {
   // filters
   statuses?: ContractStatus[]
@@ -192,7 +198,7 @@ export type ContractFilterRequest = {
   offset?: number
 
   // sorting
-  sortField?: 'status' | 'negotiationHeight' | 'expirationHeight'
+  sortField?: ContractFilterSortField
   sortDesc?: boolean
 }
 
@@ -305,12 +311,12 @@ export function useMetrics(args?: HookArgsSwr<{ timestamp: string }, Metrics>) {
   })
 }
 
-type Period = '15m' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+type Interval = '15m' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
 
-const metricsPeriodRoute = '/metrics/:period'
+const metricsPeriodRoute = '/metrics/:interval'
 export function useMetricsPeriod(
   args?: HookArgsSwr<
-    { period: Period; start: string; periods: number },
+    { interval: Interval; start: string; periods?: number },
     Metrics[]
   >
 ) {
@@ -370,12 +376,12 @@ export type HostSettings = {
   baseRPCPrice: Currency
   sectorAccessPrice: Currency
 
-  collateral: Currency
+  collateralMultiplier: number
   maxCollateral: Currency
 
-  minStoragePrice: Currency
-  minEgressPrice: Currency
-  minIngressPrice: Currency
+  storagePrice: Currency
+  egressPrice: Currency
+  ingressPrice: Currency
 
   priceTableValidity: number
 
@@ -391,7 +397,7 @@ export type HostSettings = {
   egressLimit: number
 
   // DNS settings
-  dynDNS: DNSSettings
+  ddns: DNSSettings
 
   revision: number
 }
@@ -404,12 +410,11 @@ export function useSettings(args?: HookArgsSwr<void, HostSettings>) {
   })
 }
 
-// Merges updates into existing settings
 export function useSettingsUpdate(
   args?: HookArgsCallback<void, Partial<HostSettings>, HostSettings>
 ) {
-  return usePostFunc({ ...args, route: '/settings' }, (mutate) => {
-    mutate((key) => {
+  return usePatchFunc({ ...args, route: '/settings' }, async (mutate) => {
+    await mutate((key) => {
       return key.startsWith(settingsRoute)
     })
   })
@@ -419,16 +424,16 @@ export function useSettingsAnnounce(args?: HookArgsCallback<void, void, void>) {
   return usePostFunc({ ...args, route: '/settings/announce' })
 }
 
-export function useSettingsDynDNSUpdate(
+export function useSettingsDdnsUpdate(
   args?: HookArgsCallback<void, void, void>
 ) {
-  return usePutFunc({ ...args, route: '/settings/dyndns/update' })
+  return usePutFunc({ ...args, route: '/settings/ddns/update' })
 }
 
-export function useSettingsDynDNS(
+export function useSettingsDdns(
   args?: HookArgsWithPayloadSwr<void, void, void>
 ) {
-  return usePutSwr({ ...args, payload: {}, route: '/settings/dyndns/update' })
+  return usePutSwr({ ...args, payload: {}, route: '/settings/ddns/update' })
 }
 
 // volumes
@@ -476,7 +481,7 @@ export function useVolumeCreate(
     Volume
   >
 ) {
-  return usePostFunc({ ...args, route: volumesRoute }, (mutate) => {
+  return usePostFunc({ ...args, route: volumesRoute }, async (mutate) => {
     mutate((key) => {
       return key.startsWith(volumesRoute)
     })
@@ -486,7 +491,7 @@ export function useVolumeCreate(
 export function useVolumeUpdate(
   args?: HookArgsCallback<{ id: number }, { readOnly: boolean }, void>
 ) {
-  return usePutFunc({ ...args, route: '/volumes/:id' }, (mutate) => {
+  return usePutFunc({ ...args, route: '/volumes/:id' }, async (mutate) => {
     mutate((key) => {
       return key.startsWith(volumesRoute)
     })
@@ -496,7 +501,7 @@ export function useVolumeUpdate(
 export function useVolumeDelete(
   args?: HookArgsCallback<{ id: number; force?: boolean }, void, void>
 ) {
-  return useDeleteFunc({ ...args, route: '/volumes/:id' }, (mutate) => {
+  return useDeleteFunc({ ...args, route: '/volumes/:id' }, async (mutate) => {
     mutate((key) => {
       return key.startsWith(volumesRoute)
     })
@@ -517,7 +522,7 @@ export function useVolumeResize(
   )
 }
 
-type SystemDirResponse = {
+export type SystemDirResponse = {
   path: string
   totalBytes: number
   freeBytes: number
@@ -534,4 +539,85 @@ export function useSystemDirectoryCreate(
   args?: HookArgsCallback<void, { path: string }, void>
 ) {
   return usePutFunc({ ...args, route: '/system/dir' })
+}
+
+// logs
+
+type LogEntry = {
+  timestamp: string
+  level: string
+  name: string
+  caller: string
+  message: string
+  fields: Record<string, unknown>
+}
+
+export function useLogsSearch(
+  args: HookArgsWithPayloadSwr<
+    void,
+    {
+      names?: string[]
+      callers?: string[]
+      levels?: string[]
+      before?: string
+      after?: string
+      limit?: number
+      offset?: number
+    },
+    { count: number; entries: LogEntry[] }
+  >
+) {
+  return usePostSwr({ ...args, route: '/log/entries' })
+}
+
+// alerts
+
+type AlertSeverity = 'info' | 'warning' | 'error' | 'critical'
+
+type Alert = {
+  id: string
+  severity: AlertSeverity
+  message: string
+  data: {
+    contractID?: number
+    blockHeight?: number
+    resolution?: string
+    volume?: string
+    volumeID?: number
+
+    elapsed?: number
+    error?: string
+
+    checked?: number
+    missing?: number
+    corrupt?: number
+    total?: number
+
+    oldSectors?: number
+    currentSectors?: number
+    targetSectors?: number
+    migratedSectors?: number
+
+    migrated?: number
+    target?: number
+
+    force?: boolean
+  }
+  timestamp: string
+}
+
+const alertsRoute = '/alerts'
+
+export function useAlerts(args?: HookArgsSwr<void, Alert[]>) {
+  return useGetSwr({ ...args, route: alertsRoute })
+}
+
+export function useAlertsDismiss(
+  args?: HookArgsCallback<void, string[], void>
+) {
+  return usePostFunc({ ...args, route: '/alerts/dismiss' }, async (mutate) => {
+    mutate((key) => {
+      return key.startsWith(alertsRoute)
+    })
+  })
 }

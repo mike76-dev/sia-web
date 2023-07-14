@@ -1,5 +1,62 @@
 # hostd
 
+## 0.17.0
+
+### Minor Changes
+
+- aa50389b: The login screen now has an option to show the custom API field.
+- aa50389b: The login screen timeout for an unresponsive daemon is now 10 seconds.
+
+## 0.16.0
+
+### Minor Changes
+
+- 00c43ed3: The wallet now sends the correct amount when fee is included in amount.
+- b1692517: Dynamic DNS secret and password settings are now hidden password fields.
+
+## 0.15.0
+
+### Minor Changes
+
+- 09072b7c: Home page storage metric card now shows physical sectors instead of contract sectors.
+- 867763b2: hostd now features alerts. Alerts notify the user to important contract and storage events.
+- f8723a70: Collateral configuration setting is now a multiple of storage price.
+- b4e6d67c: The contracts page now properly instructs the user to configure and announce the host when there are no contracts.
+- e76398fb: The host announcement dialog now shows the correct fee amount.
+
+## 0.14.0
+
+### Minor Changes
+
+- 2e1e6662: Fixed an issue where flat lines were not showing up on graphs.
+- d9112931: Pricing metrics now show proper values.
+
+## 0.13.0
+
+### Minor Changes
+
+- 06e7e1c5: Numbers are now displayed and entered in localized format.
+- 000db6a6: Currency options now include CAD, AUS, RUB, and CNY.
+- 06e7e1c5: Dates and times are now displayed in a localized format.
+- cad2fa5a: The volume creation dialog now allows selecting the location via text input.
+- 46372064: Pricing metrics are now in the same units as their corresponding configuration values.
+- 198df6a6: Contracts can now be sorted by expiration height.
+- 32f69b4f: The metrics page now remembers selected data time span, interval, and date range.
+- ae32be10: The Node overview now features a logs panel that shows the last 100 actions.
+- 33cd3b54: The transaction details dialog title is now based on the specific type.
+- 198df6a6: Metrics now show the correct interval with start and end date time details.
+
+## 0.12.0
+
+### Minor Changes
+
+- d32ffbe: Directory navigation in the volume creation dialog now works properly when navigating up to the root drive.
+- 7900664: Metrics charts now properly show the final data point.
+- 2994f8f: New directories can now be created directly from the volume creation dialog directory selection tool.
+- 08e616b: Dynamic DNS configuration errors are now displayed in full.
+- 7299f00: Price settings are no longer described as "minimum".
+- 8bae495: Host announcement transactions now show up labeled as such in the transaction list.
+
 ## 0.11.0
 
 ### Minor Changes

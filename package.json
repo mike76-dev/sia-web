@@ -10,6 +10,7 @@
     "build": "nx build",
     "test": "nx test",
     "release": "changeset publish",
+    "build:wasm": "GOOS=js GOARCH=wasm go build -o  apps/walletd/public/walletd.wasm ./walletd/wasm",
     "feeds": "node apps/website/scripts/syncFeeds.js"
   },
   "private": true,
@@ -87,6 +88,7 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.43.9",
     "react-hot-toast": "^2.2.0",
+    "react-idle-timer": "^5.7.2",
     "react-intersection-observer": "^9.1.0",
     "react-is": "18.2.0",
     "react-qr-code": "^2.0.7",
@@ -104,6 +106,7 @@
     "typed.js": "^2.0.12",
     "use-debounce": "^9.0.3",
     "use-local-storage-state": "^17.0.1",
+    "uuid": "^9.0.0",
     "vhost": "^3.0.2",
     "yup": "^0.32.11"
   },

@@ -9,6 +9,20 @@ import {
   HookArgsWithPayloadSwr,
 } from '@siafoundation/react-core'
 
+type AutopilotStatus = {
+  configured: boolean
+  migrating: boolean
+  scanning: boolean
+  uptime: string
+}
+
+export function useAutopilotStatus(args?: HookArgsSwr<void, AutopilotStatus>) {
+  return useGetSwr({
+    ...args,
+    route: '/autopilot/status',
+  })
+}
+
 const autopilotConfigKey = '/autopilot/config'
 export function useAutopilotConfig(args?: HookArgsSwr<void, AutopilotConfig>) {
   return useGetSwr({
@@ -20,7 +34,7 @@ export function useAutopilotConfig(args?: HookArgsSwr<void, AutopilotConfig>) {
 export function useAutopilotConfigUpdate(
   args?: HookArgsCallback<void, AutopilotConfig, void>
 ) {
-  return usePutFunc({ ...args, route: autopilotConfigKey }, (mutate) => {
+  return usePutFunc({ ...args, route: autopilotConfigKey }, async (mutate) => {
     mutate((key) => key === autopilotConfigKey)
   })
 }
@@ -31,15 +45,6 @@ export function useAutopilotActions(
   return useGetSwr({
     ...args,
     route: '/autopilot/actions',
-  })
-}
-
-export function useAutopilotStatus(
-  args?: HookArgsSwr<void, { currentPeriod: number }>
-) {
-  return useGetSwr({
-    ...args,
-    route: '/autopilot/status',
   })
 }
 

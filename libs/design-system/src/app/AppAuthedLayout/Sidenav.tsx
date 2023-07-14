@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router'
-import { useAppSettings } from '@siafoundation/react-core'
 import { LockIcon } from '../../icons/LockIcon'
 import { DiceIcon } from '../../icons/DiceIcon'
 import { GearIcon } from '../../icons/GearIcon'
@@ -9,12 +7,11 @@ import { Logo } from '../../core/Logo'
 import { navbarAppHeight } from '../AppNavbar'
 import { SidenavItemWallet } from './SidenavItemWallet'
 import { SidenavItem } from './SidenavItem'
-import { getRouteToSaveAsPrev } from '../../hooks/useMonitorConnAndLock'
 import BigNumber from 'bignumber.js'
 
 type Props = {
   routes: {
-    lockscreen: string
+    login: string
     home: string
     node: {
       index: string
@@ -24,8 +21,10 @@ type Props = {
     }
   }
   profile: React.ReactNode
+  showWallet?: boolean
   walletBalance?: BigNumber
   isSynced: boolean
+  lock?: () => void
   openSettings: () => void
   children: React.ReactNode
 }
@@ -34,12 +33,12 @@ export function Sidenav({
   routes,
   profile,
   isSynced,
+  showWallet = true,
   walletBalance,
+  lock,
   openSettings,
   children,
 }: Props) {
-  const { lock } = useAppSettings()
-  const router = useRouter()
   return (
     <Panel className="relative overflow-hidden z-10 h-full w-[75px] rounded-none border-y-0">
       <div className="flex flex-col items-center h-full">
@@ -55,24 +54,20 @@ export function Sidenav({
           <div className="flex flex-col gap-6 items-center">{children}</div>
           <div className="flex-1" />
           <Separator className="w-full" />
-          <SidenavItemWallet
-            routes={routes}
-            isSynced={isSynced}
-            walletBalance={walletBalance}
-          />
+          {showWallet && (
+            <SidenavItemWallet
+              routes={routes}
+              isSynced={isSynced}
+              walletBalance={walletBalance}
+            />
+          )}
           <SidenavItem title="Blockchain node" route={routes.node.index}>
             <DiceIcon />
           </SidenavItem>
-          <SidenavItem title="Settings" onClick={() => openSettings()}>
+          <SidenavItem title="App preferences" onClick={() => openSettings()}>
             <GearIcon />
           </SidenavItem>
-          <SidenavItem
-            title="Lock app"
-            onClick={() => {
-              lock()
-              router.replace(getRouteToSaveAsPrev(router, routes))
-            }}
-          >
+          <SidenavItem title="Lock app" onClick={lock}>
             <LockIcon />
           </SidenavItem>
         </div>

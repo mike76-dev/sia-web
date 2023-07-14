@@ -12,8 +12,9 @@ import {
 } from '@siafoundation/react-core'
 
 export interface ConsensusState {
-  BlockHeight: number
-  Synced: boolean
+  blockHeight: number
+  synced: boolean
+  lastBlockTime: string
 }
 
 export interface ContractAcquireRequest {
@@ -163,6 +164,10 @@ export interface MigrateParams {
   ToContracts: string
 }
 
+export type ContractSetSettings = {
+  default: string
+}
+
 export type GougingSettings = {
   maxStoragePrice: string
   maxDownloadPrice: string
@@ -200,6 +205,7 @@ export interface Contract {
   renewedFrom: string
   spending: ContractSpending
   totalCost: Currency
+  size: number
 }
 
 export interface Block {
@@ -343,10 +349,10 @@ export interface AutopilotConfig {
 }
 
 export interface WalletTransaction {
-  Raw: Transaction
-  Index: ChainIndex
-  ID: string
-  Inflow: Currency
-  Outflow: Currency
-  Timestamp: string
+  raw: Transaction
+  index: ChainIndex
+  id: string
+  inflow: Currency
+  outflow: Currency
+  timestamp: string
 }

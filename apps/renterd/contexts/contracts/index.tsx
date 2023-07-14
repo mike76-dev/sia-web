@@ -18,7 +18,8 @@ import BigNumber from 'bignumber.js'
 import {
   ContractData,
   columnsDefaultVisible,
-  columnsDefaultSort,
+  defaultSortField,
+  sortOptions,
 } from './types'
 import { columns } from './columns'
 
@@ -39,8 +40,8 @@ function useContractsMain() {
       },
     },
   })
-  const currentHeight = network.data?.Synced
-    ? network.data.BlockHeight
+  const currentHeight = network.data?.synced
+    ? network.data.blockHeight
     : estimatedNetworkHeight
 
   const dataset = useMemo<ContractData[] | null>(() => {
@@ -77,6 +78,7 @@ function useContractsMain() {
           spendingFundAccount: new BigNumber(c.spending.fundAccount),
           satellite: satellite.data && satellite.data.contracts ?
             satellite.data.contracts[c.id] : '',
+          size: new BigNumber(c.size),
         }
       }) || []
     return data
@@ -88,27 +90,27 @@ function useContractsMain() {
   const {
     configurableColumns,
     enabledColumns,
+    sortableColumns,
     toggleColumnVisibility,
     setColumnsVisible,
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
-  } = useTableState(
-    'renterd/v0/contracts',
+  } = useTableState('renterd/v0/contracts', {
     columns,
     columnsDefaultVisible,
-    columnsDefaultSort
-  )
+    sortOptions,
+    defaultSortField,
+  })
 
   const datasetFiltered = useClientFilteredDataset({
     dataset,
     filters,
-    sortColumn,
+    sortField,
     sortDirection,
   })
 
@@ -155,20 +157,20 @@ function useContractsMain() {
     },
     configurableColumns,
     enabledColumns,
+    sortableColumns,
     toggleColumnVisibility,
     setColumnsVisible,
     setColumnsHidden,
     toggleSort,
     setSortDirection,
-    setSortColumn,
-    sortColumn,
+    setSortField,
+    sortField,
     filters,
     setFilter,
     removeFilter,
     removeLastFilter,
     resetFilters,
     sortDirection,
-    sortOptions,
     resetDefaultColumnVisibility,
   }
 }

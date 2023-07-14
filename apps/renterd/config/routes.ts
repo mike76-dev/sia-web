@@ -26,10 +26,10 @@ export const routes = {
   node: {
     index: '/node',
   },
-  lockscreen: '/login',
   satellite: {
     index: '/satellite',
   },
+  login: '/login',
 }
 
 export const connectivityRoute = '/bus/consensus/state'

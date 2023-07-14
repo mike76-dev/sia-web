@@ -1,6 +1,11 @@
+import { humanDate } from '@siafoundation/sia-js'
 import { omit } from 'lodash'
 import { ChartPoint } from '../components/ChartXY'
-import { format } from 'date-fns'
+import {
+  daysInMilliseconds,
+  hoursInMilliseconds,
+  minutesInMilliseconds,
+} from './time'
 
 type TransformMode = 'diff' | 'none'
 
@@ -41,30 +46,77 @@ export function formatChartData<Key extends string>(
   return result
 }
 
+type TimeRange = {
+  start: number
+  end: number
+}
+
+type DataTimeSpan = '7' | '30' | '90' | '365' | 'all'
+
+export function getTimeRange(span: DataTimeSpan): TimeRange {
+  const now = new Date().getTime()
+  if (span === 'all') {
+    return {
+      start: new Date(2022, 1, 1).getTime(),
+      end: now,
+    }
+  }
+  return {
+    start: now - daysInMilliseconds(Number(span)),
+    end: now,
+  }
+}
+
 const dataIntervalLabelFormatters: Record<
   DataInterval | 'default',
   (timestamp: number) => string
 > = {
   '15m': (timestamp: number) => {
-    return `15m window ending at ${format(timestamp, 'P kk:mm')}`
+    const endTimestamp = timestamp + minutesInMilliseconds(15)
+    return `15m interval from ${humanDate(timestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })} to ${humanDate(endTimestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })}`
   },
   hourly: (timestamp: number) => {
-    return `Hour ending at ${format(timestamp, 'P kk:mm')}`
+    const endTimestamp = timestamp + hoursInMilliseconds(1)
+    return `Hour interval from ${humanDate(timestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })} to ${humanDate(endTimestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })}`
   },
   daily: (timestamp: number) => {
-    return `Day ending on ${format(timestamp, 'P')}`
+    const endTimestamp = timestamp + hoursInMilliseconds(24)
+    return `Day interval from ${humanDate(timestamp)} to ${humanDate(
+      endTimestamp
+    )}`
   },
   weekly: (timestamp: number) => {
-    return `Week ending on ${format(timestamp, 'P')}`
+    const endTimestamp = timestamp + daysInMilliseconds(7)
+    return `Week interval from ${humanDate(timestamp)} to ${humanDate(
+      endTimestamp
+    )}`
   },
   monthly: (timestamp: number) => {
-    return `Month ending on ${format(timestamp, 'P')}`
+    const endTimestamp = timestamp + daysInMilliseconds(30)
+    return `Month interval from ${humanDate(timestamp)} to ${humanDate(
+      endTimestamp
+    )}`
   },
   yearly: (timestamp: number) => {
-    return `Year ending on ${format(timestamp, 'P')}`
+    const endTimestamp = timestamp + daysInMilliseconds(365)
+    return `Year interval from ${humanDate(timestamp)} to ${humanDate(
+      endTimestamp
+    )}`
   },
   default: (timestamp: number) => {
-    return `${format(timestamp, 'P')}`
+    return `${humanDate(timestamp)}`
   },
 } as const
 

@@ -3,34 +3,37 @@ import { ConfigurationTipNumber } from './ConfigurationTipNumber'
 import { toHastings } from '@siafoundation/sia-js'
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form'
 import { FieldLabelAndError } from '../components/Form'
-import { ConfigField, useRegisterForm } from './configurationFields'
+import { ConfigFields, useRegisterForm } from './configurationFields'
 import BigNumber from 'bignumber.js'
 
 type Props<Values extends FieldValues, Categories extends string> = {
   name: Path<Values>
   form: UseFormReturn<Values>
-  field: ConfigField<Values, Categories>
+  fields: ConfigFields<Values, Categories>
 }
 
 export function ConfigurationSiacoin<
   Values extends FieldValues,
   Categories extends string
->({ name, form, field }: Props<Values, Categories>) {
+>({ name, form, fields }: Props<Values, Categories>) {
+  const field = fields[name]
   const {
     average,
     suggestion,
     units,
     suggestionTip,
     averageTip,
+    after,
     decimalsLimitSc = 6,
     decimalsLimitFiat = 6,
     tipsDecimalsLimitSc = 0,
   } = field
-  const { onChange, onBlur, value, error } = useRegisterForm({
+  const { setValue, value, error } = useRegisterForm({
     name,
     field,
     form,
   })
+  const After = after || (() => null)
   return (
     <div className="flex flex-col gap-3 items-end">
       <div className="flex flex-col gap-3 w-[220px]">
@@ -45,13 +48,13 @@ export function ConfigurationSiacoin<
           changed={form.formState.dirtyFields[name]}
           placeholder={(suggestion as BigNumber) || (average as BigNumber)}
           onChange={(val) => {
-            onChange(val as PathValue<Values, Path<Values>>)
+            setValue(val as PathValue<Values, Path<Values>>, true)
           }}
-          onBlur={(e) => {
-            onBlur(e)
-            onChange(value)
+          onBlur={() => {
+            setValue(value, true)
           }}
         />
+        <After name={name} form={form} fields={fields} />
         {average && (
           <ConfigurationTipNumber
             type="siacoin"
@@ -60,7 +63,7 @@ export function ConfigurationSiacoin<
             decimalsLimit={tipsDecimalsLimitSc}
             value={toHastings(average as BigNumber)}
             onClick={() => {
-              onChange(average as PathValue<Values, Path<Values>>)
+              setValue(average as PathValue<Values, Path<Values>>, true)
             }}
           />
         )}
@@ -72,7 +75,7 @@ export function ConfigurationSiacoin<
             decimalsLimit={tipsDecimalsLimitSc}
             value={toHastings(suggestion as BigNumber)}
             onClick={() => {
-              onChange(suggestion as PathValue<Values, Path<Values>>)
+              setValue(suggestion as PathValue<Values, Path<Values>>, true)
             }}
           />
         )}

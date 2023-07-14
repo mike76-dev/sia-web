@@ -126,7 +126,7 @@ export function usePostFunc<Params extends RequestParams, Payload, Result>(
         })
         const response = await axios.post<Result>(reqRoute, payload, reqConfig)
         if (after) {
-          after(
+          await after(
             (matcher, data = (d) => d, opts) =>
               mutate(
                 (key) => {
@@ -156,9 +156,11 @@ export function usePostFunc<Params extends RequestParams, Payload, Result>(
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
+        // If the network is disconnected then response.status will be 0 and
+        // data undefined, so return axios e.message error.
         return {
-          status: e.response.status,
-          error: e.response.data,
+          status: e.response?.status,
+          error: e.response?.data || e.message,
         } as Response<Result>
       }
     },
