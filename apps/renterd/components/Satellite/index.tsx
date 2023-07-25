@@ -189,8 +189,8 @@ export function Satellite() {
     form.reset({
       enabled: config.data?.enabled,
       address: config.data?.address,
-      publicKey: decodePK(config.data?.publicKey),
-      renterSeed: decodeSeed(config.data?.renterSeed),
+      publicKey: decodePK(config.data?.publicKey || ''),
+      renterSeed: decodeSeed(config.data?.renterSeed || ''),
       autoRenew: settings.data?.autoRenew,
     })
   }, [form, config.data, settings.data])
@@ -265,11 +265,13 @@ export function Satellite() {
 
 function decodePK(pk: string) {
   let i = pk.indexOf(':')
-  if (i < 0) {
-    return pk
-  } else {
-    return pk.slice(i + 1)
+  if (i >= 0) {
+    pk = pk.slice(i + 1)
   }
+  if (pk == '0000000000000000000000000000000000000000000000000000000000000000') {
+    return ''
+  }
+  return pk
 }
 
 function encodePK(pk: string) {
