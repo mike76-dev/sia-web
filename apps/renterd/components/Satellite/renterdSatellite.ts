@@ -1,11 +1,9 @@
-import { useGetSwr } from '@siafoundation/react-core'
 import {
+  useGetSwr,
+  usePostFunc,
+  usePutFunc,
   HookArgsSwr,
   HookArgsCallback,
-} from '@siafoundation/react-core'
-import {
-  usePutFunc,
-  usePostFunc,
 } from '@siafoundation/react-core'
 
 // struct2ts:github.com/mike76-dev/renterd-satellite/Config
