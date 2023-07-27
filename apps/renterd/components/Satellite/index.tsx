@@ -23,11 +23,12 @@ import { FieldErrors, useForm } from 'react-hook-form'
 import { entries } from 'lodash'
 
 const initialValues = {
-  enabled: false,
-  address: '',
-  publicKey: '',
-  renterSeed: '',
-  autoRenew: false,
+  enabled:        false,
+  address:        '',
+  publicKey:      '',
+  renterSeed:     '',
+  autoRenew:      false,
+  backupMetadata: false
 }
 
 export function Satellite() {
@@ -117,6 +118,14 @@ export function Satellite() {
       description: <>Contract renewals are handled automatically by the satellite.</>,
       validation: {},
     },
+    backupMetadata: {
+      type: 'boolean',
+      category: 'settings',
+      title: 'Backup File Metadata',
+      description: <>Automatically save file metadata when uploading files.<br/>
+        <small>WARNING! When disabled, any saved metadata is deleted from the satellite.</small></>,
+      validation: {},
+    },
   }
 
   const { openDialog } = useDialog()
@@ -157,6 +166,7 @@ export function Satellite() {
           await settingsUpdate.post({
             payload: {
               autoRenew: values.autoRenew,
+              backupMetadata: values.backupMetadata,
             },
           })
         }
@@ -192,6 +202,7 @@ export function Satellite() {
       publicKey: decodePK(config.data?.publicKey || ''),
       renterSeed: decodeSeed(config.data?.renterSeed || ''),
       autoRenew: settings.data?.autoRenew,
+      backupMetadata: settings.data?.backupMetadata,
     })
   }, [form, config.data, settings.data])
 
