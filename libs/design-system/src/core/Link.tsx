@@ -5,15 +5,18 @@ import { textStyles } from './Text'
 import { buttonStyles } from './Button'
 import { VariantProps } from '../types'
 import { Tooltip } from './Tooltip'
+import { UrlObject } from 'url'
 
-const linkStyles = cva(['cursor-pointer'], {
+const linkVariants = cva(['cursor-pointer'], {
   variants: {
     disabled: {
-      true: 'opacity-50',
+      true: 'opacity-50 pointer-events-none',
     },
     underline: {
-      default: 'underline underline-offset-2',
-      hover: 'hover:underline underline-offset-2',
+      accent:
+        'underline underline-offset-4 decoration-2 decoration-accentdark-900 dark:decoration-accentdark-900',
+      default: 'underline underline-offset-4',
+      hover: 'hover:underline underline-offset-4',
       none: '',
     },
   },
@@ -23,10 +26,10 @@ const linkStyles = cva(['cursor-pointer'], {
   },
 })
 
-type LinkVariants = VariantProps<typeof textStyles> &
-  VariantProps<typeof linkStyles>
+export type LinkVariants = VariantProps<typeof textStyles> &
+  VariantProps<typeof linkVariants>
 
-const styles = ({
+export const linkStyles = ({
   font,
   size,
   scaleSize,
@@ -39,18 +42,30 @@ const styles = ({
   className,
 }: LinkVariants) =>
   cx(
-    textStyles({ scaleSize, size, font, color, weight, noWrap, ellipsis }),
-    linkStyles({ disabled, underline }),
+    textStyles({
+      scaleSize,
+      size,
+      font,
+      color,
+      weight,
+      noWrap,
+      ellipsis,
+      underline,
+    }),
+    linkVariants({ disabled, underline }),
     className
   )
 
 export const Link = React.forwardRef<
   HTMLAnchorElement,
-  React.ComponentProps<typeof BaseNextLink> & LinkVariants
+  Omit<React.ComponentProps<typeof BaseNextLink>, 'href'> &
+    LinkVariants & {
+      href?: string | UrlObject
+    }
 >(
   (
     {
-      href,
+      href = '#',
       font,
       size,
       scaleSize,
@@ -70,9 +85,9 @@ export const Link = React.forwardRef<
     const rel = _rel || (target === '_blank' ? 'noopener' : undefined)
     return (
       <BaseNextLink
-        href={href || '#'}
+        href={href}
         ref={ref}
-        className={styles({
+        className={linkStyles({
           font,
           scaleSize,
           size,
@@ -94,14 +109,15 @@ export const Link = React.forwardRef<
 
 export const LinkButton = React.forwardRef<
   HTMLAnchorElement,
-  React.ComponentProps<typeof BaseNextLink> &
+  Omit<React.ComponentProps<typeof BaseNextLink>, 'href'> &
     VariantProps<typeof buttonStyles> & {
+      href?: string | UrlObject
       tip?: React.ReactNode
     }
 >(
   (
     {
-      href,
+      href = '#',
       disabled,
       variant,
       size,
@@ -121,7 +137,7 @@ export const LinkButton = React.forwardRef<
       return (
         <Tooltip content={tip}>
           <BaseNextLink
-            href={href || '#'}
+            href={href}
             ref={ref}
             className={buttonStyles({
               variant,
@@ -141,7 +157,7 @@ export const LinkButton = React.forwardRef<
     }
     return (
       <BaseNextLink
-        href={href || '#'}
+        href={href}
         ref={ref}
         className={buttonStyles({
           variant,

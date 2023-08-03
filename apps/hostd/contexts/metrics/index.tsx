@@ -26,6 +26,9 @@ import {
   StorageCategories,
   RevenueCategories,
   OperationsKeys,
+  getDataIntervalInMs,
+  CollateralKeys,
+  CollateralCategories,
 } from './types'
 import { formatISO } from 'date-fns'
 import {
@@ -69,11 +72,9 @@ function useMetricsMain() {
     }
   )
 
-  const [timeRange, setTimeRange] = useLocalStorageState<TimeRange>(
-    'v0/metrics/timeRange',
-    {
-      defaultValue: getTimeRange(dataTimeSpan),
-    }
+  const timeRange = useMemo<TimeRange>(
+    () => getTimeRange(dataTimeSpan),
+    [dataTimeSpan]
   )
 
   const setDataTimeSpan = useCallback(
@@ -81,9 +82,8 @@ function useMetricsMain() {
       const option = dataTimeSpanOptions.find((o) => o.value === span)
       setDataInterval(option.interval)
       _setDataTimeSpan(option.value)
-      setTimeRange(getTimeRange(option.value))
     },
-    [_setDataTimeSpan, setDataInterval, setTimeRange]
+    [_setDataTimeSpan, setDataInterval]
   )
 
   const formatTimestamp = useMemo(
@@ -94,7 +94,11 @@ function useMetricsMain() {
   const metricsPeriod = useMetricsPeriod({
     params: {
       interval: dataInterval,
-      start: formatISO(new Date(timeRange.start)),
+      // subtract 1 data interval so that one previous datum is available for
+      // calculating the first delta
+      start: formatISO(
+        new Date(timeRange.start - getDataIntervalInMs(dataInterval))
+      ),
       // periods: getPeriods(timeRange, dataInterval),
     },
     config: {
@@ -136,7 +140,7 @@ function useMetricsMain() {
           .toNumber(),
         timestamp: new Date(m.timestamp).getTime(),
       })),
-      'diff'
+      'delta'
     )
     const stats = computeChartStats(data)
     return {
@@ -248,11 +252,46 @@ function useMetricsMain() {
     }
   }, [metricsPeriod, formatTimestamp])
 
+  const collateral = useMemo<
+    Chart<CollateralKeys, CollateralCategories>
+  >(() => {
+    const data = formatChartData(
+      metricsPeriod.data?.map((m) => ({
+        locked: Number(m.contracts.lockedCollateral),
+        risked: Number(m.contracts.riskedCollateral),
+        timestamp: new Date(m.timestamp).getTime(),
+      })),
+      'none'
+    )
+    const stats = computeChartStats(data)
+    return {
+      data,
+      stats,
+      config: {
+        enabledGraph: ['locked', 'risked'],
+        enabledTip: ['locked', 'risked'],
+        data: {
+          locked: chartConfigs.locked,
+          risked: chartConfigs.risked,
+        },
+        format: (v) => humanSiacoin(v),
+        formatTimestamp,
+        disableAnimations,
+      },
+      chartType: 'area',
+      isLoading: metricsPeriod.isValidating,
+    }
+  }, [metricsPeriod, formatTimestamp])
+
   const pricing = useMemo<Chart<PricingKeys, never>>(() => {
     const data = formatChartData(
       metricsPeriod.data?.map((m) => ({
         baseRPC: humanBaseRpcPrice(m.pricing.baseRPCPrice).toNumber(),
-        collateral: humanCollateralPrice(m.pricing.collateral).toNumber(),
+        collateral: humanCollateralPrice(
+          new BigNumber(m.pricing.storagePrice).times(
+            m.pricing.collateralMultiplier
+          )
+        ).toNumber(),
         contract: Number(m.pricing.contractPrice),
         egress: humanEgressPrice(m.pricing.egressPrice).toNumber(),
         ingress: humanIngressPrice(m.pricing.ingressPrice).toNumber(),
@@ -429,7 +468,7 @@ function useMetricsMain() {
         registryWrites: m.registry.writes,
         timestamp: new Date(m.timestamp).getTime(),
       })),
-      'diff'
+      'delta'
     )
     const stats = computeChartStats(data)
     return {
@@ -474,7 +513,7 @@ function useMetricsMain() {
         ingress: m.data.rhp3.ingress + m.data.rhp2.ingress,
         timestamp: new Date(m.timestamp).getTime(),
       })),
-      'diff'
+      'delta'
     )
     const stats = computeChartStats(data)
     return {
@@ -547,6 +586,7 @@ function useMetricsMain() {
     setDataInterval,
     operations,
     revenue,
+    collateral,
     contracts,
     storage,
     pricing,

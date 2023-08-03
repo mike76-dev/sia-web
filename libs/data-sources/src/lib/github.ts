@@ -1,10 +1,9 @@
-import { getGitHubToken } from '@siafoundation/env'
 import Axios from 'axios'
 import { orderBy } from 'lodash'
 import { buildErrorResponse500 } from './error'
 import { AsyncDataSourceResponse } from './types'
 
-const githubToken = getGitHubToken()
+const githubToken = process.env['GITHUB_TOKEN']
 
 const axios = Axios.create({
   headers: {
@@ -193,6 +192,22 @@ export async function getGitHubHostdLatestRelease(): Promise<GitHubRelease | nul
   try {
     const response = await axios.get(
       'https://api.github.com/repos/SiaFoundation/hostd/releases?per_page=1'
+    )
+    if (response.data.length) {
+      return response.data[0]
+    } else {
+      return null
+    }
+  } catch (e) {
+    console.log(e)
+    return null
+  }
+}
+
+export async function getGitHubWalletdLatestRelease(): Promise<GitHubRelease | null> {
+  try {
+    const response = await axios.get(
+      'https://api.github.com/repos/SiaFoundation/walletd/releases?per_page=1'
     )
     if (response.data.length) {
       return response.data[0]

@@ -1,48 +1,35 @@
-import fs from 'fs'
-import path from 'path'
-import {
-  SiteHeading,
-  getImageProps,
-  webLinks,
-  Text,
-} from '@siafoundation/design-system'
+import { SiteHeading, webLinks, Text } from '@siafoundation/design-system'
 import { Layout } from '../../components/Layout'
 import { routes } from '../../config/routes'
-import { getCacheStats } from '../../content/stats'
-import backgroundImage from '../../assets/backgrounds/nate-bridge.png'
-import previewImage from '../../assets/previews/nate-bridge.png'
+import { getStats } from '../../content/stats'
 import { AsyncReturnType } from '../../lib/types'
 import { getMinutesInSeconds } from '../../lib/time'
-import { SectionSimple } from '../../components/SectionSimple'
-import { getContentDirectory } from '@siafoundation/env'
-import matter from 'gray-matter'
-import { serialize } from 'next-mdx-remote/serialize'
+import { SectionSolid } from '../../components/SectionSolid'
 import { format } from 'date-fns'
 import { MDXRemote } from 'next-mdx-remote'
 import { components } from '../../config/mdx'
-
-const backgroundImageProps = getImageProps(backgroundImage)
-const previewImageProps = getImageProps(previewImage)
+import { backgrounds, previews } from '../../content/assets'
+import { SectionTransparent } from '../../components/SectionTransparent'
+import { getNotionPage } from '../../lib/notion'
 
 type Props = AsyncReturnType<typeof getStaticProps>['props']
 
-export default function HostBestPractices({
-  title,
-  date,
-  description,
-  source,
-}: Props) {
+const title = 'Sia Network Hosting Best Practices'
+const description = 'High-level guidance for Hosts on the Sia network.'
+
+export default function HostBestPractices({ date, source }: Props) {
   return (
     <Layout
       title={title}
       description={description}
       path={routes.community.index}
       heading={
-        <SectionSimple className="pt-24 md:pt-40 pb-6 md:pb-20">
+        <SectionTransparent className="pt-24 md:pt-40 pb-6 md:pb-20">
           <SiteHeading
             title={title}
             description={description}
             size="64"
+            anchorLink={false}
             links={[
               {
                 title: 'Hosting Docs',
@@ -56,39 +43,32 @@ export default function HostBestPractices({
               },
             ]}
           />
-        </SectionSimple>
+        </SectionTransparent>
       }
-      backgroundImage={backgroundImageProps}
-      previewImage={previewImageProps}
+      backgroundImage={backgrounds.nateBridge}
+      previewImage={previews.nateBridge}
     >
-      <SectionSimple className="md:pt-20 pb-24 md:pb-40">
+      <SectionSolid className="md:pt-20 pb-24 md:pb-40">
         <MDXRemote {...source} components={components} />
         <Text
           className="mt-24 md:mt-32 mb-24"
           color="verySubtle"
         >{`Document version date: ${format(new Date(date), 'PP')}`}</Text>
-      </SectionSimple>
+      </SectionSolid>
     </Layout>
   )
 }
 
+const databaseId = 'a328ef7df2d84306b09dc64c65b25147'
+
 export async function getStaticProps() {
-  const stats = await getCacheStats()
+  const stats = await getStats()
 
-  const { data, content } = matter(
-    fs.readFileSync(
-      path.join(getContentDirectory(), 'pages/hosting-best-practices.mdx'),
-      'utf-8'
-    )
-  )
-
-  const source = await serialize(content)
+  const { date, source } = await getNotionPage(databaseId)
 
   return {
     props: {
-      title: data.title as string,
-      date: data.date as string,
-      description: data.description as string,
+      date,
       source,
       fallback: {
         '/api/stats': stats,

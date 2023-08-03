@@ -15,12 +15,12 @@ export function HomeStorage() {
       <Heading>Storage</Heading>
       <DatumScrollArea>
         <DatumCardConfigurable
-          label="storage"
+          label="storage (physical)"
           color={storage.config.data['physicalSectors'].color}
           value={storage.stats['physicalSectors']}
           defaultMode="latest"
           isLoading={storage.isLoading}
-          enabledModes={['latest', 'average', 'total']}
+          enabledModes={['latest', 'average']}
           format={humanBytes}
         />
         <DatumCardConfigurable
@@ -29,7 +29,7 @@ export function HomeStorage() {
           value={storage.stats['registryEntries']}
           defaultMode="latest"
           isLoading={storage.isLoading}
-          enabledModes={['latest', 'average', 'total']}
+          enabledModes={['latest', 'average']}
           format={humanBytes}
         />
       </DatumScrollArea>

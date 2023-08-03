@@ -20,14 +20,13 @@ export function Statsbar() {
     contributors,
     forks,
     releases,
-    downloads,
     // downloadSpeed,
     // uploadSpeed,
     // cpuUsage,
     // memoryUsage,
   } = data || {}
   return (
-    <div className="flex flex-col gap6">
+    <div className="flex flex-col gap-6">
       {/* <Heading font="mono">Numbers</Heading> */}
       <div className="flex gap-x-20 gap-y-12 justify-start flex-wrap">
         <StatSection
@@ -115,10 +114,6 @@ export function Statsbar() {
               value: releases,
               label: 'releases',
             },
-            {
-              value: downloads,
-              label: 'downloads',
-            },
           ]}
         />
       </div>
@@ -133,9 +128,9 @@ type StatProps = {
 
 function Stat({ value, label }: StatProps) {
   return (
-    <Paragraph font="mono" size="14">
+    <Paragraph font="mono" size="12">
       {value}{' '}
-      <Text color="subtle" font="sans" size="14">
+      <Text color="subtle" font="sans" size="12">
         {label}
       </Text>
     </Paragraph>

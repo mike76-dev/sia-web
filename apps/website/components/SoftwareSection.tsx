@@ -6,33 +6,35 @@ import {
   Book16,
   LogoGithub16,
 } from '@siafoundation/design-system'
-import { CalloutSoftware } from './CalloutSoftware'
+import { CalloutCoreSoftware } from './CalloutCoreSoftware'
 
 type Props = {
   title: string
+  status?: string
   description: React.ReactNode
   version: string
   sourceLink: string
   docsLink: string
   links: LinkData[]
-  startTime: number
+  background: string
 }
 
 export function SoftwareSection({
   title,
+  status,
   description,
   version,
   sourceLink,
   docsLink,
   links,
-  startTime,
+  background,
 }: Props) {
   return (
-    <CalloutSoftware
+    <CalloutCoreSoftware
       name={title}
+      status={status}
       description={description}
-      startTime={startTime}
-      variant="subtle"
+      background={background}
     >
       <div className="flex flex-col">
         <Text size="14" weight="bold" className="mt-4 mb-4">
@@ -67,6 +69,6 @@ export function SoftwareSection({
           </Text>
         </div>
       </div>
-    </CalloutSoftware>
+    </CalloutCoreSoftware>
   )
 }

@@ -1,28 +1,74 @@
-import { ContentItemProps } from '@siafoundation/design-system'
-import { getCacheNewsPostsList } from './news'
-import { getCacheArticles } from './articles'
+import { getCacheValue } from '../lib/cache'
+import { getMinutesInSeconds } from '../lib/time'
+import { addNewTab } from '../lib/utils'
+import { fetchAllFeedItems } from '@siafoundation/data-sources'
 
-const limit = 50
+type Tag =
+  | 'sia-all'
+  | 'featured'
+  | 'ecosystem-featured'
+  | 'ecosystem-all'
+  | 'technical'
 
-type Filter = 'press' | 'ecosystem'
+type FeedItem = {
+  title: string
+  tags: Tag[]
+  date: string
+  link: string
+  newTab?: boolean
+}
 
-export async function getCacheFeed(filter?: Filter) {
-  let posts = []
+const maxAge = getMinutesInSeconds(5)
 
-  if ([undefined, 'press'].includes(filter)) {
-    const news = await getCacheNewsPostsList(limit)
-    posts.push(...news)
+async function fetchFeedContent(
+  tags: Tag[],
+  limit?: number
+): Promise<FeedItem[]> {
+  const items = await getFeedItems()
+  return items
+    .filter((a) =>
+      !tags.length ? true : tags.find((tag) => a.tags?.includes(tag))
+    )
+    .slice(0, limit)
+    .map(addNewTab) as FeedItem[]
+}
+
+export async function getFeedContent(tags: Tag[], limit?: number) {
+  return getCacheValue(
+    'getFeedContent' + tags.join('') + limit,
+    async () => {
+      return fetchFeedContent(tags, limit)
+    },
+    maxAge
+  )
+}
+
+async function getFeedItems() {
+  return getCacheValue(
+    'feed/items',
+    async () => {
+      return fetchAllFeedItems([])
+    },
+    maxAge
+  )
+}
+
+const limit = 20
+
+type Filter = 'foundation' | 'ecosystem'
+
+export async function getNewsFeed(filter?: Filter) {
+  const items = await getFeedContent([])
+
+  if (filter === 'foundation') {
+    return items
+      .filter((i) => i.link.startsWith('https://blog.sia.tech'))
+      .slice(0, limit)
   }
-  if ([undefined, 'ecosystem'].includes(filter)) {
-    const articles = await getCacheArticles([], limit)
-    posts.push(...articles)
+  if (filter === 'ecosystem') {
+    return items
+      .filter((i) => !i.link.startsWith('https://blog.sia.tech'))
+      .slice(0, limit)
   }
-
-  posts.sort((a, b) =>
-    new Date(a.date) < new Date(b.date) ? 1 : -1
-  ) as ContentItemProps[]
-
-  posts = posts.slice(0, limit)
-
-  return posts
+  return items.slice(0, limit)
 }

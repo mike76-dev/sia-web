@@ -3,7 +3,7 @@ import { toPairs } from 'lodash'
 import { webLinks } from '@siafoundation/design-system'
 import { getMinutesInSeconds } from '../lib/time'
 import { getCacheValue } from '../lib/cache'
-import { getContentPath } from '@siafoundation/env'
+import { getAssetPath } from '@siafoundation/data-sources'
 
 type Report = {
   year: string
@@ -14,16 +14,16 @@ type ReportPair = [string, Report[]]
 
 const maxAge = getMinutesInSeconds(5)
 
-export async function getCacheReports(): Promise<ReportPair[]> {
-  return getCacheValue('articles', async () => getReports(), maxAge)
+export async function getReports(): Promise<ReportPair[]> {
+  return getCacheValue('transparencyReports', async () => readReports(), maxAge)
 }
 
-function getReports(): ReportPair[] {
+function readReports(): ReportPair[] {
   let reports: Report[] = []
 
   try {
     reports = fs
-      .readdirSync(getContentPath('transparency'))
+      .readdirSync(getAssetPath('transparency'))
       .map((filename) => {
         const [name, ext] = filename.split('.')
         const [year, quarter] = name.split('-')

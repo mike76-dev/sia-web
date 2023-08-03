@@ -10,49 +10,34 @@ export const menuSections = [
         title: 'Home',
       },
       {
-        link: routes.getStarted.index,
-        title: 'Get Started',
-      },
-      {
         link: routes.learn.index,
         title: 'Learn',
       },
       {
-        link: webLinks.docs.index,
-        title: 'Documentation',
-        newTab: true,
+        link: routes.rent.index,
+        title: 'Rent',
       },
       {
-        link: webLinks.apiDocs.siad,
-        title: 'API Docs',
-        newTab: true,
+        link: routes.host.index,
+        title: 'Host',
       },
       {
-        link: routes.whitepaper.pdf,
-        title: 'Whitepaper',
-        newTab: true,
+        link: routes.wallet.index,
+        title: 'Wallet',
       },
       {
         link: routes.activity.index,
         title: 'Activity',
+      },
+      {
+        link: routes.news.index,
+        title: 'News',
       },
     ],
   },
   {
     title: 'Software',
     links: [
-      {
-        link: routes.getStarted.index,
-        title: 'siad',
-      },
-      {
-        link: routes.getStarted.index,
-        title: 'Sia UI',
-      },
-      {
-        link: routes.getStarted.index,
-        title: 'embarcadero',
-      },
       {
         link: routes.software.renterd,
         title: 'renterd',
@@ -62,14 +47,23 @@ export const menuSections = [
         title: 'hostd',
       },
       {
-        link: routes.getStarted.index,
+        link: routes.software.walletd,
         title: 'walletd',
+      },
+      {
+        link: routes.software.explored,
+        title: 'explored',
         disabled: true,
       },
       {
-        link: routes.getStarted.index,
-        title: 'explorerd',
-        disabled: true,
+        link: webLinks.docs.index,
+        title: 'Documentation',
+        newTab: true,
+      },
+      {
+        link: routes.whitepaper.pdf,
+        title: 'Whitepaper',
+        newTab: true,
       },
     ],
   },
@@ -93,17 +87,17 @@ export const menuSections = [
         title: 'Hosting Best Practices',
       },
       {
-        link: routes.newsroom.index,
-        title: 'Newsroom',
-      },
-      {
-        link: webLinks.docs.brand,
-        title: 'Brand guidelines',
-        newTab: true,
+        link: routes.letter.index,
+        title: 'Letter',
       },
       {
         link: webLinks.jobs,
         title: 'Careers',
+        newTab: true,
+      },
+      {
+        link: webLinks.docs.brand,
+        title: 'Brand guidelines',
         newTab: true,
       },
     ],
@@ -138,6 +132,11 @@ export const menuSections = [
       {
         link: webLinks.forum,
         title: 'Forum',
+        newTab: true,
+      },
+      {
+        link: webLinks.bluesky,
+        title: 'Bluesky',
         newTab: true,
       },
     ],

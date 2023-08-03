@@ -1,6 +1,5 @@
 import {
   getBenchmarks,
-  getCounts,
   getNavigatorStatus,
   getGitHub,
   getSiaCentralHostsNetworkMetrics,
@@ -12,8 +11,8 @@ import { getMinutesInSeconds } from '../lib/time'
 
 const maxAge = getMinutesInSeconds(5)
 
-export async function getCacheStats() {
-  return getCacheValue('stats', () => getStats(), maxAge)
+export async function getStats() {
+  return getCacheValue('stats', () => readStats(), maxAge)
 }
 
 // This function is used to SSG pages and in the /api/stats API route.
@@ -21,7 +20,7 @@ export async function getCacheStats() {
 // all the other props which ideally are not revalidated nearly as often.
 // The stats components revalidate against the API endpoint which has a low SWR
 // cache value, which avoids needing to change the SSG revalidate value.
-async function getStats() {
+async function readStats() {
   if (process.env.NODE_ENV === 'development') {
     return {
       activeHosts: '20,531',
@@ -35,7 +34,6 @@ async function getStats() {
       contributors: '2,069',
       forks: '20,472',
       releases: '2,041',
-      downloads: '201,059,994',
       downloadSpeed: '201.44 Gbps',
       uploadSpeed: '2071.08 Mbps',
       cpuUsage: '20.147%',
@@ -43,14 +41,12 @@ async function getStats() {
     }
   }
 
-  const [hostsStats, navigator, downloadCounts, github, benchmarks] =
-    await Promise.all([
-      getSiaCentralHostsNetworkMetrics(),
-      getNavigatorStatus(),
-      getCounts(),
-      getGitHub(),
-      getBenchmarks(),
-    ])
+  const [hostsStats, navigator, github, benchmarks] = await Promise.all([
+    getSiaCentralHostsNetworkMetrics(),
+    getNavigatorStatus(),
+    getGitHub(),
+    getBenchmarks(),
+  ])
   const latestBenchmark = benchmarks.data[0]
 
   const stats = {
@@ -79,7 +75,6 @@ async function getStats() {
     contributors: humanNumber(github.data?.contributors),
     forks: humanNumber(github.data?.forks),
     releases: humanNumber(github.data?.releases),
-    downloads: humanNumber(downloadCounts.data?.total),
     // benchmarks
     downloadSpeed: humanSpeed(latestBenchmark?.downloadThroughput),
     uploadSpeed: humanSpeed(latestBenchmark?.uploadThroughput),
@@ -90,4 +85,4 @@ async function getStats() {
   return stats
 }
 
-export type Stats = AsyncReturnType<typeof getStats>
+export type Stats = AsyncReturnType<typeof readStats>

@@ -1,4 +1,4 @@
-# [![Sia Web](https://sia.tech/banners/sia-banner-web.png)](http://sia.tech)
+# [![Sia Web](https://sia.tech/assets/banners/sia-banner-web.png)](http://sia.tech)
 
 # Web
 
@@ -12,7 +12,7 @@ User interfaces for the Sia software. The latest Sia software takes a modular ap
 
 ![stability-beta](https://img.shields.io/badge/stability-beta-yellow.svg)
 
-The [renterd](https://github.com/siafoundation/renterd) user interface, focused on renting functionality.
+The [`renterd`](https://github.com/siafoundation/renterd) user interface, focused on renting functionality.
 
 ### [explorer-v1](apps/explorer-v1)
 
@@ -22,15 +22,15 @@ The `explorer-v1` user interface, a Sia blockchain explorer interface based on [
 
 ### [hostd](apps/hostd)
 
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-orange.svg)
+![stability-beta](https://img.shields.io/badge/stability-beta-yellow.svg)
 
-The `hostd` user interface, focused on hosting functionality.
+The [`hostd`](https://github.com/siafoundation/hostd) user interface, focused on hosting functionality.
 
 ### [walletd](apps/walletd)
 
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-orange.svg)
+![stability-alpha](https://img.shields.io/badge/stability-alpha-orange.svg)
 
-The `walletd` user interface, includes a wallet with support for hot, cold, and hardware wallets.
+The [`walletd`](https://github.com/siafoundation/walletd) user interface, includes a wallet with support for hot, cold, and hardware wallets.
 
 ## Libraries
 
@@ -48,13 +48,11 @@ The Sia web libraries provide developers with convenient TypeScript SDKs for usi
 - [@siafoundation/sia-nodejs](libs/sia-nodejs) - Sia NodeJS client for controlling a v1 `siad`.
 - [@siafoundation/design-system](libs/design-system) - React-based design system used across Sia apps and websites.
 - [@siafoundation/data-sources](libs/data-sources) - Data sources used for stats on the website.
-- [@siafoundation/env](libs/env) - Environment variables for use across projects.
 
 ## Internal
 
 - [website](apps/website) - The main [sia.tech](https://sia.tech) website with information on the Sia project and the Sia Foundation.
 - [asset-server](apps/asset-server) - Powers [api.sia.tech](https://api.sia.tech) and all downloadable assets on [sia.tech](https://sia.tech) such as the Sia software releases.
-- [design-site](apps/design-site) - The [design.sia.tech](https://design.sia.tech) website for exploring the design system used across Sia apps and websites.
 
 ## Development
 

@@ -1,7 +1,17 @@
 /* eslint-disable react/no-unescaped-entities */
 import { webLinks } from '@siafoundation/design-system'
-import { Versions } from '../content/versions'
+import { backgrounds } from '../content/assets'
 import { SoftwareSection } from './SoftwareSection'
+
+type Versions = {
+  sia: {
+    latest: string
+    testnet: string
+  }
+  embarcadero: {
+    latest: string
+  }
+}
 
 type Props = {
   versions: Versions
@@ -21,7 +31,7 @@ export function SoftwareSectionTestnet({ versions }: Props) {
         sourceLink={webLinks.github.siad}
         docsLink={webLinks.docs.siad}
         version={versions.sia.testnet}
-        startTime={0}
+        background={backgrounds.natePath}
         links={[
           {
             title: 'Windows AMD',

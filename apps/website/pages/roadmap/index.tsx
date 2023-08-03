@@ -1,8 +1,5 @@
-import fs from 'fs'
-import path from 'path'
 import {
   SiteHeading,
-  getImageProps,
   Heading,
   Link,
   Separator,
@@ -10,42 +7,40 @@ import {
 } from '@siafoundation/design-system'
 import { Layout } from '../../components/Layout'
 import { routes } from '../../config/routes'
-import { getCacheStats } from '../../content/stats'
-import backgroundImage from '../../assets/backgrounds/nate-trickle.png'
-import previewImage from '../../assets/previews/nate-trickle.png'
+import { getStats } from '../../content/stats'
 import { AsyncReturnType } from '../../lib/types'
 import { getMinutesInSeconds } from '../../lib/time'
-import { SectionSimple } from '../../components/SectionSimple'
-import { getContentDirectory } from '@siafoundation/env'
-import matter from 'gray-matter'
-import { serialize } from 'next-mdx-remote/serialize'
+import { SectionSolid } from '../../components/SectionSolid'
 import { MDXRemote } from 'next-mdx-remote'
 import { components } from '../../config/mdx'
 import { TableOfContents } from '../../components/TableOfContents'
-import { getCachePrs } from '../../content/prs'
+import { getPrs } from '../../content/prs'
 import { GitHubActivity } from '../../components/GitHubActivity'
+import { backgrounds, previews } from '../../content/assets'
+import { SectionTransparent } from '../../components/SectionTransparent'
+import { getNotionPage } from '../../lib/notion'
 import { format } from 'date-fns'
-
-const backgroundImageProps = getImageProps(backgroundImage)
-const previewImageProps = getImageProps(previewImage)
 
 type Props = AsyncReturnType<typeof getStaticProps>['props']
 
-export default function Roadmap({
-  title,
-  date,
-  description,
-  source,
-  prs,
-}: Props) {
+const title = 'The Sia Foundation Roadmap'
+const description =
+  'This Sia roadmap provides mid to high level insight into core Sia development. It will be updated once a quarter at minimum, and will show an outline of what we’re currently working on, why we’re working on it, and what we have in mind after that’s done.'
+
+export default function Roadmap({ date, source, prs }: Props) {
   return (
     <Layout
       title={title}
       description={description}
-      path={routes.community.index}
+      path={routes.roadmap.index}
       heading={
-        <SectionSimple className="pt-24 md:pt-40 pb-6">
-          <SiteHeading title={title} description={description} size="64">
+        <SectionTransparent className="pt-24 md:pt-40 pb-6">
+          <SiteHeading
+            title={title}
+            description={description}
+            size="64"
+            anchorLink={false}
+          >
             <TableOfContents
               className="mt-10"
               items={[
@@ -64,12 +59,12 @@ export default function Roadmap({
               ]}
             />
           </SiteHeading>
-        </SectionSimple>
+        </SectionTransparent>
       }
-      backgroundImage={backgroundImageProps}
-      previewImage={previewImageProps}
+      backgroundImage={backgrounds.nateTrickle}
+      previewImage={previews.nateTrickle}
     >
-      <SectionSimple className="pb-24 md:pb-40">
+      <SectionSolid className="pb-24 md:pb-40">
         <MDXRemote {...source} components={components} />
         <Text
           className="mt-24 md:mt-32"
@@ -89,29 +84,23 @@ export default function Roadmap({
         >
           View full activity feed →
         </Link>
-      </SectionSimple>
+      </SectionSolid>
     </Layout>
   )
 }
 
+const roadmapId = 'd74a8e95cb1e40f4bd0b12fdf4ad67a9'
+
 export async function getStaticProps() {
-  const stats = await getCacheStats()
+  const stats = await getStats()
 
-  const { data, content } = matter(
-    fs.readFileSync(
-      path.join(getContentDirectory(), 'pages/roadmap.mdx'),
-      'utf-8'
-    )
-  )
+  const { date, source } = await getNotionPage(roadmapId)
 
-  const prs = await getCachePrs()
-  const source = await serialize(content)
+  const prs = await getPrs()
 
   return {
     props: {
-      title: data.title as string,
-      date: data.date as string,
-      description: data.description as string,
+      date,
       source,
       prs: prs.slice(0, 10),
       fallback: {

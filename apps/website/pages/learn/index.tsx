@@ -4,24 +4,18 @@ import {
   Callout,
   Link,
   SiteHeading,
-  getImageProps,
   webLinks,
 } from '@siafoundation/design-system'
 import { Layout } from '../../components/Layout'
 import { routes } from '../../config/routes'
-import { getCacheStats } from '../../content/stats'
+import { getStats } from '../../content/stats'
 import { getMinutesInSeconds } from '../../lib/time'
 import { textContent } from '../../lib/utils'
-import backgroundImage from '../../assets/backgrounds/light.png'
-import previewImage from '../../assets/previews/light.png'
-import { getCacheTutorials } from '../../content/tutorials'
+import { getTutorialArticles } from '../../content/articles'
 import { AsyncReturnType } from '../../lib/types'
-import { SectionSimple } from '../../components/SectionSimple'
 import { SectionGradient } from '../../components/SectionGradient'
-import { SectionWaves } from '../../components/SectionWaves'
-
-const backgroundImageProps = getImageProps(backgroundImage)
-const previewImageProps = getImageProps(previewImage)
+import { SectionTransparent } from '../../components/SectionTransparent'
+import { backgrounds, patterns, previews } from '../../content/assets'
 
 const title = 'Learn'
 const description =
@@ -36,12 +30,17 @@ export default function Learn({ getStarted }: Props) {
       description={textContent(description)}
       path={routes.learn.index}
       heading={
-        <SectionSimple className="pt-24 md:pt-40 pb-6 md:pb-20">
-          <SiteHeading size="64" title={title} description={description} />
-        </SectionSimple>
+        <SectionTransparent className="pt-24 md:pt-40 pb-6 md:pb-20">
+          <SiteHeading
+            size="64"
+            title={title}
+            description={description}
+            anchorLink={false}
+          />
+        </SectionTransparent>
       }
-      backgroundImage={backgroundImageProps}
-      previewImage={previewImageProps}
+      backgroundImage={backgrounds.light}
+      previewImage={previews.light}
     >
       <SectionGradient className="pt-10 md:pt-24 pb-16 md:pb-32">
         <div className="flex flex-wrap items-center justify-between gap-4 gap-y-20">
@@ -104,13 +103,14 @@ export default function Learn({ getStarted }: Props) {
               actionTitle="Learn more"
               actionLink={webLinks.docs.sia101}
               actionNewTab
+              background={backgrounds.nateTrickle}
               description={<>Visit our docs to learn more about Sia.</>}
               className="w-full md:h-[500px]"
             />
           </div>
         </div>
       </SectionGradient>
-      <SectionWaves className="pt-8 md:pt-32 pb-16 md:pb-40">
+      <SectionTransparent className="pt-8 md:pt-24 pb-16 md:pb-40">
         <div className="flex flex-col lg:max-w-3xl">
           <SiteHeading
             size="32"
@@ -271,39 +271,49 @@ export default function Learn({ getStarted }: Props) {
             ]}
           />
         </div>
-      </SectionWaves>
-      <SectionGradient className="pt-10 md:pt-32 pb-20 md:pb-40">
-        <SiteHeading
-          size="32"
-          className="pb-10 md:pb-20"
-          title="Learn more about the basics"
-          description={
-            <>Technical tutorials for new developers looking to build on Sia.</>
-          }
-        />
-        <ContentGallery items={getStarted} />
-        <Callout
-          className="mt-20 md:mt-48"
-          eyebrow="Start building"
-          title="Developer Resources"
-          description={
-            <>
-              Software downloads, tutorials, technical walkthroughs, and more.
-            </>
-          }
-          startTime={20}
-          actionTitle="Explore"
-          actionLink={routes.getStarted.index}
-          size="2"
-        />
+      </SectionTransparent>
+      <SectionGradient>
+        <div className="pt-10 md:pt-24 pb-20 md:pb-40">
+          <SiteHeading
+            size="32"
+            className="pb-10 md:pb-20"
+            title="Learn more about the basics"
+            description={
+              <>
+                Technical tutorials for new developers looking to build on Sia.
+              </>
+            }
+          />
+          <ContentGallery items={getStarted} />
+        </div>
+        <div className="pt-10 md:pt-24 pb-20 md:pb-40 grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
+          <Callout
+            size="0"
+            title="Rent"
+            background={patterns.leaves}
+            description={
+              <>Rent space and store your data on the Sia network.</>
+            }
+            actionTitle="Rent storage"
+            actionLink={routes.rent.index}
+          />
+          <Callout
+            size="0"
+            title="Host"
+            background={patterns.jungle}
+            description={<>Offer your storage space on the Sia network.</>}
+            actionTitle="Start hosting"
+            actionLink={routes.host.index}
+          />
+        </div>
       </SectionGradient>
     </Layout>
   )
 }
 
 export async function getStaticProps() {
-  const stats = await getCacheStats()
-  const getStarted = await getCacheTutorials()
+  const stats = await getStats()
+  const getStarted = await getTutorialArticles()
   return {
     props: {
       getStarted,

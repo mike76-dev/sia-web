@@ -221,6 +221,12 @@ export function useContracts(
   })
 }
 
+export function useContractsIntegrityCheck(
+  args?: HookArgsCallback<{ id: string }, void, void>
+) {
+  return usePutFunc({ ...args, route: '/contracts/:id/integrity' })
+}
+
 // metrics
 
 // Revenue is a collection of metrics related to revenue.
@@ -248,6 +254,8 @@ type Contracts = {
   rejected: number
   failed: number
   successful: number
+  lockedCollateral: string
+  riskedCollateral: string
 }
 
 // Pricing is a collection of metrics related to the host's pricing settings.
@@ -258,7 +266,7 @@ type Pricing = {
   baseRPCPrice: string
   sectorAccessPrice: string
   storagePrice: string
-  collateral: string
+  collateralMultiplier: number
 }
 
 // Registry is a collection of metrics related to the host's registry.

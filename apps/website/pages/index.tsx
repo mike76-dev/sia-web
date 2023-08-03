@@ -2,72 +2,38 @@
 import {
   ContentGallery,
   Callout,
-  ContentProject,
   SiteHeading,
-  getImageProps,
   webLinks,
-  Link,
   Code,
   Text,
 } from '@siafoundation/design-system'
 import { Layout } from '../components/Layout'
 import { routes } from '../config/routes'
 import { AsyncReturnType } from '../lib/types'
-import { getCacheArticles } from '../content/articles'
-import { getCacheSoftware } from '../content/software'
-import { getCacheTutorials } from '../content/tutorials'
-import backgroundImage from '../assets/backgrounds/mountain.png'
-import previewImage from '../assets/previews/mountain.png'
-import { useCallback, useMemo, useState } from 'react'
+import { getFeedContent } from '../content/feed'
+import { getProjects } from '../content/projects'
+import { getTutorialArticles } from '../content/articles'
 import { textContent } from '../lib/utils'
-import Letter from '../components/Letter'
-import { JiggleArrow } from '../components/JiggleArrow'
 import { SectionGradient } from '../components/SectionGradient'
-import { SectionSimple } from '../components/SectionSimple'
-import { SectionWaves } from '../components/SectionWaves'
-import { usePullTop } from '../hooks/usePullTop'
-import { cx } from 'class-variance-authority'
-import { SoftwareSectionNextGen } from '../components/SoftwareSectionNextGen'
+import { SectionSolid } from '../components/SectionSolid'
+import { SectionTransparent } from '../components/SectionTransparent'
+import { backgrounds, patterns, previews } from '../content/assets'
+import { HostMap } from '../components/HostMap'
+import { CalloutProject } from '../components/CalloutProject'
+import { getGeoHosts } from '../content/geoHosts'
+import { getExchangeRates } from '../content/exchangeRates'
+import { getStats } from '../content/stats'
+import { getMinutesInSeconds } from '../lib/time'
 
-const backgroundImageProps = getImageProps(backgroundImage)
-const previewImageProps = getImageProps(previewImage)
-
-const transitionWidthDuration = 300
-const transitionFadeDelay = 500
-
-type Props = AsyncReturnType<typeof getServerSideProps>['props']
+type Props = AsyncReturnType<typeof getStaticProps>['props']
 
 export default function Home({
   featured,
   tutorials,
   services,
-}: // seenLetter,
-Props) {
-  // const [showLetter, setShowLetter] = useState<boolean>(!seenLetter)
-  const [showLetter, setShowLetter] = useState<boolean>(false)
-
-  // useEffect(() => {
-  //   document.cookie =
-  //     'seen-letter=true; max-age=2147483647; SameSite=None; Secure'
-  // }, [])
-
-  const toggleLanding = useCallback(() => {
-    setShowLetter((showLetter) => !showLetter)
-
-    setTimeout(() => {
-      document.getElementById('main-scroll').scrollTo({
-        top: 0,
-      })
-    }, transitionWidthDuration)
-  }, [setShowLetter])
-
-  const pullPending = usePullTop('main-scroll', !showLetter, toggleLanding)
-
-  const letterEl = useMemo(
-    () => <Letter onDone={() => toggleLanding()} />,
-    [toggleLanding]
-  )
-
+  rates,
+  hosts,
+}: Props) {
   const description = (
     <>
       Cryptography has unleashed the latent power of the Internet by enabling
@@ -78,21 +44,8 @@ Props) {
       harnesses this power to create a trustless cloud storage marketplace,
       allowing buyers and sellers to transact directly. No intermediaries, no
       borders, no vendor lock-in, no spying, no throttling, no walled gardens;
-      it's a return to the Internet we once knew.{' '}
-      <Link
-        href="/"
-        color="subtle"
-        className={cx(
-          'transition-colors ease-in',
-          'underline underline-offset-4 decoration-dotted',
-          'decoration-gray-500/50 dark:decoration-gray-800/10',
-          'hover:decoration-gray-500/70 hover:dark:decoration-gray-800/20'
-        )}
-        underline="none"
-        onClick={toggleLanding}
-      >
-        The future is making a comeback.
-      </Link>
+      it's a return to the Internet we once knew. The future is making a
+      comeback.
     </>
   )
 
@@ -101,57 +54,48 @@ Props) {
       title="Decentralized data storage"
       description={textContent(description)}
       path={routes.home.index}
-      focus={showLetter ? letterEl : null}
-      transitions
-      transitionWidthDuration={transitionWidthDuration}
-      transitionFadeDelay={transitionFadeDelay}
       heading={
-        <SectionSimple className="pt-24 md:pt-40 pb-6 md:pb-20">
+        <SectionTransparent
+          className="pt-24 md:pt-52"
+          gradientClassName="via-white/[96%] dark:via-graydark-100/[98%]"
+        >
           <SiteHeading
             size="64"
             anchorLink={false}
             title="Decentralized data storage"
             description={description}
-            className="relative"
-          >
-            {pullPending && (
-              <JiggleArrow
-                title="Go to letter"
-                onClick={toggleLanding}
-                direction="up"
-                className="absolute -mt-3 md:-mt-6"
-              />
-            )}
-            {/* <div>
-              <Link size="20" href={routes.getStarted.index}>
-                Download the software →
-              </Link>
-            </div> */}
-          </SiteHeading>
-        </SectionSimple>
+            className="relative z-10"
+          />
+          <HostMap hosts={hosts} rates={rates} />
+        </SectionTransparent>
       }
-      backgroundImage={backgroundImageProps}
-      previewImage={previewImageProps}
+      backgroundImage={backgrounds.mountain}
+      previewImage={previews.mountain}
     >
-      <SectionSimple className="pt-8 md:pt-12 pb-20">
+      <SectionSolid className="pt-4 pb-20">
         <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
           <Callout
             size="0"
-            title="Start"
-            startTime={0}
+            title="Rent"
+            background={patterns.leaves}
             description={
-              <>
-                Find software downloads, beginner tutorials, developer
-                resources, technical walkthroughs, and more.
-              </>
+              <>Rent space and store your data on the Sia network.</>
             }
-            actionTitle="Get started"
-            actionLink={routes.getStarted.index}
+            actionTitle="Rent storage"
+            actionLink={routes.rent.index}
+          />
+          <Callout
+            size="0"
+            title="Host"
+            background={patterns.jungle}
+            description={<>Offer your storage space on the Sia network.</>}
+            actionTitle="Start hosting"
+            actionLink={routes.host.index}
           />
           <Callout
             size="0"
             title="Learn"
-            startTime={20}
+            background={patterns.light}
             description={
               <>
                 Learn all about how Sia works, why it was created, and the
@@ -164,7 +108,7 @@ Props) {
           <Callout
             size="0"
             title="Grants"
-            startTime={20}
+            background={patterns.bamboo}
             description={
               <>
                 The Sia Foundation welcomes contributors from all over the world
@@ -174,22 +118,8 @@ Props) {
             actionTitle="Apply for a grant"
             actionLink={routes.grants.index}
           />
-          <Callout
-            size="0"
-            title="Community"
-            startTime={20}
-            description={
-              <>
-                Sia is a vibrant community of contributors building open source
-                and commercial data storage software on the Sia network.
-              </>
-            }
-            actionTitle="Explore"
-            actionLink={routes.community.index}
-          />
-          <SoftwareSectionNextGen />
         </div>
-      </SectionSimple>
+      </SectionSolid>
       <SectionGradient className="md:pt-16 pb-20 md:pb-40">
         <SiteHeading
           size="32"
@@ -211,13 +141,13 @@ Props) {
         <ContentGallery
           items={services.map((i) => ({
             ...i,
-            newTab: true,
           }))}
-          component={ContentProject}
-          columnClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          component={CalloutProject}
+          columnClassName="grid-cols-1 md:grid-cols-2"
+          gapClassName="gap-4 sm:gap-5"
         />
       </SectionGradient>
-      <SectionWaves className="pt-7 md:pt-16 pb-14 md:pb-32">
+      <SectionTransparent className="pt-7 md:pt-16 pb-14 md:pb-32">
         <SiteHeading
           size="32"
           title="Why projects choose Sia"
@@ -300,7 +230,7 @@ Props) {
             },
           ]}
         />
-      </SectionWaves>
+      </SectionTransparent>
       <SectionGradient className="pt-12 md:pt-32 pb-8 md:pb-20">
         <SiteHeading
           size="32"
@@ -347,22 +277,27 @@ Props) {
   )
 }
 
-export async function getServerSideProps({ req }) {
-  // const seenLetter: boolean = req.cookies['seen-letter'] || false
-  const featured = await getCacheArticles(['sia-all', 'featured'], 5)
-  const tutorials = await getCacheTutorials()
-  const services = await getCacheSoftware('storage_services', 5)
+export async function getStaticProps() {
+  const featured = await getFeedContent(['sia-all', 'featured'], 5)
+  const tutorials = await getTutorialArticles()
+  const hosts = await getGeoHosts()
+  const rates = await getExchangeRates()
+  const services = await getProjects('featured', 5)
+  const stats = await getStats()
+
+  const props = {
+    featured,
+    tutorials,
+    hosts,
+    rates: rates.data?.rates.sc,
+    services,
+    fallback: {
+      '/api/stats': stats,
+    },
+  }
 
   return {
-    props: {
-      featured,
-      tutorials,
-      services,
-      // seenLetter,
-      // Because this page is SSR'd, do not block requests with slow stats query
-      // fallback: {
-      //   '/api/stats': stats,
-      // },
-    },
+    props,
+    revalidate: getMinutesInSeconds(5),
   }
 }
