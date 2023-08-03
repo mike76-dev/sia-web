@@ -28,7 +28,8 @@ const initialValues = {
   publicKey:      '',
   renterSeed:     '',
   autoRenew:      false,
-  backupMetadata: false
+  backupMetadata: false,
+  autoRepair:     false,
 }
 
 export function Satellite() {
@@ -126,6 +127,13 @@ export function Satellite() {
         <small>WARNING! When disabled, any saved metadata is deleted from the satellite.</small></>,
       validation: {},
     },
+    autoRepair: {
+      type: 'boolean',
+      category: 'settings',
+      title: 'File Auto Repair',
+      description: <>The satellite performs automatic file repairs.</>,
+      validation: {},
+    },
   }
 
   const { openDialog } = useDialog()
@@ -167,6 +175,7 @@ export function Satellite() {
             payload: {
               autoRenew: values.autoRenew,
               backupMetadata: values.backupMetadata,
+              autoRepair: values.autoRepair,
             },
           })
         }
@@ -203,6 +212,7 @@ export function Satellite() {
       renterSeed: decodeSeed(config.data?.renterSeed || ''),
       autoRenew: settings.data?.autoRenew,
       backupMetadata: settings.data?.backupMetadata,
+      autoRepair: settings.data?.autoRepair,
     })
   }, [form, config.data, settings.data])
 
