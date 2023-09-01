@@ -59,19 +59,20 @@ export function ValueCopyable({
           {text}
         </Text>
       )}
-      <Button
-        variant="ghost"
-        size="none"
-        className="ml-1"
-        onClick={(e) => {
-          e.stopPropagation()
-          copyToClipboard(cleanValue, label)
-        }}
-      >
-        <Text color={color}>
-          <Copy16 className={size === '10' ? 'scale-75' : 'scale-90'} />
-        </Text>
-      </Button>
+      <div className="ml-1 flex items-center">
+        <Button
+          variant="ghost"
+          size="none"
+          onClick={(e) => {
+            e.stopPropagation()
+            copyToClipboard(cleanValue, label)
+          }}
+        >
+          <Text color={color}>
+            <Copy16 className={size === '10' ? 'scale-75' : 'scale-90'} />
+          </Text>
+        </Button>
+      </div>
     </div>
   )
 }

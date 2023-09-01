@@ -9,30 +9,37 @@ import {
   useHostsSearch,
 } from '@siafoundation/react-renterd'
 import { ContractData } from '../contracts/types'
-import { useRenterd } from '../renterd'
+import { useApp } from '../app'
+import { SiaCentralHost } from '@siafoundation/react-core'
 
 export function useDataset({
-  autopilotMode,
+  autopilotStatus,
   regularResponse,
   autopilotResponse,
   allContracts,
   allowlist,
   blocklist,
   isAllowlistActive,
+  geoHosts,
+  onHostSelect,
 }: {
-  autopilotMode: ReturnType<typeof useRenterd>['autopilotMode']
+  autopilotStatus: ReturnType<typeof useApp>['autopilot']['status']
   regularResponse: ReturnType<typeof useHostsSearch>
   autopilotResponse: ReturnType<typeof useAutopilotHostsSearch>
   allContracts: ContractData[]
   allowlist: ReturnType<typeof useHostsAllowlist>
   blocklist: ReturnType<typeof useHostsBlocklist>
   isAllowlistActive: boolean
+  geoHosts: SiaCentralHost[]
+  onHostSelect: (publicKey: string, location?: [number, number]) => void
 }) {
   return useMemo<HostData[] | null>(() => {
-    if (autopilotMode === 'off') {
+    if (autopilotStatus === 'off') {
       return (
         regularResponse.data?.map((host) => {
+          const sch = geoHosts.find((gh) => gh.public_key === host.publicKey)
           return {
+            onClick: () => onHostSelect(host.publicKey, sch?.location),
             ...getHostFields(host, allContracts),
             ...getAllowedFields({
               host,
@@ -41,13 +48,17 @@ export function useDataset({
               isAllowlistActive,
             }),
             ...getAutopilotFields(),
+            location: sch?.location,
+            countryCode: sch?.country_code,
           }
         }) || null
       )
-    } else if (autopilotMode === 'on') {
+    } else if (autopilotStatus === 'on') {
       return (
         autopilotResponse.data?.map((ah) => {
+          const sch = geoHosts.find((gh) => gh.public_key === ah.host.publicKey)
           return {
+            onClick: () => onHostSelect(ah.host.publicKey, sch?.location),
             ...getHostFields(ah.host, allContracts),
             ...getAllowedFields({
               host: ah.host,
@@ -55,20 +66,24 @@ export function useDataset({
               blocklist: blocklist.data,
               isAllowlistActive,
             }),
-            ...getAutopilotFields(ah),
+            ...getAutopilotFields(ah.checks),
+            location: sch?.location,
+            countryCode: sch?.country_code,
           }
         }) || null
       )
     }
     return null
   }, [
-    autopilotMode,
+    onHostSelect,
+    autopilotStatus,
     regularResponse.data,
     autopilotResponse.data,
     allContracts,
     allowlist.data,
     blocklist.data,
     isAllowlistActive,
+    geoHosts,
   ])
 }
 
@@ -87,15 +102,17 @@ function getHostFields(host: Host, allContracts: ContractData[]) {
     ),
     totalInteractions: new BigNumber(
       host.interactions.SuccessfulInteractions +
-      host.interactions.FailedInteractions || 0
+        host.interactions.FailedInteractions || 0
     ),
     failedInteractions: new BigNumber(
       host.interactions.FailedInteractions || 0
     ),
     totalScans: new BigNumber(host.interactions.TotalScans || 0),
-    activeContracts: new BigNumber(
+    activeContractsCount: new BigNumber(
       allContracts?.filter((c) => c.hostKey === host.publicKey).length || 0
     ),
+    activeContracts:
+      allContracts?.filter((c) => c.hostKey === host.publicKey) || [],
     priceTable: host.priceTable,
     settings: host.settings,
   }
@@ -133,7 +150,7 @@ function getAllowedFields({
   }
 }
 
-function getAutopilotFields(ah?: {
+function getAutopilotFields(ahc?: {
   score: number
   gougingBreakdown: {
     v2: {
@@ -163,22 +180,24 @@ function getAutopilotFields(ah?: {
   usable: boolean
 }) {
   return {
-    score: new BigNumber(ah?.score || 0),
+    score: new BigNumber(ahc?.score || 0),
     scoreBreakdown: {
-      age: new BigNumber(ah?.scoreBreakdown.age || 0),
-      collateral: new BigNumber(ah?.scoreBreakdown.collateral || 0),
-      interactions: new BigNumber(ah?.scoreBreakdown.interactions || 0),
-      prices: new BigNumber(ah?.scoreBreakdown.prices || 0),
-      storageRemaining: new BigNumber(ah?.scoreBreakdown.storageRemaining || 0),
-      uptime: new BigNumber(ah?.scoreBreakdown.uptime || 0),
-      version: new BigNumber(ah?.scoreBreakdown.version || 0),
+      age: new BigNumber(ahc?.scoreBreakdown.age || 0),
+      collateral: new BigNumber(ahc?.scoreBreakdown.collateral || 0),
+      interactions: new BigNumber(ahc?.scoreBreakdown.interactions || 0),
+      prices: new BigNumber(ahc?.scoreBreakdown.prices || 0),
+      storageRemaining: new BigNumber(
+        ahc?.scoreBreakdown.storageRemaining || 0
+      ),
+      uptime: new BigNumber(ahc?.scoreBreakdown.uptime || 0),
+      version: new BigNumber(ahc?.scoreBreakdown.version || 0),
     },
-    gougingBreakdown: ah?.gougingBreakdown || {
+    gougingBreakdown: ahc?.gougingBreakdown || {
       v2: {},
       v3: {},
     },
-    gouging: ah?.gouging,
-    unusableReasons: ah?.unusableReasons || [],
-    usable: ah?.usable,
+    gouging: ahc?.gouging,
+    unusableReasons: ahc?.unusableReasons || [],
+    usable: ahc?.usable,
   }
 }

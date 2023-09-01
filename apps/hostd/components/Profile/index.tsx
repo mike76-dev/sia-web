@@ -42,7 +42,7 @@ export function Profile() {
       peerCount={peers.data?.length}
       connectPeer={() => openDialog('connectPeer')}
       isSynced={syncStatus.isSynced}
-      percent={syncStatus.percent}
+      syncPercent={syncStatus.syncPercent}
       nodeBlockHeight={syncStatus.nodeBlockHeight}
       estimatedBlockHeight={syncStatus.estimatedBlockHeight}
       firstTimeSyncing={syncStatus.firstTimeSyncing}
@@ -102,11 +102,15 @@ export function Profile() {
         <Label size="14" color="subtle" noWrap className="w-[100px]">
           Version
         </Label>
-        <div className="flex-1 flex justify-end overflow-hidden">
-          <Link size="14" href={versionUrl} target="_blank">
-            {state.data?.version}
-          </Link>
-        </div>
+        <Link
+          size="14"
+          href={versionUrl}
+          underline="hover"
+          target="_blank"
+          ellipsis
+        >
+          {state.data?.version}
+        </Link>
       </div>
     </DaemonProfile>
   )

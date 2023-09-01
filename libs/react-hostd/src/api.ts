@@ -25,17 +25,19 @@ import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
 export type StateHost = {
   publicKey: string
   walletAddress: string
-  network: string
+  network: 'Mainnet' | 'Zen Testnet'
   version: string
   commit: string
   OS: string
   buildTime: string
 }
 
+export const stateHostKey = '/state/host'
+
 export function useStateHost(args?: HookArgsSwr<void, StateHost>) {
   return useGetSwr({
     ...args,
-    route: '/state/host',
+    route: stateHostKey,
   })
 }
 
@@ -319,7 +321,14 @@ export function useMetrics(args?: HookArgsSwr<{ timestamp: string }, Metrics>) {
   })
 }
 
-type Interval = '15m' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+type Interval =
+  | '5m'
+  | '15m'
+  | 'hourly'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
 
 const metricsPeriodRoute = '/metrics/:interval'
 export function useMetricsPeriod(

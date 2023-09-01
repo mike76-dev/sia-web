@@ -2,6 +2,8 @@ import {
   useTableState,
   useDatasetEmptyState,
   useServerFilters,
+  triggerErrorToast,
+  truncate,
 } from '@siafoundation/design-system'
 import {
   HostsSearchFilterMode,
@@ -11,31 +13,58 @@ import {
   useHostsBlocklist,
   useHostsSearch,
 } from '@siafoundation/react-renterd'
-import { createContext, useContext, useMemo } from 'react'
-import { TableColumnId, columnsDefaultVisible } from './types'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import {
+  TableColumnId,
+  columnsDefaultVisible,
+  ViewMode,
+  HostDataWithLocation,
+} from './types'
 import { useRouter } from 'next/router'
 import { columns } from './columns'
 import { useContracts } from '../contracts'
 import { useDataset } from './dataset'
-import { useRenterd } from '../renterd'
+import { useApp } from '../app'
+import { useAppSettings, useSiaCentralHosts } from '@siafoundation/react-core'
+import { Commands, emptyCommands } from '../../components/Hosts/HostMap/Globe'
 
 const defaultLimit = 50
 
 function useHostsMain() {
   const router = useRouter()
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
   const limit = Number(router.query.limit || defaultLimit)
   const offset = Number(router.query.offset || 0)
   const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
     useServerFilters()
 
   const { dataset: allContracts } = useContracts()
-  const { autopilotMode } = useRenterd()
+  const { autopilot } = useApp()
+
+  const keyIn = useMemo(() => {
+    let keyIn: string[] = []
+    if (filters.find((f) => f.id === 'hasActiveContracts') && allContracts) {
+      keyIn = allContracts.map((c) => c.hostKey)
+    }
+    if (filters.find((f) => f.id === 'publicKeyContains')) {
+      keyIn.push(filters.find((f) => f.id === 'publicKeyContains')?.value)
+    }
+    return keyIn.length ? keyIn : undefined
+  }, [filters, allContracts])
 
   const autopilotResponse = useAutopilotHostsSearch({
     disabled:
       // prevents an extra fetch when allContracts is null
-      (filters.find((f) => f.id === 'activeContracts') && !allContracts) ||
-      autopilotMode !== 'on',
+      (filters.find((f) => f.id === 'hasActiveContracts') && !allContracts) ||
+      autopilot.status !== 'on',
     payload: {
       limit,
       offset,
@@ -44,10 +73,7 @@ function useHostsMain() {
       filterMode: (filters.find((f) => f.id === 'filterMode')?.value ||
         'all') as HostsSearchFilterMode,
       addressContains: filters.find((f) => f.id === 'addressContains')?.value,
-      keyIn:
-        filters.find((f) => f.id === 'activeContracts') && allContracts
-          ? allContracts.map((c) => c.hostKey)
-          : undefined,
+      keyIn,
     },
     config: {
       swr: {
@@ -58,7 +84,7 @@ function useHostsMain() {
   })
 
   const regularResponse = useHostsSearch({
-    disabled: autopilotMode !== 'off',
+    disabled: autopilot.status !== 'off',
     payload: {
       limit,
       offset,
@@ -66,7 +92,7 @@ function useHostsMain() {
         'all') as HostsSearchFilterMode,
       addressContains: filters.find((f) => f.id === 'addressContains')?.value,
       keyIn:
-        filters.find((f) => f.id === 'activeContracts') && allContracts
+        filters.find((f) => f.id === 'hasActiveContracts') && allContracts
           ? allContracts.map((c) => c.hostKey)
           : undefined,
     },
@@ -76,19 +102,102 @@ function useHostsMain() {
   const blocklist = useHostsBlocklist()
   const isAllowlistActive = !!allowlist.data?.length
 
+  const { settings } = useAppSettings()
+  const geo = useSiaCentralHosts({
+    disabled: !settings.siaCentral,
+    config: {
+      swr: {
+        revalidateOnFocus: false,
+      },
+    },
+  })
+
+  useEffect(() => {
+    if (!settings.siaCentral) {
+      setViewMode('list')
+    }
+  }, [settings.siaCentral])
+
+  const geoHosts = useMemo(() => geo.data?.hosts || [], [geo.data])
+
+  const cmdRef = useRef<Commands>(emptyCommands)
+
+  const setCmd = useCallback(
+    (cmd: Commands) => {
+      cmdRef.current = cmd
+    },
+    [cmdRef]
+  )
+
+  const [activeHostPublicKey, setActiveHostPublicKey] = useState<string>()
+
+  const scrollToHost = useCallback((publicKey: string) => {
+    // move table to host, select via data id data-table
+    const rowEl = document.getElementById(publicKey)
+    const scrollEl = document.getElementById('scroll-hosts')
+    if (!rowEl || !scrollEl) {
+      return
+    }
+    scrollEl.scroll({
+      top: rowEl.offsetTop - 50,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const onHostMapClick = useCallback(
+    (publicKey: string, location?: [number, number]) => {
+      if (activeHostPublicKey === publicKey) {
+        setActiveHostPublicKey(undefined)
+        return
+      }
+      setActiveHostPublicKey(publicKey)
+      if (location) {
+        cmdRef.current.moveToLocation(location)
+      }
+      scrollToHost(publicKey)
+    },
+    [setActiveHostPublicKey, cmdRef, activeHostPublicKey, scrollToHost]
+  )
+
+  const onHostListClick = useCallback(
+    (publicKey: string, location?: [number, number]) => {
+      if (activeHostPublicKey === publicKey) {
+        setActiveHostPublicKey(undefined)
+        return
+      }
+      setActiveHostPublicKey(publicKey)
+      if (location) {
+        cmdRef.current.moveToLocation(location)
+      } else {
+        triggerErrorToast(
+          `Geographic location is unknown for host ${truncate(publicKey, 20)}`
+        )
+      }
+      scrollToHost(publicKey)
+    },
+    [setActiveHostPublicKey, cmdRef, activeHostPublicKey, scrollToHost]
+  )
+
+  const onHostMapHover = useCallback(
+    (publicKey: string, location?: [number, number]) => null,
+    []
+  )
+
   const dataset = useDataset({
-    autopilotMode,
+    autopilotStatus: autopilot.status,
     autopilotResponse,
     regularResponse,
     allContracts,
     allowlist,
     blocklist,
     isAllowlistActive,
+    geoHosts,
+    onHostSelect: onHostListClick,
   })
 
   const disabledCategories = useMemo(
-    () => (autopilotMode === 'off' ? ['autopilot'] : []),
-    [autopilotMode]
+    () => (autopilot.status === 'off' ? ['autopilot'] : []),
+    [autopilot.status]
   )
 
   const {
@@ -115,15 +224,39 @@ function useHostsMain() {
   )
 
   const isValidating =
-    autopilotMode === 'on'
+    autopilot.status === 'on'
       ? autopilotResponse.isValidating
       : regularResponse.isValidating
   const error =
-    autopilotMode === 'on' ? autopilotResponse.error : regularResponse.error
+    autopilot.status === 'on' ? autopilotResponse.error : regularResponse.error
   const dataState = useDatasetEmptyState(dataset, isValidating, error, filters)
 
+  const isAutopilotConfigured = autopilot.state.data?.configured
+  const tableContext = useMemo(
+    () => ({
+      isAutopilotConfigured,
+    }),
+    [isAutopilotConfigured]
+  )
+
+  const hostsWithLocation = useMemo(
+    () => dataset?.filter((h) => h.location) as HostDataWithLocation[],
+    [dataset]
+  )
+
+  const activeHost = useMemo(
+    () => dataset?.find((d) => d.publicKey === activeHostPublicKey),
+    [dataset, activeHostPublicKey]
+  )
+
   return {
-    autopilotMode,
+    setCmd,
+    viewMode,
+    activeHost,
+    onHostMapHover,
+    onHostMapClick,
+    setViewMode,
+    hostsWithLocation,
     error,
     dataState,
     offset,
@@ -131,6 +264,7 @@ function useHostsMain() {
     pageCount: dataset?.length || 0,
     columns: filteredTableColumns,
     dataset,
+    tableContext,
     configurableColumns,
     enabledColumns,
     toggleColumnVisibility,

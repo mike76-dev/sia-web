@@ -1,5 +1,18 @@
 # @siafoundation/react-core
 
+## 0.14.0
+
+### Minor Changes
+
+- c3d93283: Added useTryUntil.
+- c3d93283: Add useSiaCentralHosts.
+
+## 0.13.0
+
+### Minor Changes
+
+- 8cd442b4: Added a global swr mutate function.
+
 ## 0.12.0
 
 ### Minor Changes

@@ -128,18 +128,30 @@ export interface Sector {
   host: string
   root: string
 }
-
-export interface SlabSlice {
+export interface Slab {
+  health: number
   key: EncryptionKey
   minShards: number
-  shards?: Sector[]
+  shards: Sector[]
+}
+
+export interface SlabSlice {
+  slab: Slab
   offset: number
   length: number
 }
 
 export interface Obj {
+  name: string
+  size: number
+  health: number
   key: EncryptionKey
   slabs?: SlabSlice[]
+  partialSlab?: {
+    minShards: number
+    totalShards: number
+    data?: string
+  }
 }
 
 export interface AddObjectRequest {
@@ -179,6 +191,10 @@ export type GougingSettings = {
   minPriceTableValidity: number
   minAccountExpiry: number
   minMaxEphemeralAccountBalance: string
+}
+
+export type UploadPackingSettings = {
+  enabled: boolean
 }
 
 export type RedundancySettings = {

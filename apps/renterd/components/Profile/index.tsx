@@ -1,27 +1,28 @@
 import {
   DaemonProfile,
   Label,
+  Link,
   Text,
   ValueCopyable,
 } from '@siafoundation/design-system'
 import { useSyncStatus } from '../../hooks/useSyncStatus'
 import {
-  useConsensusNetwork,
+  useBusState,
   useSyncerPeers,
-  useWalletAddress,
+  useWallet,
 } from '@siafoundation/react-renterd'
 import { useDialog } from '../../contexts/dialog'
 
 export function Profile() {
   const { openDialog } = useDialog()
-  const network = useConsensusNetwork({
+  const state = useBusState({
     config: {
       swr: {
         revalidateOnFocus: false,
       },
     },
   })
-  const address = useWalletAddress({
+  const wallet = useWallet({
     config: {
       swr: {
         revalidateOnFocus: false,
@@ -30,13 +31,22 @@ export function Profile() {
   })
   const peers = useSyncerPeers()
   const syncStatus = useSyncStatus()
+
+  const version = state.data?.version
+  const versionUrl =
+    version === '?'
+      ? `https://github.com/SiaFoundation/renterd/commits/`
+      : version?.match(/^v\d+\.\d+\.\d+/)
+      ? `https://github.com/SiaFoundation/renterd/releases/${version}`
+      : `https://github.com/SiaFoundation/renterd/tree/${version}`
+
   return (
     <DaemonProfile
       name="renterd"
       peerCount={peers.data?.length}
       connectPeer={() => openDialog('connectPeer')}
       isSynced={syncStatus.isSynced}
-      percent={syncStatus.percent}
+      syncPercent={syncStatus.syncPercent}
       nodeBlockHeight={syncStatus.nodeBlockHeight}
       estimatedBlockHeight={syncStatus.estimatedBlockHeight}
       firstTimeSyncing={syncStatus.firstTimeSyncing}
@@ -50,7 +60,7 @@ export function Profile() {
           className="overflow-hidden"
           size="14"
           maxLength={50}
-          value={address.data}
+          value={wallet.data?.address}
           type="address"
         />
       </div>
@@ -58,20 +68,24 @@ export function Profile() {
         <Label size="14" color="subtle" noWrap className="w-[100px]">
           Network
         </Label>
-        <Text size="14">{network.data?.Name}</Text>
+        <div className="flex-1 flex justify-end overflow-hidden">
+          <Text size="14">{state.data?.network}</Text>
+        </div>
       </div>
-      {/* <div className="flex gap-4 justify-between items-center">
-          <Label size="14" color="subtle" noWrap className="w-[100px]">
-            Version
-          </Label>
-          <Link
-            size="14"
-            href={`https://github.com/SiaFoundation/renterd/tree/${state.data?.commit}`}
-            target="_blank"
-          >
-            {state.data?.version}
-          </Link>
-        </div> */}
+      <div className="flex gap-4 justify-between items-center">
+        <Label size="14" color="subtle" noWrap className="w-[100px]">
+          Version
+        </Label>
+        <Link
+          size="14"
+          href={versionUrl}
+          underline="hover"
+          target="_blank"
+          ellipsis
+        >
+          {state.data?.version}
+        </Link>
+      </div>
     </DaemonProfile>
   )
 }

@@ -1,0 +1,66 @@
+{
+  "name": "crons",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/crons/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/crons",
+        "main": "apps/crons/src/main.ts",
+        "tsConfig": "apps/crons/tsconfig.app.json",
+        "webpackConfig": "apps/crons/webpack.config.js",
+        "isolatedConfig": true,
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "sourceMap": false,
+          "externalDependencies": "none"
+        },
+        "ci": {
+          "outputPath": "apps/crons/dist",
+          "optimization": true,
+          "extractLicenses": true,
+          "sourceMap": false,
+          "externalDependencies": "none"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/js:node",
+      "options": {
+        "inspect": "inspect",
+        "buildTarget": "crons:build"
+      },
+      "configurations": {
+        "production": {
+          "inspect": false,
+          "buildTarget": "crons:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/crons/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/apps/crons"],
+      "options": {
+        "jestConfig": "apps/crons/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

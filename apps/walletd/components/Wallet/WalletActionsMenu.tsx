@@ -12,7 +12,7 @@ import { useWalletBalance } from '@siafoundation/react-walletd'
 import { useRouter } from 'next/router'
 import { useWallets } from '../../contexts/wallets'
 import { useDialog } from '../../contexts/dialog'
-import { WalletDropdownMenu } from '../WalletDropdownMenu'
+import { WalletContextMenu } from '../WalletContextMenu'
 
 export function WalletActionsMenu() {
   const status = useSyncStatus()
@@ -48,10 +48,15 @@ export function WalletActionsMenu() {
       )}
       <EventsViewDropdownMenu />
       {wallet && (
-        <WalletDropdownMenu
+        <WalletContextMenu
           wallet={wallet}
           trigger={
-            <Button size="small" tip="Wallet settings" tipAlign="end">
+            <Button
+              size="small"
+              tip="Wallet settings"
+              tipAlign="end"
+              tipSide="bottom"
+            >
               <Settings16 />
             </Button>
           }

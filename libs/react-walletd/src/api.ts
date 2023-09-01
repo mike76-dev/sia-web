@@ -52,7 +52,6 @@ export function useConsensusNetwork(
   })
 }
 
-// TODO
 export function useEstimatedNetworkBlockHeight(): number {
   const network = useConsensusNetwork({
     config: {
@@ -90,12 +89,12 @@ type GatewayPeer = {
   syncDuration: number
 }
 
-const syncerPeers = '/syncer/peers'
+export const syncerPeersKey = '/syncer/peers'
 
 export function useSyncerPeers(args?: HookArgsSwr<void, GatewayPeer[]>) {
   return useGetSwr({
     ...args,
-    route: syncerPeers,
+    route: syncerPeersKey,
   })
 }
 
@@ -106,7 +105,7 @@ export function useSyncerConnect(args?: HookArgsCallback<void, string, never>) {
       route: '/syncer/connect',
     },
     async (mutate) => {
-      mutate((key) => key === syncerPeers)
+      mutate((key) => key === syncerPeersKey)
     }
   )
 }
@@ -156,7 +155,7 @@ export function useWallets(args?: HookArgsSwr<void, Wallets>) {
 type Address = Record<string, unknown>
 type Addresses = Record<string, Address>
 
-const walletAddressesRoute = '/wallets/:id/addresses'
+export const walletAddressesRoute = '/wallets/:id/addresses'
 export function useWalletAddresses(
   args: HookArgsSwr<{ id: string }, Addresses>
 ) {
@@ -212,7 +211,7 @@ export function useWalletAddressAdd(
     },
     async (mutate, data) => {
       mutate((key) =>
-        key.startsWith(walletAddressesRoute.replace(':id', data.params.id))
+        key.startsWith('/wallets/:id'.replace(':id', data.params.id))
       )
     }
   )
@@ -231,15 +230,17 @@ export function useWalletAddressDelete(
   )
 }
 
+const walletBalanceRoute = '/wallets/:id/balance'
 export function useWalletBalance(
   args: HookArgsSwr<{ id: string }, { siacoins: string; siafunds: number }>
 ) {
   return useGetSwr({
     ...args,
-    route: '/wallets/:id/balance',
+    route: walletBalanceRoute,
   })
 }
 
+const walletEventsRoute = '/wallets/:id/events'
 export function useWalletEvents(
   args: HookArgsSwr<
     { id: string; offset: number; limit: number },
@@ -248,7 +249,7 @@ export function useWalletEvents(
 ) {
   return useGetSwr({
     ...args,
-    route: '/wallets/:id/events',
+    route: walletEventsRoute,
   })
 }
 
@@ -296,24 +297,24 @@ export function useWalletFund(
 }
 
 type WalletReserveRequest = {
-  siacoinOutputs: SiacoinOutputID[]
-  siafundOutputs: SiafundOutputID[]
+  siacoinOutputs?: SiacoinOutputID[]
+  siafundOutputs?: SiafundOutputID[]
   duration: number
 }
 
 export function useWalletReserve(
   args?: HookArgsCallback<{ id: string }, WalletReserveRequest, void>
 ) {
-  return usePostFunc({ ...args, route: '/wallet/:id/reserve' })
+  return usePostFunc({ ...args, route: '/wallets/:id/reserve' })
 }
 
 type WalletReleaseRequest = {
-  siacoinOutputs: SiacoinOutputID[]
-  siafundOutputs: SiafundOutputID[]
+  siacoinOutputs?: SiacoinOutputID[]
+  siafundOutputs?: SiafundOutputID[]
 }
 
 export function useWalletRelease(
   args?: HookArgsCallback<{ id: string }, WalletReleaseRequest, void>
 ) {
-  return usePostFunc({ ...args, route: '/wallet/:id/release' })
+  return usePostFunc({ ...args, route: '/wallets/:id/release' })
 }

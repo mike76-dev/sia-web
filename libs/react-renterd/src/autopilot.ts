@@ -1,5 +1,5 @@
 import { Action, AutopilotConfig, Host } from './siaTypes'
-import { HostsSearchPayload } from './bus'
+import { HostsSearchPayload, StateResponse } from './bus'
 import {
   useGetSwr,
   usePostSwr,
@@ -7,19 +7,27 @@ import {
   HookArgsSwr,
   HookArgsCallback,
   HookArgsWithPayloadSwr,
+  delay,
 } from '@siafoundation/react-core'
 
 type AutopilotStatus = {
   configured: boolean
   migrating: boolean
+  migratingLastStart: string
   scanning: boolean
-  uptime: string
+  scanningLastStart: string
+  synced: boolean
+  uptimeMS: string
 }
 
-export function useAutopilotStatus(args?: HookArgsSwr<void, AutopilotStatus>) {
+type AutopilotState = AutopilotStatus & StateResponse
+
+const autopilotStateKey = '/autopilot/state'
+
+export function useAutopilotState(args?: HookArgsSwr<void, AutopilotState>) {
   return useGetSwr({
     ...args,
-    route: '/autopilot/status',
+    route: autopilotStateKey,
   })
 }
 
@@ -36,6 +44,13 @@ export function useAutopilotConfigUpdate(
 ) {
   return usePutFunc({ ...args, route: autopilotConfigKey }, async (mutate) => {
     mutate((key) => key === autopilotConfigKey)
+    // might need a delay before revalidating status which returns whether
+    // or not autopilot is configured
+    const func = async () => {
+      await delay(1000)
+      mutate((key) => key === autopilotStateKey)
+    }
+    func()
   })
 }
 
@@ -50,40 +65,44 @@ export function useAutopilotActions(
 
 export type AutopilotHost = {
   host: Host
-  score: number
-  scoreBreakdown: {
-    age: number
-    collateral: number
-    interactions: number
-    storageRemaining: number
-    prices: number
-    uptime: number
-    version: number
-  }
-  unusableReasons: string[]
-  gougingBreakdown: {
-    v2: {
-      contractErr?: string
-      downloadErr?: string
-      gougingErr?: string
-      uploadErr?: string
+  checks?: {
+    score: number
+    scoreBreakdown: {
+      age: number
+      collateral: number
+      interactions: number
+      storageRemaining: number
+      prices: number
+      uptime: number
+      version: number
     }
-    v3: {
-      contractErr?: string
-      downloadErr?: string
-      gougingErr?: string
-      uploadErr?: string
+    unusableReasons: string[]
+    gougingBreakdown: {
+      v2: {
+        contractErr?: string
+        downloadErr?: string
+        gougingErr?: string
+        uploadErr?: string
+      }
+      v3: {
+        contractErr?: string
+        downloadErr?: string
+        gougingErr?: string
+        uploadErr?: string
+      }
     }
+    gouging: boolean
+    usable: boolean
   }
-  gouging: boolean
-  usable: boolean
 }
+
+export const autopilotHostsKey = '/autopilot/hosts'
 
 export function useAutopilotHostsSearch(
   args?: HookArgsWithPayloadSwr<void, HostsSearchPayload, AutopilotHost[]>
 ) {
   return usePostSwr({
     ...args,
-    route: '/autopilot/hosts',
+    route: autopilotHostsKey,
   })
 }

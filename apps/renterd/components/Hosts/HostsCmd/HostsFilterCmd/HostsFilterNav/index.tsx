@@ -5,7 +5,8 @@ import { hostsFilterAllowBlockPage } from '../HostsFilterCmdGroups/AllowBlock'
 import { ServerFilterItem } from '@siafoundation/design-system'
 import { hostsFilterContractsPage } from '../HostsFilterCmdGroups/Contracts'
 import { hostsFilterUsablePage } from '../HostsFilterCmdGroups/Usable'
-import { useRenterd } from '../../../../../contexts/renterd'
+import { PublicKeyCmdNav } from '../HostsFilterCmdGroups/PublicKey'
+import { useApp } from '../../../../../contexts/app'
 
 export const commandPage = {
   namespace: 'hosts',
@@ -25,10 +26,10 @@ export function HostsFilterNav({
   pushPage,
   select,
 }: Props) {
-  const { autopilotMode } = useRenterd()
+  const { autopilot } = useApp()
   return (
     <>
-      {autopilotMode === 'on' && (
+      {autopilot.status === 'on' && (
         <CommandItemNav
           currentPage={currentPage}
           parentPage={parentPage}
@@ -40,6 +41,12 @@ export function HostsFilterNav({
           {hostsFilterUsablePage.label}
         </CommandItemNav>
       )}
+      <PublicKeyCmdNav
+        currentPage={currentPage}
+        parentPage={parentPage}
+        commandPage={commandPage}
+        select={select}
+      />
       <AddressCmdNav
         currentPage={currentPage}
         parentPage={parentPage}

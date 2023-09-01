@@ -12,12 +12,11 @@ import { HostsFilterAddressDialog } from '../components/Hosts/HostsFilterAddress
 import { ContractsFilterAddressDialog } from '../components/Contracts/ContractsFilterAddressDialog'
 import { ContractsFilterPublicKeyDialog } from '../components/Contracts/ContractsFilterPublicKeyDialog'
 import { FilesSearchDialog } from '../components/Files/FilesSearchDialog'
-import {
-  useSyncerConnect,
-  useWalletAddress,
-} from '@siafoundation/react-renterd'
+import { useSyncerConnect, useWallet } from '@siafoundation/react-renterd'
 import { RenterdSendSiacoinDialog } from '../dialogs/RenterdSendSiacoinDialog'
 import { RenterdTransactionDetailsDialog } from '../dialogs/RenterdTransactionDetailsDialog'
+import { AlertsDialog } from '../dialogs/AlertsDialog'
+import { HostsFilterPublicKeyDialog } from '../components/Hosts/HostsFilterPublicKeyDialog'
 
 export type DialogType =
   | 'cmdk'
@@ -31,10 +30,12 @@ export type DialogType =
   | 'hostBlocklistAdd'
   | 'hostBlocklistRemove'
   | 'hostsFilterAddress'
+  | 'hostsFilterPublicKey'
   | 'contractsFilterAddress'
   | 'contractsFilterPublicKey'
   | 'filesCreateDirectory'
   | 'filesSearch'
+  | 'alerts'
   | 'confirm'
 
 type ConfirmProps = {
@@ -118,7 +119,7 @@ export function Dialogs() {
     openConfirmDialog,
   } = useDialog()
   const connect = useSyncerConnect()
-  const address = useWalletAddress()
+  const wallet = useWallet()
 
   return (
     <>
@@ -134,8 +135,8 @@ export function Dialogs() {
       />
       <RenterdSendSiacoinDialog />
       <WalletSingleAddressDetailsDialog
-        address={address.data}
-        isValidating={address.isValidating}
+        address={wallet.data?.address}
+        isValidating={wallet.isValidating}
         open={dialog === 'addressDetails'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
@@ -165,12 +166,20 @@ export function Dialogs() {
         open={dialog === 'hostsFilterAddress'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
+      <HostsFilterPublicKeyDialog
+        open={dialog === 'hostsFilterPublicKey'}
+        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+      />
       <ContractsFilterAddressDialog
         open={dialog === 'contractsFilterAddress'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
       <ContractsFilterPublicKeyDialog
         open={dialog === 'contractsFilterPublicKey'}
+        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+      />
+      <AlertsDialog
+        open={dialog === 'alerts'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
       <ConfirmDialog

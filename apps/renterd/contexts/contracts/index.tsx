@@ -14,6 +14,7 @@ import {
 } from '@siafoundation/react-renterd'
 import { useSatellite } from './satellite'
 import { createContext, useContext, useMemo } from 'react'
+import { useSiaCentralHosts } from '@siafoundation/react-core'
 import BigNumber from 'bignumber.js'
 import {
   ContractData,
@@ -31,6 +32,8 @@ function useContractsMain() {
   const offset = Number(router.query.offset || 0)
   const response = useContractsData()
   const satellite = useSatellite()
+  const geo = useSiaCentralHosts()
+  const geoHosts = useMemo(() => geo.data?.hosts || [], [geo.data])
 
   const estimatedNetworkHeight = useEstimatedNetworkBlockHeight()
   const network = useConsensusState({
@@ -61,6 +64,7 @@ function useContractsMain() {
           contractId: c.id,
           hostIp: c.hostIP,
           hostKey: c.hostKey,
+          location: geoHosts.find((h) => h.public_key === c.hostKey)?.location,
           timeline: startTime,
           startTime,
           endTime,
@@ -82,7 +86,7 @@ function useContractsMain() {
         }
       }) || []
     return data
-  }, [response.data, currentHeight, satellite.data])
+  }, [response.data, geoHosts, currentHeight, satellite.data])
 
   const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
     useClientFilters<ContractData>()

@@ -1,3 +1,5 @@
+import { busStateKey } from '@siafoundation/react-renterd'
+
 export const routes = {
   home: '/',
   files: {
@@ -32,4 +34,4 @@ export const routes = {
   login: '/login',
 }
 
-export const connectivityRoute = '/bus/consensus/state'
+export const connectivityRoute = busStateKey

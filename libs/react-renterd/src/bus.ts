@@ -38,6 +38,29 @@ import {
   WalletTransaction,
 } from './siaTypes'
 
+// state
+
+type BuildState = {
+  network: 'Mainnet' | 'Zen Testnet'
+  version: string
+  commit: string
+  OS: string
+  buildTime: number
+}
+
+export type StateResponse = BuildState & {
+  startTime: number
+}
+
+export const busStateKey = '/bus/state'
+
+export function useBusState(args?: HookArgsSwr<void, StateResponse>) {
+  return useGetSwr({
+    ...args,
+    route: busStateKey,
+  })
+}
+
 // consensus
 
 export function useConsensusState(args?: HookArgsSwr<void, ConsensusState>) {
@@ -47,21 +70,8 @@ export function useConsensusState(args?: HookArgsSwr<void, ConsensusState>) {
   })
 }
 
-export type ConsensusNetwork = {
-  Name: string
-}
-
-export function useConsensusNetwork(
-  args?: HookArgsSwr<void, ConsensusNetwork>
-) {
-  return useGetSwr({
-    ...args,
-    route: '/bus/consensus/network',
-  })
-}
-
 export function useEstimatedNetworkBlockHeight(): number {
-  const network = useConsensusNetwork({
+  const state = useBusState({
     config: {
       swr: {
         revalidateOnFocus: false,
@@ -69,9 +79,9 @@ export function useEstimatedNetworkBlockHeight(): number {
     },
   })
   const res = useSWR(
-    network,
+    state,
     () => {
-      if (network.data?.Name === 'zen') {
+      if (state.data?.network === 'Zen Testnet') {
         return getTestnetZenBlockHeight()
       }
       return getMainnetBlockHeight()
@@ -150,12 +160,16 @@ export function useTxPoolBroadcast(
 
 // wallet
 
-export function useWalletBalance(args?: HookArgsSwr<void, string>) {
-  return useGetSwr({ ...args, route: '/bus/wallet/balance' })
+type WalletResponse = {
+  scanHeight: number
+  address: string
+  confirmed: string
+  unconfirmed: string
+  spendable: string
 }
 
-export function useWalletAddress(args?: HookArgsSwr<void, string>) {
-  return useGetSwr({ ...args, route: '/bus/wallet/address' })
+export function useWallet(args?: HookArgsSwr<void, WalletResponse>) {
+  return useGetSwr({ ...args, route: '/bus/wallet' })
 }
 
 export function useWalletAddresses(args?: HookArgsSwr<void, string[]>) {
@@ -272,8 +286,8 @@ export function useHostsSearch(
   })
 }
 
-export function useHostsPubkey(args: HookArgsSwr<{ hostKey: string }, Host>) {
-  return useGetSwr({ ...args, route: '/bus/hosts/:hostKey' })
+export function useHost(args: HookArgsSwr<{ hostKey: string }, Host>) {
+  return useGetSwr({ ...args, route: '/bus/host/:hostKey' })
 }
 
 export function useHostsPubkeyInteractionAdd(
@@ -368,7 +382,7 @@ export function useContractsRelease(
 }
 
 export function useContract(args: HookArgsSwr<{ id: string }, Contract>) {
-  return useGetSwr({ ...args, route: '/bus/contracts/:id' })
+  return useGetSwr({ ...args, route: '/bus/contract/:id' })
 }
 
 export function useContractCreate(
@@ -384,7 +398,7 @@ export function useContractRenew(
 }
 
 export function useContractDelete(
-  args: HookArgsCallback<{ id: string }, void, never>
+  args?: HookArgsCallback<{ id: string }, void, never>
 ) {
   return useDeleteFunc({ ...args, route: '/bus/contracts/:id/delete' })
 }
@@ -408,6 +422,7 @@ export function useContractsetUpdate(
 export type ObjEntry = {
   name: string
   size: number
+  health: number
 }
 
 export function useObjectDirectory(
@@ -433,7 +448,7 @@ export function useObjectAdd(
 }
 
 export function useObjectDelete(
-  args?: HookArgsCallback<{ key: string }, void, never>
+  args?: HookArgsCallback<{ key: string; batch?: boolean }, void, never>
 ) {
   return useDeleteFunc(
     { ...args, route: '/bus/objects/:key' },
@@ -490,4 +505,42 @@ export function useSettingUpdate(
       mutate((key) => key.startsWith(`/bus/setting/${args.params.key}`))
     }
   )
+}
+
+type AlertSeverity = 'info' | 'warning' | 'error' | 'critical'
+
+type Alert = {
+  id: string
+  severity: AlertSeverity
+  message: string
+  timestamp: string
+  data: {
+    account?: string
+    host?: string
+    key?: string
+  }
+}
+
+const alertsRoute = '/bus/alerts'
+export function useAlerts(args?: HookArgsSwr<void, Alert[]>) {
+  return useGetSwr({ ...args, route: alertsRoute })
+}
+
+export function useAlertsDismiss(
+  args?: HookArgsCallback<void, string[], void>
+) {
+  return usePostFunc(
+    { ...args, route: '/bus/alerts/dismiss' },
+    async (mutate) => {
+      mutate((key) => {
+        return key.startsWith(alertsRoute)
+      })
+    }
+  )
+}
+
+// slabs
+
+export function useSlabObjects(args: HookArgsSwr<{ key: string }, ObjEntry[]>) {
+  return useGetSwr({ ...args, route: '/bus/slab/:key/objects' })
 }

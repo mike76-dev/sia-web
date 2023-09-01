@@ -52,10 +52,9 @@ type TimeRange = {
   end: number
 }
 
-type DataTimeSpan = '7' | '30' | '90' | '365' | 'all'
+type DataTimeSpan = '1' | '7' | '30' | '90' | '365' | 'all'
 
-export function getTimeRange(span: DataTimeSpan): TimeRange {
-  const now = new Date().getTime()
+export function getTimeRange(span: DataTimeSpan, now: number): TimeRange {
   if (span === 'all') {
     return {
       start: new Date(2022, 1, 1).getTime(),
@@ -72,6 +71,16 @@ const dataIntervalLabelFormatters: Record<
   DataInterval | 'default',
   (timestamp: number) => string
 > = {
+  '5m': (timestamp: number) => {
+    const endTimestamp = timestamp + minutesInMilliseconds(5)
+    return `5m interval from ${humanDate(timestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })} to ${humanDate(endTimestamp, {
+      timeStyle: 'short',
+      hour12: false,
+    })}`
+  },
   '15m': (timestamp: number) => {
     const endTimestamp = timestamp + minutesInMilliseconds(15)
     return `15m interval from ${humanDate(timestamp, {
@@ -122,6 +131,7 @@ const dataIntervalLabelFormatters: Record<
 } as const
 
 export type DataInterval =
+  | '5m'
   | '15m'
   | 'hourly'
   | 'daily'

@@ -1,5 +1,20 @@
 # walletd
 
+## 0.10.0
+
+### Minor Changes
+
+- 8da56663: The connectivity and login check no longer depends on consensus APIs which in some rare cases can be unresponsive.
+
+## 0.9.0
+
+### Minor Changes
+
+- 2242911d: The app now warns the user if it is running on the testnet with a prominent banner.
+- 16038776: Table headers now freeze in view when the table scrolls.
+- 2242911d: Fixed an issue where walletd would indefinitely report as "syncing" - the synced state is now based on the most recent block's timestamp being within the last 2 hours.
+- 2242911d: The contrast was improved on the syncing progress text in the daemon profile.
+
 ## 0.8.0
 
 ### Minor Changes

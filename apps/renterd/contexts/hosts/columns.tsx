@@ -16,7 +16,7 @@ import {
 import { humanBytes, humanNumber } from '@siafoundation/sia-js'
 import { HostData, TableColumnId } from './types'
 import { format, formatDistance, formatRelative } from 'date-fns'
-import { HostDropdownMenu } from '../../components/Hosts/HostDropdownMenu'
+import { HostContextMenu } from '../../components/Hosts/HostContextMenu'
 import { useWorkflows } from '@siafoundation/react-core'
 import {
   AutopilotHost,
@@ -27,7 +27,11 @@ import {
 import BigNumber from 'bignumber.js'
 import React from 'react'
 
-type HostsTableColumn = TableColumn<TableColumnId, HostData, void> & {
+type HostsTableColumn = TableColumn<
+  TableColumnId,
+  HostData,
+  { isAutopilotConfigured: boolean }
+> & {
   fixed?: boolean
   category: string
 }
@@ -42,10 +46,7 @@ export const columns: HostsTableColumn[] = (
       category: 'general',
       cellClassName: 'w-[50px] !pl-2 !pr-4 [&+*]:!pl-0',
       render: ({ data }) => (
-        <HostDropdownMenu
-          address={data.netAddress}
-          publicKey={data.publicKey}
-        />
+        <HostContextMenu address={data.netAddress} publicKey={data.publicKey} />
       ),
     },
     {
@@ -121,37 +122,61 @@ export const columns: HostsTableColumn[] = (
       id: 'ap_usable',
       label: 'usable',
       category: 'autopilot',
-      render: ({ data }) => (
-        <Tooltip
-          side="right"
-          content={data.usable ? 'Host is usable' : 'Host is not usable'}
-        >
-          <div className="flex gap-2 items-center">
-            <div className="mt-[5px]">
-              <Text color={data.usable ? 'green' : 'red'}>
-                {data.usable ? (
-                  <CheckboxCheckedFilled16 />
-                ) : (
-                  <WarningSquareFilled16 />
-                )}
-              </Text>
-            </div>
-            <div className="flex flex-col">
-              {data.unusableReasons.map((reason) => (
-                <Text key={reason} size="10" noWrap>
-                  {reason}
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip side="right" content="Autopilot is not configured">
+              <div className="mt-[5px]">
+                <Text color="subtle">
+                  <UndefinedFilled16 />
                 </Text>
-              ))}
+              </div>
+            </Tooltip>
+          )
+        }
+        return (
+          <Tooltip
+            side="right"
+            content={data.usable ? 'Host is usable' : 'Host is not usable'}
+          >
+            <div className="flex gap-2 items-center">
+              <div className="mt-[5px]">
+                <Text color={data.usable ? 'green' : 'red'}>
+                  {data.usable ? (
+                    <CheckboxCheckedFilled16 />
+                  ) : (
+                    <WarningSquareFilled16 />
+                  )}
+                </Text>
+              </div>
+              <div className="flex flex-col">
+                {data.unusableReasons.map((reason) => (
+                  <Text key={reason} size="10" noWrap>
+                    {reason}
+                  </Text>
+                ))}
+              </div>
             </div>
-          </div>
-        </Tooltip>
-      ),
+          </Tooltip>
+        )
+      },
     },
     {
       id: 'ap_gouging',
       label: 'gouging',
       category: 'autopilot',
-      render: ({ data }) => {
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip side="right" content="Autopilot is not configured">
+              <div className="mt-[5px]">
+                <Text color="subtle">
+                  <UndefinedFilled16 />
+                </Text>
+              </div>
+            </Tooltip>
+          )
+        }
         return (
           <Tooltip
             side="right"
@@ -253,7 +278,7 @@ export const columns: HostsTableColumn[] = (
       category: 'general',
       contentClassName: 'w-[50px]',
       render: ({ data }) => {
-        const hasContract = data.activeContracts.gt(0)
+        const hasContract = data.activeContractsCount.gt(0)
         return (
           <Tooltip
             side="right"
@@ -420,7 +445,7 @@ export const columns: HostsTableColumn[] = (
       render: ({ data }) => (
         <ValueNum
           size="12"
-          value={data.activeContracts}
+          value={data.activeContractsCount}
           variant="value"
           format={(v) => humanNumber(v.toNumber())}
         />
@@ -431,112 +456,186 @@ export const columns: HostsTableColumn[] = (
       label: 'overall score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.score}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.score}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreAge',
       label: 'age score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.age}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.age}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreCollateral',
       label: 'collateral score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.collateral}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.collateral}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreInteractions',
       label: 'interactions score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.interactions}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.interactions}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scorePrices',
       label: 'prices score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.prices}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.prices}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreStorageRemaining',
       label: 'storage remaining score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.storageRemaining}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.storageRemaining}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreUptime',
       label: 'uptime score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.uptime}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.uptime}
+            variant="value"
+            format={(v) => v.toPrecision(2)}
+          />
+        )
+      },
     },
     {
       id: 'ap_scoreVersion',
       label: 'version score',
       category: 'autopilot',
       contentClassName: 'w-[120px] justify-end',
-      render: ({ data }) => (
-        <ValueNum
-          size="12"
-          value={data.scoreBreakdown.version}
-          variant="value"
-          format={(v) => v.toPrecision(2)}
-        />
-      ),
+      render: ({ data, context }) => {
+        if (!context.isAutopilotConfigured) {
+          return (
+            <Tooltip content="Autopilot is not configured">
+              <Text color="verySubtle">-</Text>
+            </Tooltip>
+          )
+        }
+        return (
+          <ValueNum
+            size="12"
+            value={data.scoreBreakdown.version}
+            variant="value"
+            format={(v) =>
+              context.isAutopilotConfigured ? '-' : v.toPrecision(2)
+            }
+          />
+        )
+      },
     },
     // price table
     {

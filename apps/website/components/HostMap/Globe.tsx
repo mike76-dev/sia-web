@@ -13,7 +13,7 @@ import { random, sortBy } from 'lodash'
 import { getHostLabel } from './utils'
 import { Host } from '../../content/geoHosts'
 import { getAssetUrl } from '../../content/assets'
-import { useTheme } from '@siafoundation/design-system'
+import { useTheme } from 'next-themes'
 import { useElementSize } from 'usehooks-ts'
 
 type Props = {
@@ -98,9 +98,9 @@ function GlobeComponent({ activeHost, hosts, rates, selectActiveHost }: Props) {
       const addExtra = Math.random() < 0.1
       if (addExtra) {
         const randomDistantIndex = random(
-          // Math.round((hosts.length - 1) / 2),
+          // Math.round((hostRoutes.length - 1) / 2),
           0,
-          hosts.length - 1
+          hostRoutes.length - 1
         )
         const extra = hostRoutes[randomDistantIndex]
         routes.push(extra)
@@ -132,7 +132,7 @@ function GlobeComponent({ activeHost, hosts, rates, selectActiveHost }: Props) {
     [backgroundRoutes, activeRoutes]
   )
 
-  const { activeTheme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const [containerRef, { width: size }] = useElementSize()
 
   return (
@@ -145,9 +145,12 @@ function GlobeComponent({ activeHost, hosts, rates, selectActiveHost }: Props) {
         globeImageUrl={`/_next/image?url=${encodeURIComponent(
           getAssetUrl('assets/map.png')
         )}&w=2048&q=50`}
+        bumpImageUrl={`/_next/image?url=${encodeURIComponent(
+          getAssetUrl('assets/earth-topology.png')
+        )}&w=2048&q=70`}
         arcsData={routes}
         atmosphereColor="rgba(30, 169,76, 1)"
-        atmosphereAltitude={activeTheme === 'dark' ? 0.05 : 0.15}
+        atmosphereAltitude={resolvedTheme === 'dark' ? 0.05 : 0.15}
         animateIn={false}
         arcLabel={(r: Route) => getHostLabel({ host: r.dst, rates })}
         arcStartLat={(r: Route) => +r.src.location[0]}
@@ -178,8 +181,8 @@ function GlobeComponent({ activeHost, hosts, rates, selectActiveHost }: Props) {
         pointAltitude={0}
         pointColor={(h: Host) =>
           h.public_key === activeHost.public_key
-            ? 'rgba(102, 255, 0, 1.0)'
-            : 'rgba(102, 255, 0, 0.6)'
+            ? 'rgba(0,255,0,1)'
+            : 'rgba(0,255,0,1)'
         }
         pointRadius={(h: Host) =>
           h.public_key === activeHost.public_key ? 0.6 : 0.2

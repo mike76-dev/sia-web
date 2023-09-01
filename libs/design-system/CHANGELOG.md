@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.56.0
+
+### Minor Changes
+
+- d0ebd8a6: Migrated theming to next-themes.
+- c3d93283: Table now supports an active row with colored border.
+- c3d93283: AppAuthedLayout now has a scroll prop.
+- c3d93283: Fixed border issues with table.
+- c3d93283: Add box-shadow based border classes.
+
+## 0.55.0
+
+### Minor Changes
+
+- ce199e51: All dropdown menus now have higher contrast text.
+- ce199e51: Added new ValueMenu component for displaying truncated text with a menu button.
+- 16038776: Table headers now freeze in view when the table scrolls.
+
 ## 0.54.0
 
 ### Minor Changes
