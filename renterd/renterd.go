@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"net/http"
 
-	"go.sia.tech/web/ui"
+	"github.com/mike76-dev/sia-web/ui"
 )
 
 //go:embed all:assets/*
