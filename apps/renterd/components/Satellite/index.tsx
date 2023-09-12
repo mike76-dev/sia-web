@@ -132,7 +132,15 @@ export function Satellite() {
       category: 'settings',
       title: 'File Auto Repair',
       description: <>The satellite performs automatic file repairs.</>,
-      validation: {},
+      validation: {
+        validate: value => {
+          if (!value || (form.getValues('autoRenew') && form.getValues('backupMetadata'))) {
+            return true
+          } else {
+            return 'Auto-repairs only work when both auto-renewals and metadata backups are enabled'
+          }
+        }
+      },
     },
   }
 
