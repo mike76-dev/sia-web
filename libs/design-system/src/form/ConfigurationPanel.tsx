@@ -7,6 +7,7 @@ import { PanelMenuSetting } from '../app/PanelMenuSetting'
 import { PanelMenuSection } from '../app/PanelMenuSection'
 import { Fragment } from 'react'
 import { ConfigurationSelect } from './ConfigurationSelect'
+import { ConfigurationCombo } from './ConfigurationCombo'
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form'
 import { ConfigField, ConfigFields } from './configurationFields'
 
@@ -52,6 +53,8 @@ export function ConfigurationPanel<
                 <ConfigurationSwitch form={form} name={key} fields={fields} />
               ) : val.type === 'select' ? (
                 <ConfigurationSelect form={form} name={key} fields={fields} />
+              ) : val.type === 'combo' ? (
+                <ConfigurationCombo form={form} name={key} fields={fields} />
               ) : null
             }
           />

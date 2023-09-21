@@ -54,3 +54,23 @@ export function useRenterSettingsUpdate(
     mutate((key) => key === renterSettingsKey)
   })
 }
+
+// struct2ts:github.com/mike76-dev/renterd-satellite/SatelliteInfo
+export interface SatelliteInfo {
+  address:    string,
+  publicKey:  string,
+  renterSeed: string
+}
+
+export interface SatelliteData {
+  satellites: SatelliteInfo[],
+}
+
+const satellitesKey = '/satellite/satellites'
+
+export function useSatellites(args?: HookArgsSwr<void, SatelliteData>) {
+  return useGetSwr({
+    ...args,
+    route: satellitesKey,
+  })
+}

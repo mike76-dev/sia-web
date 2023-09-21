@@ -18,6 +18,7 @@ import {
   useSatelliteConfigUpdate,
   useRenterSettings,
   useRenterSettingsUpdate,
+  useSatellites,
 } from './renterdSatellite'
 import { FieldErrors, useForm } from 'react-hook-form'
 import { entries } from 'lodash'
@@ -38,6 +39,16 @@ export function Satellite() {
     defaultValues: initialValues,
   })
 
+  const satellites = useSatellites()
+  const options = () => {
+    let result = new(Array<{label: string, value: string}>)
+    for (const key in satellites.data?.satellites) {
+      let address = satellites.data.satellites[key].address
+      result.push({label: address, value: address})
+    }
+    return result
+  }
+
   const fields: ConfigFields<typeof initialValues, 'config' | 'settings'> = {
     enabled: {
       type: 'boolean',
@@ -47,23 +58,42 @@ export function Satellite() {
       validation: {},
     },
     address: {
-      type: 'text',
+      type: 'combo',
       category: 'config',
+      options: options(),
       title: 'Address',
       description: (
-        <>The network address of the satellite.</>
-      ),
-      suggestion: ' ',
-      suggestionTip: (
-        <>IP address or domain name plus port number.</>
+        <>The network address of the satellite.<br/>
+        <small>Format: &lt;IP address or domain name&gt;:&lt;port number&gt;.
+        Default port is 9992.</small></>
       ),
       validation: {
         validate: {
           required: value => {
             if (!value && form.getValues('enabled')) return 'required'
+            let v = value.toString()
+            if (v.length < 3) return 'wrong format'
+            let i = v.indexOf(':')
+            if (i < 1) return 'wrong format'
+            let p = v.slice(i + 1)
+            let port = parseInt(p)
+            if (Number.isNaN(port) || port < 0 || port > 65535) return 'wrong format'
             return true
           },
         },
+        onChange: (event) => {
+          for (const key in satellites.data.satellites) {
+            if (satellites.data.satellites[key].address == event.target.value) {
+              form.setValue('publicKey', decodePK(satellites.data.satellites[key].publicKey), {
+                shouldDirty: true
+              })
+              form.setValue('renterSeed', decodeSeed(satellites.data.satellites[key].renterSeed), {
+                shouldDirty: true
+              })
+              break
+            }
+          }
+        }
       },
     },
     publicKey: {
@@ -71,11 +101,8 @@ export function Satellite() {
       category: 'config',
       title: 'Public Key',
       description: (
-        <>The public key of the satellite.</>
-      ),
-      suggestion: ' ',
-      suggestionTip: (
-        <>Hexadecimal 32-byte public key</>
+        <>The public key of the satellite.<br/>
+        <small>Hexadecimal 32-byte public key.</small></>
       ),
       validation: {
         validate: {
@@ -94,11 +121,8 @@ export function Satellite() {
       category: 'config',
       title: 'Renter Seed',
       description: (
-        <>The seed provided by the satellite.</>
-      ),
-      suggestion: ' ',
-      suggestionTip: (
-        <>Hexadecimal 32-byte seed</>
+        <>The seed provided by the satellite.<br/>
+        <small>Hexadecimal 32-byte seed.</small></>
       ),
       validation: {
         validate: {
