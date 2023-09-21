@@ -20,13 +20,11 @@ export type ContractData = {
   spendingUploads: BigNumber
   spendingDownloads: BigNumber
   spendingFundAccount: BigNumber
-  satellite: string
   size: BigNumber
 }
 
 export type TableColumnId =
   | 'actions'
-  | 'satellite'
   | 'contractId'
   | 'hostIp'
   | 'hostKey'
@@ -50,10 +48,6 @@ export const columnsDefaultVisible: TableColumnId[] = [
   'spendingDownloads',
   'spendingFundAccount',
 ]
-
-export type SatelliteData = {
-  contracts: Record<string, string>
-}
 
 export type SortField =
   | 'contractId'
