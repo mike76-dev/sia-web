@@ -14,25 +14,19 @@ import {
 } from '../icons/carbon'
 import { ThemeRadio } from '../components/ThemeRadio'
 import { webLinks } from '../data/webLinks'
-import { CurrencyId, useAppSettings } from '@siafoundation/react-core'
+import { useAppSettings } from '@siafoundation/react-core'
 import { Dialog } from '../core/Dialog'
 import { minutesInMilliseconds } from '../lib/time'
+import { CurrencySelector } from './CurrencySelector'
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  showSiaStats?: boolean
   securityEl?: React.ReactNode
 }
 
-export function SettingsDialog({
-  open,
-  onOpenChange,
-  showSiaStats = true,
-  securityEl,
-}: Props) {
-  const { settings, setSettings, setCurrency, currencyOptions, gpu } =
-    useAppSettings()
+export function SettingsDialog({ open, onOpenChange, securityEl }: Props) {
+  const { settings, setSettings, gpu } = useAppSettings()
 
   return (
     <Dialog
@@ -59,19 +53,7 @@ export function SettingsDialog({
                   <Heading size="20" className="flex-1">
                     Currency
                   </Heading>
-                  <Select
-                    disabled={!settings.siaCentral}
-                    value={settings.currency.id}
-                    onChange={(e) =>
-                      setCurrency(e.currentTarget.value as CurrencyId)
-                    }
-                  >
-                    {currencyOptions.map(({ id, label }) => (
-                      <Option key={id} value={id}>
-                        {label}
-                      </Option>
-                    ))}
-                  </Select>
+                  <CurrencySelector />
                 </div>
                 <Paragraph size="14">
                   Select a currency for price conversions from Siacoin. Requires
@@ -204,29 +186,6 @@ export function SettingsDialog({
                 </Paragraph>
               </div>
             </Alert>
-            {showSiaStats ? (
-              <Alert>
-                <div className="flex flex-col gap-4">
-                  <div className="flex gap-2 items-center">
-                    <Text>
-                      <Information16 />
-                    </Text>
-                    <Heading size="20" className="flex-1">
-                      SiaStats
-                    </Heading>
-                    <Switch
-                      size="medium"
-                      checked={settings.siaStats}
-                      onCheckedChange={(val) => setSettings({ siaStats: val })}
-                    />
-                  </div>
-                  <Paragraph size="14">
-                    The app fetches the network block height from the SiaStats
-                    API. This data is used to calculate sync progress.
-                  </Paragraph>
-                </div>
-              </Alert>
-            ) : null}
           </div>
         </div>
         <Separator className="w-full" />
@@ -242,7 +201,7 @@ export function SettingsDialog({
             </Paragraph>
             <div className="flex gap-4">
               <Link
-                href={webLinks.website}
+                href={webLinks.website.index}
                 target="_blank"
                 className="flex items-center gap-1"
               >

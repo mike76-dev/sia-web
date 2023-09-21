@@ -9,6 +9,7 @@ import { useObjectUpload } from '@siafoundation/react-renterd'
 import { useFiles } from '../../contexts/files'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
+import { bucketAndKeyParamsFromPath } from '../../contexts/files/paths'
 
 const initialValues = {
   name: '',
@@ -37,9 +38,9 @@ export function FilesCreateDirectoryDialog({
     validationSchema,
     onSubmit: async (values, actions) => {
       const response = await upload.put({
-        params: {
-          key: activeDirectoryPath.slice(1) + values.name + '/',
-        },
+        params: bucketAndKeyParamsFromPath(
+          activeDirectoryPath + values.name + '/'
+        ),
         payload: null,
       })
       if (response.error) {

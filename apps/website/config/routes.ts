@@ -31,7 +31,7 @@ export const routes = {
   },
   whitepaper: {
     index: '/whitepaper',
-    pdf: `${webLinks.website}/sia.pdf`,
+    pdf: `${webLinks.website.index}/sia.pdf`,
   },
   community: {
     index: '/community-ecosystem',
@@ -71,6 +71,9 @@ export const routes = {
   },
   terms: {
     index: '/terms-of-service',
+  },
+  privacy: {
+    index: '/privacy-policy',
   },
   letter: {
     index: '/letter',

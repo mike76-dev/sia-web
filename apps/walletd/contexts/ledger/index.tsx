@@ -1,6 +1,5 @@
 import TransportWebBLE from '@ledgerhq/hw-transport-web-ble'
 import TransportWebHID from '@ledgerhq/hw-transport-webhid'
-import TransportWebUSB from '@ledgerhq/hw-transport-webusb'
 import Sia from '@siacentral/ledgerjs-sia'
 import {
   createContext,
@@ -9,23 +8,11 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { TransportType } from './types'
+import { LedgerDevice, TransportType } from './types'
 
 function useLedgerMain() {
   const [waitingForUser, setWaitingForUser] = useState(false)
-  const [device, setDevice] = useState<{
-    type: TransportType
-    sia: Sia
-    publicKey0?: string
-    address0?: string
-    transport: {
-      forget: () => void
-      deviceModel: {
-        productName: string
-      }
-      _disconnectEmitted: boolean
-    }
-  }>()
+  const [device, setDevice] = useState<LedgerDevice>()
   const [error, setError] = useState<Error>()
 
   const disconnect = useCallback(() => {
@@ -55,12 +42,6 @@ function useLedgerMain() {
           break
         case 'Bluetooth':
           transport = await TransportWebBLE.create()
-          break
-        case 'USB':
-          transport = await TransportWebUSB.openConnected()
-          if (!transport) {
-            transport = await TransportWebUSB.create()
-          }
           break
         default:
           throw new Error(`Unsupported transport method: ${type}`)

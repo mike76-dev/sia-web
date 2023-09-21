@@ -15,7 +15,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          node_version: 16
+          node_version: 19.5.0
       - name: Commit lint
         shell: bash
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
@@ -45,4 +45,5 @@ jobs:
           ASSETS: ${{ github.workspace }}/assets
       - name: Export
         shell: bash
-        run: npx nx affected --target=export --configuration=ci --parallel=5
+        # issue with parallelism
+        run: npx nx affected --target=export --configuration=ci --parallel=1

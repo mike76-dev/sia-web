@@ -1,97 +1,17 @@
-import { NextRouter, useRouter } from 'next/router'
+'use client'
+
+import { useRouter, usePathname } from 'next/navigation'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useCallback } from 'react'
 import useLocalStorageState from 'use-local-storage-state'
 import { useGpuFeatures } from './useGpuFeatures'
 import { clearAllSwrKeys } from '../utils'
 import { useWorkflows } from '../workflows'
-
-export type CurrencyId =
-  | 'usd'
-  | 'cad'
-  | 'eur'
-  | 'gbp'
-  | 'jpy'
-  | 'aud'
-  | 'cny'
-  | 'rub'
-  | 'btc'
-  | 'eth'
-
-export type CurrencyOption = {
-  id: CurrencyId
-  label: string
-  prefix: string
-  fixed: number
-}
-
-const currencyOptions: CurrencyOption[] = [
-  {
-    id: 'usd',
-    label: 'USD',
-    prefix: '$',
-    fixed: 2,
-  },
-  {
-    id: 'cad',
-    label: 'CAD',
-    prefix: '$',
-    fixed: 2,
-  },
-  {
-    id: 'eur',
-    label: 'EUR',
-    prefix: '€',
-    fixed: 2,
-  },
-  {
-    id: 'gbp',
-    label: 'GBP',
-    prefix: '£',
-    fixed: 2,
-  },
-  {
-    id: 'jpy',
-    label: 'JPY',
-    prefix: '¥',
-    fixed: 2,
-  },
-  {
-    id: 'aud',
-    label: 'AUD',
-    prefix: '$',
-    fixed: 2,
-  },
-  {
-    id: 'rub',
-    label: 'RUB',
-    prefix: '₽',
-    fixed: 2,
-  },
-  {
-    id: 'cny',
-    label: 'CNY',
-    prefix: '¥',
-    fixed: 2,
-  },
-  {
-    id: 'btc',
-    label: 'BTC',
-    prefix: '₿',
-    fixed: 6,
-  },
-  {
-    id: 'eth',
-    label: 'ETH',
-    prefix: 'Ξ',
-    fixed: 6,
-  },
-]
+import { CurrencyId, CurrencyOption, currencyOptions } from './currency'
 
 export type AppSettings = {
   api: string
   allowCustomApi: boolean
-  siaStats: boolean
   siaCentral: boolean
   password?: string
   currency: CurrencyOption
@@ -107,7 +27,6 @@ export type AppSettings = {
 const defaultSettings: AppSettings = {
   api: '',
   allowCustomApi: false,
-  siaStats: true,
   siaCentral: true,
   password: undefined,
   currency: currencyOptions[0],
@@ -186,6 +105,7 @@ function useAppSettingsMain({
   )
 
   const router = useRouter()
+  const pathname = usePathname()
   // Arbirary callbacks can be registered at a unique key.
   const [onLockCallbacks, setOnLockCallbacks] = useState<
     Record<string, (() => void) | undefined>
@@ -201,12 +121,9 @@ function useAppSettingsMain({
   )
   const lock = useCallback(() => {
     if (lockRoutes) {
-      router.push({
-        pathname: lockRoutes.login,
-        query: {
-          prev: getRouteToSaveAsPrev(router, lockRoutes),
-        },
-      })
+      router.push(
+        `${lockRoutes.login}?prev=${getRouteToSaveAsPrev(pathname, lockRoutes)}`
+      )
     }
     setSettings({ password: '' })
     resetWorkflows()
@@ -217,7 +134,14 @@ function useAppSettingsMain({
         callback()
       }
     }
-  }, [router, lockRoutes, setSettings, resetWorkflows, onLockCallbacks])
+  }, [
+    router,
+    lockRoutes,
+    setSettings,
+    resetWorkflows,
+    onLockCallbacks,
+    pathname,
+  ])
 
   const isUnlocked = useMemo(() => !!settings.password, [settings])
 
@@ -251,11 +175,11 @@ export function AppSettingsProvider({ children, ...props }: Props) {
 }
 
 export function getRouteToSaveAsPrev(
-  router: NextRouter,
+  pathname: string,
   routes: { home: string; login: string }
 ) {
-  if ([routes.login].includes(router.asPath)) {
+  if ([routes.login].includes(pathname)) {
     return routes.home
   }
-  return router.asPath
+  return pathname
 }

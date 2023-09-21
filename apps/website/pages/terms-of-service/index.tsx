@@ -14,10 +14,9 @@ import { getNotionPage } from '../../lib/notion'
 
 type Props = AsyncReturnType<typeof getStaticProps>['props']
 
-const title = 'Terms of Service'
 const description = ''
 
-export default function TermsOfService({ date, source }: Props) {
+export default function TermsOfService({ title, date, source }: Props) {
   return (
     <Layout
       title={title}
@@ -52,10 +51,11 @@ const databaseId = 'ef6862a3f8274243be41077fac52b77d'
 export async function getStaticProps() {
   const stats = await getStats()
 
-  const { date, source } = await getNotionPage(databaseId)
+  const { title, date, source } = await getNotionPage(databaseId)
 
   return {
     props: {
+      title,
       date,
       source,
       fallback: {

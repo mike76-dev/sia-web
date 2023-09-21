@@ -2,16 +2,16 @@ import { Panel } from '../core/Panel'
 import { Heading } from '../core/Heading'
 import { Link } from '../core/Link'
 import { Text } from '../core/Text'
-import { getEntityTypeInitials, getEntityTypeLabel } from '../lib/entityTypes'
+import { getEntityTypeLabel } from '../lib/entityTypes'
 import { humanNumber } from '@siafoundation/sia-js'
 import { formatDistance } from 'date-fns'
 import { EntityAvatar } from './EntityAvatar'
-import { EntityListSkeleton, itemBorderStyles } from './EntityList'
 import { cx } from 'class-variance-authority'
+import { EntityListSkeleton } from './EntityListSkeleton'
 
 type BlockListItemProps = {
-  miningPool: string
-  timestamp: number
+  miningPool?: string
+  timestamp: string | number
   height: number
   href: string
 }
@@ -19,9 +19,10 @@ type BlockListItemProps = {
 type Props = {
   title: string
   blocks?: BlockListItemProps[]
+  skeletonCount?: number
 }
 
-export function BlockList({ title, blocks }: Props) {
+export function BlockList({ title, blocks, skeletonCount = 10 }: Props) {
   return (
     <Panel>
       <div className="flex flex-col rounded overflow-hidden">
@@ -51,7 +52,7 @@ export function BlockList({ title, blocks }: Props) {
             >
               <EntityAvatar
                 label={getEntityTypeLabel('block')}
-                initials={getEntityTypeInitials('block')}
+                initials="B"
                 href={block.href}
                 shape="square"
               />
@@ -61,8 +62,14 @@ export function BlockList({ title, blocks }: Props) {
                     <Link href={block.href} underline="none">
                       {humanNumber(block.height)}
                     </Link>
-                  </Text>{' '}
-                  mined by <Text weight="bold">{block.miningPool}</Text>{' '}
+                  </Text>
+                  {block.miningPool
+                    ? ' mined by '
+                    : i < blocks.length - 1
+                    ? ' mined '
+                    : ''}
+                  <Text weight="bold">{block.miningPool}</Text>
+                  {block.miningPool ? ' ' : ''}
                   {i < blocks.length - 1
                     ? `in ${formatDistance(
                         new Date(block.timestamp),
@@ -77,9 +84,16 @@ export function BlockList({ title, blocks }: Props) {
                 </Text>
               </div>
             </div>
-          )) || <EntityListSkeleton />}
+          )) || <EntityListSkeleton skeletonCount={skeletonCount} />}
         </div>
       </div>
     </Panel>
+  )
+}
+
+function itemBorderStyles() {
+  return cx(
+    'border-t border-gray-200 dark:border-graydark-300',
+    'first:border-none'
   )
 }

@@ -14,7 +14,6 @@ import {
 } from '@siafoundation/react-renterd'
 import { useSatellite } from './satellite'
 import { createContext, useContext, useMemo } from 'react'
-import { useSiaCentralHosts } from '@siafoundation/react-core'
 import BigNumber from 'bignumber.js'
 import {
   ContractData,
@@ -23,6 +22,7 @@ import {
   sortOptions,
 } from './types'
 import { columns } from './columns'
+import { useSiaCentralHosts } from '@siafoundation/react-sia-central'
 
 const defaultLimit = 50
 
@@ -149,6 +149,7 @@ function useContractsMain() {
     dataState,
     limit,
     offset,
+    isLoading: response.isLoading,
     error: response.error,
     pageCount: datasetPage?.length || 0,
     datasetCount: datasetFiltered?.length || 0,
