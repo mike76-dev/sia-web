@@ -2,14 +2,17 @@ import {
   DropdownMenu,
   DropdownMenuItem,
   Button,
+  DropdownMenuLeftSlot,
+  DropdownMenuLabel,
+  Text,
+  secondsInMilliseconds,
+} from '@siafoundation/design-system'
+import {
   Draggable16,
   DataView16,
   ListChecked16,
-  DropdownMenuLeftSlot,
   Filter16,
-  DropdownMenuLabel,
-  Text,
-} from '@siafoundation/design-system'
+} from '@siafoundation/react-icons'
 import {
   useHostsAllowlist,
   useHostsBlocklist,
@@ -115,7 +118,7 @@ export function HostContextMenu({
             payload: {
               hostKey: publicKey,
               hostIP: address,
-              timeout: 30000000000,
+              timeout: secondsInMilliseconds(30),
             },
           })
         }

@@ -1,23 +1,27 @@
 import {
   Button,
-  Download16,
   LoadingDots,
   Panel,
   ProgressBar,
   ScrollArea,
-  Subtract24,
   Text,
-  Upload16,
 } from '@siafoundation/design-system'
+import {
+  Close16,
+  Download16,
+  Subtract24,
+  Upload16,
+} from '@siafoundation/react-icons'
 import { useState } from 'react'
 import { useFiles } from '../contexts/files'
 
-function getProgress(upload: { loaded?: number; size?: number }) {
-  return upload.loaded ? upload.loaded / upload.size : 1
+function getProgress(transfer: { loaded?: number; size?: number }) {
+  return transfer.loaded !== undefined ? transfer.loaded / transfer.size : 1
 }
 
 export function TransfersBar() {
-  const { uploadsList, downloadsList } = useFiles()
+  const { uploadsList, uploadCancel, downloadsList, downloadCancel } =
+    useFiles()
   const [maximized, setMaximized] = useState<boolean>(true)
 
   const uploadCount = uploadsList.length
@@ -49,9 +53,19 @@ export function TransfersBar() {
                       key={upload.path}
                       className="flex flex-col gap-1 border-t first:border-t-0 border-gray-200 dark:border-graydark-300 px-3 py-2"
                     >
-                      <Text ellipsis size="14" className="">
-                        {upload.path}
-                      </Text>
+                      <div className="flex gap-1">
+                        <Text ellipsis size="14" className="flex-1">
+                          {upload.path}
+                        </Text>
+                        <Button
+                          tip="Cancel file upload"
+                          variant="ghost"
+                          size="none"
+                          onClick={() => uploadCancel(upload)}
+                        >
+                          <Close16 />
+                        </Button>
+                      </div>
                       <ProgressBar
                         variant="accent"
                         value={upload.loaded}
@@ -90,9 +104,19 @@ export function TransfersBar() {
                       key={download.path}
                       className="flex flex-col gap-1 border-t first:border-t-0 border-gray-200 dark:border-graydark-300 px-3 py-2"
                     >
-                      <Text ellipsis size="14" className="">
-                        {download.path}
-                      </Text>
+                      <div className="flex gap-1">
+                        <Text ellipsis size="14" className="flex-1">
+                          {download.path}
+                        </Text>
+                        <Button
+                          tip="Cancel file download"
+                          variant="ghost"
+                          size="none"
+                          onClick={() => downloadCancel(download)}
+                        >
+                          <Close16 />
+                        </Button>
+                      </div>
                       <ProgressBar
                         variant="accent"
                         value={download.loaded}
