@@ -2,12 +2,14 @@ import {
   Text,
   Button,
   triggerSuccessToast,
-  Reset16,
-  Save16,
   ConfigurationPanel,
   triggerErrorToast,
   ConfigFields,
 } from '@siafoundation/design-system'
+import {
+  Reset16,
+  Save16,
+} from '@siafoundation/react-icons'
 import { useCallback, useEffect, useMemo } from 'react'
 import { RenterdSidenav } from '../RenterdSidenav'
 import { routes } from '../../config/routes'
