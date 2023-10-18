@@ -14,54 +14,49 @@ import {
   PendingFilled16,
   Subtract24,
 } from '@siafoundation/react-icons'
-import { useApp } from '../contexts/app'
 import { useSyncStatus } from '../hooks/useSyncStatus'
 import { routes } from '../config/routes'
 import { useDialog } from '../contexts/dialog'
-import { useNotEnoughContracts } from './Files/checks/useNotEnoughContracts'
-import { useAutopilotConfig, useWallet } from '@siafoundation/react-renterd'
+import { useSettings, useWallet } from '@siafoundation/react-hostd'
 import BigNumber from 'bignumber.js'
-import { humanSiacoin } from '@siafoundation/sia-js'
+import { humanSiacoin, toHastings } from '@siafoundation/sia-js'
 import { useAppSettings } from '@siafoundation/react-core'
+import { useVolumes } from '../contexts/volumes'
 import useLocalStorageState from 'use-local-storage-state'
 
 export function OnboardingBar() {
   const { isUnlocked } = useAppSettings()
-  const app = useApp()
   const { openDialog } = useDialog()
+  const { dataset: volumes } = useVolumes()
+  const settings = useSettings()
   const wallet = useWallet()
-  const autopilot = useAutopilotConfig({
-    config: {
-      swr: {
-        errorRetryInterval: 10_000,
-      },
-    },
-  })
   const [maximized, setMaximized] = useLocalStorageState<boolean>(
-    'v0/renterd/onboarding/maximized',
+    'v0/hostd/onboarding/maximized',
     {
       defaultValue: true,
     }
   )
-
   const syncStatus = useSyncStatus()
-  const notEnoughContracts = useNotEnoughContracts()
 
-  if (!isUnlocked || app.autopilot.status !== 'on') {
+  if (!isUnlocked) {
     return null
   }
 
   const walletBalance = new BigNumber(wallet.data?.confirmed || 0)
-  const allowance = new BigNumber(autopilot.data?.contracts.allowance || 0)
+  const minimumBalance = toHastings(5_000)
 
-  const step1Configured = app.autopilot.state.data?.configured
-  const step2Synced = syncStatus.isSynced
-  const step3Funded =
-    app.autopilot.state.data?.configured &&
-    wallet.data &&
-    walletBalance.gte(allowance)
-  const step4Contracts = !notEnoughContracts.active
-  const steps = [step1Configured, step2Synced, step3Funded, step4Contracts]
+  const step1Funded = wallet.data && walletBalance.gte(minimumBalance)
+  const step2Volumes = volumes?.length > 0
+  const step3Configured = settings.data?.acceptingContracts
+  const step4Synced = syncStatus.isSynced
+  // const step5Announced = false
+  const steps = [
+    step1Funded,
+    step2Volumes,
+    step3Configured,
+    step4Synced,
+    //step5Announced
+  ]
   const totalSteps = steps.length
   const completedSteps = steps.filter((step) => step).length
 
@@ -88,71 +83,9 @@ export function OnboardingBar() {
             <div className="flex justify-between items-center px-3 py-2 border-b border-gray-200 dark:border-graydark-300">
               <Text size="14">
                 Get set up by completing the following steps. Once they are
-                complete, you can start uploading files.
+                complete, your host is ready to store data.
               </Text>
             </div>
-            <Section
-              title={
-                <Link
-                  href={routes.config.index}
-                  ellipsis
-                  size="14"
-                  underline="hover"
-                >
-                  Step 1: Configure your storage settings
-                </Link>
-              }
-              description={
-                'Specify how much data you plan to store and your target price.'
-              }
-              action={
-                step1Configured ? (
-                  <Text color="green">
-                    <CheckmarkFilled16 />
-                  </Text>
-                ) : (
-                  <>
-                    <Link href={routes.config.index}>
-                      <Launch16 />
-                    </Link>
-                    <Text color="amber">
-                      <RadioButton16 />
-                    </Text>
-                  </>
-                )
-              }
-            />
-            <Section
-              title={
-                <Link
-                  href={routes.node.index}
-                  underline="hover"
-                  ellipsis
-                  size="14"
-                >
-                  Step 2: Wait for the blockchain to sync
-                </Link>
-              }
-              description={
-                'The blockchain will sync in the background, this takes some time. No user action required.'
-              }
-              action={
-                step2Synced ? (
-                  <Text color="green">
-                    <CheckmarkFilled16 />
-                  </Text>
-                ) : (
-                  <>
-                    <Text ellipsis size="14">
-                      {syncStatus.syncPercent}%
-                    </Text>
-                    <Text color="amber">
-                      <PendingFilled16 />
-                    </Text>
-                  </>
-                )
-              }
-            />
             <Section
               title={
                 <Link
@@ -162,18 +95,18 @@ export function OnboardingBar() {
                   size="14"
                   underline="hover"
                 >
-                  Step 3: Fund your wallet
+                  Step 1: Fund your wallet
                 </Link>
               }
               description={`Fund your wallet with at least ${humanSiacoin(
-                allowance
-              )} siacoin to cover the required allowance.${
+                minimumBalance
+              )} siacoin to cover required contract collateral.${
                 syncStatus.isWalletSynced
                   ? ''
                   : ' Balance will not be accurate until wallet is finished scanning.'
               }`}
               action={
-                step3Funded ? (
+                step1Funded ? (
                   <Text color="green">
                     <CheckmarkFilled16 />
                   </Text>
@@ -202,26 +135,86 @@ export function OnboardingBar() {
             <Section
               title={
                 <Link
-                  href={routes.contracts.index}
+                  href={routes.volumes.index}
                   ellipsis
                   size="14"
                   underline="hover"
                 >
-                  Step 4: Wait for storage contracts to form
+                  Step 2: Add a volume
                 </Link>
               }
               description={
-                'Once all other steps are complete, contracts will automatically form. No user action required.'
+                'Add a system volume that will be used to store data.'
               }
               action={
-                step4Contracts ? (
+                step2Volumes ? (
+                  <Text color="green">
+                    <CheckmarkFilled16 />
+                  </Text>
+                ) : (
+                  <>
+                    <Link href={routes.volumes.index}>
+                      <Launch16 />
+                    </Link>
+                    <Text color="amber">
+                      <RadioButton16 />
+                    </Text>
+                  </>
+                )
+              }
+            />
+            <Section
+              title={
+                <Link
+                  href={routes.config.index}
+                  ellipsis
+                  size="14"
+                  underline="hover"
+                >
+                  Step 3: Configure pricing and settings
+                </Link>
+              }
+              description={`Configure your host's pricing and settings and start accepting contracts.`}
+              action={
+                step3Configured ? (
+                  <Text color="green">
+                    <CheckmarkFilled16 />
+                  </Text>
+                ) : (
+                  <>
+                    <Link href={routes.config.index}>
+                      <Launch16 />
+                    </Link>
+                    <Text color="amber">
+                      <RadioButton16 />
+                    </Text>
+                  </>
+                )
+              }
+            />
+            <Section
+              title={
+                <Link
+                  href={routes.node.index}
+                  underline="hover"
+                  ellipsis
+                  size="14"
+                >
+                  Step 4: Wait for the blockchain to sync
+                </Link>
+              }
+              description={
+                'The blockchain will sync in the background, this takes some time. No user action required.'
+              }
+              action={
+                step4Synced ? (
                   <Text color="green">
                     <CheckmarkFilled16 />
                   </Text>
                 ) : (
                   <>
                     <Text ellipsis size="14">
-                      {notEnoughContracts.count}/{notEnoughContracts.required}
+                      {syncStatus.syncPercent}%
                     </Text>
                     <Text color="amber">
                       <PendingFilled16 />
