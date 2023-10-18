@@ -20,6 +20,7 @@ import { routes } from '../config/routes'
 import { useDialog } from '../contexts/dialog'
 import { useNotEnoughContracts } from './Files/checks/useNotEnoughContracts'
 import { useAutopilotConfig, useWallet } from '@siafoundation/react-renterd'
+import { useSatelliteConfig } from './Satellite/renterdSatellite'
 import BigNumber from 'bignumber.js'
 import { humanSiacoin } from '@siafoundation/sia-js'
 import { useAppSettings } from '@siafoundation/react-core'
@@ -30,6 +31,7 @@ export function OnboardingBar() {
   const app = useApp()
   const { openDialog } = useDialog()
   const wallet = useWallet()
+  const satellite = useSatelliteConfig()
   const autopilot = useAutopilotConfig({
     config: {
       swr: {
@@ -54,12 +56,15 @@ export function OnboardingBar() {
   const walletBalance = new BigNumber(wallet.data?.confirmed || 0)
   const allowance = new BigNumber(autopilot.data?.contracts.allowance || 0)
 
+  const satelliteEnabled = satellite.data?.enabled
+
   const step1Configured = app.autopilot.state.data?.configured
   const step2Synced = syncStatus.isSynced
   const step3Funded =
     app.autopilot.state.data?.configured &&
-    wallet.data &&
-    walletBalance.gte(allowance)
+    ((wallet.data &&
+    walletBalance.gte(allowance)) ||
+    satelliteEnabled)
   const step4Contracts = !notEnoughContracts.active
   const steps = [step1Configured, step2Synced, step3Funded, step4Contracts]
   const totalSteps = steps.length
