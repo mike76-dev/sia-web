@@ -24,8 +24,7 @@
           "sourceMap": false,
           "externalDependencies": "none"
         },
-        "ci": {
-          "outputPath": "apps/assets/dist",
+        "local": {
           "optimization": true,
           "extractLicenses": true,
           "sourceMap": false,
@@ -43,6 +42,28 @@
         "production": {
           "inspect": false,
           "buildTarget": "assets:build:production"
+        }
+      }
+    },
+    "container": {
+      "executor": "@nx-tools/nx-container:build",
+      "dependsOn": ["build"],
+      "defaultConfiguration": "local",
+      "options": {
+        "engine": "docker",
+        "context": "./",
+        "file": "apps/assets/Dockerfile"
+      },
+      "configurations": {
+        "local": {
+          "tags": ["siafoundation/web-assets:latest"],
+          "file": "apps/assets/Dockerfile",
+          "push": false
+        },
+        "production": {
+          "tags": ["ghcr.io/siafoundation/web-assets:latest"],
+          "file": "apps/assets/Dockerfile",
+          "push": true
         }
       }
     },

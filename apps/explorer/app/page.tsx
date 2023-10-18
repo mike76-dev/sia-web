@@ -3,13 +3,13 @@ import { appLink, network, siaCentralApi } from '../config'
 import { Home } from '../components/Home'
 import {
   getSiaCentralBlockLatest,
-  getSiaCentralBlocks,
   getSiaCentralExchangeRates,
   getSiaCentralHosts,
   getSiaCentralHostsNetworkMetrics,
 } from '@siafoundation/sia-central'
-import { range } from 'lodash'
 import { buildMetadata } from '../lib/utils'
+import { humanBytes } from '@siafoundation/sia-js'
+import { getLastFewBlocks } from '../lib/blocks'
 
 export function generateMetadata(): Metadata {
   const title = 'siascan'
@@ -24,10 +24,15 @@ export function generateMetadata(): Metadata {
   })
 }
 
-export const revalidate = 60
+export const revalidate = 0
 
 export default async function HomePage() {
-  const [m, lb, r, h] = await Promise.all([
+  const [
+    { data: m, error: metricsError },
+    { data: lb, error: latestBlockError },
+    { data: r, error: exchangeRatesError },
+    { data: h, error: hostsError },
+  ] = await Promise.all([
     getSiaCentralHostsNetworkMetrics({
       config: {
         api: siaCentralApi,
@@ -54,22 +59,40 @@ export default async function HomePage() {
   ])
 
   const lastBlockHeight = lb?.block.height || 0
-  const bs = await getSiaCentralBlocks({
-    payload: {
-      heights: range(lastBlockHeight - 5, lastBlockHeight),
-    },
-    config: {
-      api: siaCentralApi,
-    },
+  const blocks = await getLastFewBlocks(lb?.block)
+
+  if (
+    metricsError ||
+    latestBlockError ||
+    exchangeRatesError ||
+    hostsError ||
+    latestBlockError ||
+    blocks.error
+  ) {
+    console.log(new Date().toISOString(), {
+      metricsError,
+      latestBlockError,
+      exchangeRatesError,
+      blocksError: blocks.error,
+      hostsError,
+    })
+  }
+
+  console.log(new Date().toISOString(), {
+    metrics: humanBytes(Buffer.byteLength(JSON.stringify(m || ''))),
+    latestBlock: humanBytes(Buffer.byteLength(JSON.stringify(lb || ''))),
+    blocks: humanBytes(Buffer.byteLength(JSON.stringify(blocks || ''))),
+    exchangeRates: humanBytes(Buffer.byteLength(JSON.stringify(r || ''))),
+    hosts: humanBytes(Buffer.byteLength(JSON.stringify(h || ''))),
   })
 
   return (
     <Home
       metrics={m}
       blockHeight={lastBlockHeight}
-      blocks={bs.blocks}
-      hosts={h.hosts}
-      rates={r.rates}
+      blocks={blocks?.blocks || []}
+      hosts={h?.hosts || []}
+      rates={r?.rates}
     />
   )
 }

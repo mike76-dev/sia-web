@@ -6,33 +6,22 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/hostd",
-        "postcssConfig": "apps/hostd/postcss.config.js",
-        "assets": [
-          {
-            "glob": "**/*",
-            "input": "libs/design-system/src/public/",
-            "output": "/"
-          }
-        ]
+        "postcssConfig": "apps/hostd/postcss.config.js"
       },
       "configurations": {
         "development": {},
         "production": {},
-        "ci": {
-          "outputPath": "apps/hostd/dist"
-        },
-        "embed": {
-          "outputPath": "dist/apps/hostd-embed",
+        "local": {},
+        "export": {
+          "outputPath": "dist/apps/hostd-export",
           "fileReplacements": [
             {
               "replace": "apps/hostd/config/buildMode.ts",
-              "with": "apps/hostd/config/buildModeEmbed.ts"
+              "with": "apps/hostd/config/buildModeExport.ts"
             }
           ]
         }
@@ -50,27 +39,35 @@
           "buildTarget": "hostd:build:development",
           "dev": true
         },
-        "embed": {
-          "buildTarget": "hostd:build:embed",
-          "dev": true
-        },
         "production": {
           "buildTarget": "hostd:build:production",
           "dev": false
         }
       }
     },
-    "export": {
-      "executor": "@nx/next:export",
+    "container": {
+      "executor": "@nx-tools/nx-container:build",
+      "dependsOn": ["build"],
+      "defaultConfiguration": "local",
       "options": {
-        "buildTarget": "hostd:build:embed"
+        "engine": "docker",
+        "context": "./",
+        "file": "apps/hostd/Dockerfile"
+      },
+      "configurations": {
+        "local": {
+          "tags": ["siafoundation/web-hostd:latest"],
+          "push": false
+        },
+        "production": {
+          "tags": ["ghcr.io/siafoundation/web-hostd:latest"],
+          "push": true
+        }
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/apps/hostd"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/apps/hostd"],
       "options": {
         "jestConfig": "apps/hostd/jest.config.ts",
         "passWithNoTests": true
@@ -78,13 +75,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/hostd/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/hostd/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

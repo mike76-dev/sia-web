@@ -4,6 +4,7 @@ import {
   useServerFilters,
   triggerErrorToast,
   truncate,
+  minutesInMilliseconds,
 } from '@siafoundation/design-system'
 import {
   HostsSearchFilterMode,
@@ -55,8 +56,9 @@ function useHostsMain() {
     if (filters.find((f) => f.id === 'hasActiveContracts') && allContracts) {
       keyIn = allContracts.map((c) => c.hostKey)
     }
-    if (filters.find((f) => f.id === 'publicKeyContains')) {
-      keyIn.push(filters.find((f) => f.id === 'publicKeyContains')?.value)
+    const publicKeyEquals = filters.find((f) => f.id === 'publicKeyEquals')
+    if (publicKeyEquals) {
+      keyIn.push(publicKeyEquals?.value)
     }
     return keyIn.length ? keyIn : undefined
   }, [filters, allContracts])
@@ -80,6 +82,7 @@ function useHostsMain() {
       swr: {
         // before autopilot is configured this will repeatedly 500
         errorRetryInterval: 20_000,
+        refreshInterval: minutesInMilliseconds(1),
       },
     },
   })
@@ -96,6 +99,11 @@ function useHostsMain() {
         filters.find((f) => f.id === 'hasActiveContracts') && allContracts
           ? allContracts.map((c) => c.hostKey)
           : undefined,
+    },
+    config: {
+      swr: {
+        refreshInterval: minutesInMilliseconds(1),
+      },
     },
   })
 

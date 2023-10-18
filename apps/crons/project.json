@@ -24,8 +24,7 @@
           "sourceMap": false,
           "externalDependencies": "none"
         },
-        "ci": {
-          "outputPath": "apps/crons/dist",
+        "local": {
           "optimization": true,
           "extractLicenses": true,
           "sourceMap": false,
@@ -43,6 +42,28 @@
         "production": {
           "inspect": false,
           "buildTarget": "crons:build:production"
+        }
+      }
+    },
+    "container": {
+      "executor": "@nx-tools/nx-container:build",
+      "dependsOn": ["build"],
+      "defaultConfiguration": "local",
+      "options": {
+        "engine": "docker",
+        "context": "./",
+        "file": "apps/crons/Dockerfile"
+      },
+      "configurations": {
+        "local": {
+          "tags": ["siafoundation/web-crons:latest"],
+          "file": "apps/crons/Dockerfile",
+          "push": false
+        },
+        "production": {
+          "tags": ["ghcr.io/siafoundation/web-crons:latest"],
+          "file": "apps/crons/Dockerfile",
+          "push": true
         }
       }
     },

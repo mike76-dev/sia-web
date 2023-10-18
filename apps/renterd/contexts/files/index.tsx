@@ -6,7 +6,6 @@ import {
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
 import { createContext, useCallback, useContext, useMemo } from 'react'
-import { TransfersBar } from '../../components/TransfersBar'
 import { columns } from './columns'
 import {
   defaultSortField,
@@ -26,7 +25,8 @@ function useFilesMain() {
 
   // [bucket, key, directory]
   const activeDirectory = useMemo<FullPathSegments>(
-    () => (router.query.path as FullPathSegments) || [],
+    () =>
+      ((router.query.path || []) as FullPathSegments).map(decodeURIComponent),
     [router.query.path]
   )
 
@@ -43,7 +43,9 @@ function useFilesMain() {
   const setActiveDirectory = useCallback(
     (fn: (activeDirectory: FullPathSegments) => FullPathSegments) => {
       const nextActiveDirectory = fn(activeDirectory)
-      router.push('/files/' + nextActiveDirectory.join('/'))
+      router.push(
+        '/files/' + nextActiveDirectory.map(encodeURIComponent).join('/')
+      )
     },
     [router, activeDirectory]
   )
@@ -183,10 +185,5 @@ type Props = {
 
 export function FilesProvider({ children }: Props) {
   const state = useFilesMain()
-  return (
-    <FilesContext.Provider value={state}>
-      {children}
-      <TransfersBar />
-    </FilesContext.Provider>
-  )
+  return <FilesContext.Provider value={state}>{children}</FilesContext.Provider>
 }

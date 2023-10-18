@@ -1,13 +1,12 @@
-import {
-  getBenchmarks,
-  getNavigatorStatus,
-  getGitHub,
-  getSiaCentralHostsNetworkMetrics,
-} from '@siafoundation/data-sources'
-import { humanBytes, humanNumber, humanSpeed } from '@siafoundation/sia-js'
+import { getGitHub } from '@siafoundation/data-sources'
+import { humanBytes, humanNumber } from '@siafoundation/sia-js'
 import { AsyncReturnType } from '../lib/types'
 import { getCacheValue } from '../lib/cache'
 import { getMinutesInSeconds } from '../lib/time'
+import {
+  getSiaCentralBlockLatest,
+  getSiaCentralHostsNetworkMetrics,
+} from '@siafoundation/sia-central'
 
 const maxAge = getMinutesInSeconds(5)
 
@@ -34,39 +33,33 @@ async function readStats() {
       contributors: '2,069',
       forks: '20,472',
       releases: '2,041',
-      downloadSpeed: '201.44 Gbps',
-      uploadSpeed: '2071.08 Mbps',
-      cpuUsage: '20.147%',
-      memoryUsage: '201.69 MB',
     }
   }
 
-  const [hostsStats, navigator, github, benchmarks] = await Promise.all([
-    getSiaCentralHostsNetworkMetrics(),
-    getNavigatorStatus(),
-    getGitHub(),
-    getBenchmarks(),
-  ])
-  const latestBenchmark = benchmarks.data[0]
+  const [{ data: latestBlock }, { data: hostsStats }, github] =
+    await Promise.all([
+      getSiaCentralBlockLatest(),
+      getSiaCentralHostsNetworkMetrics(),
+      getGitHub(),
+    ])
 
   const stats = {
     // network
-    blockHeight: humanNumber(navigator.data?.consensusblock),
-    activeHosts: humanNumber(hostsStats.data?.totals.active_hosts),
-    onlineHosts: humanNumber(hostsStats.data?.totals.total_hosts),
+    blockHeight: humanNumber(latestBlock?.block.height),
+    activeHosts: humanNumber(hostsStats?.totals.active_hosts),
+    onlineHosts: humanNumber(hostsStats?.totals.total_hosts),
     // storage
-    totalStorage: humanBytes(hostsStats.data?.totals.total_storage),
+    totalStorage: humanBytes(hostsStats?.totals.total_storage),
     usedStorage: humanBytes(
-      hostsStats.data?.totals.total_storage -
-        hostsStats.data?.totals.remaining_storage
+      hostsStats?.totals.total_storage - hostsStats?.totals.remaining_storage
     ),
     totalRegistry: humanNumber(
-      (hostsStats.data?.totals.total_registry_entries || 0) / 1_000_000,
+      (hostsStats?.totals.total_registry_entries || 0) / 1_000_000,
       { units: 'M' }
     ),
     usedRegistry: humanNumber(
-      ((hostsStats.data?.totals.total_registry_entries || 0) -
-        (hostsStats.data?.totals.remaining_registry_entries || 0)) /
+      ((hostsStats?.totals.total_registry_entries || 0) -
+        (hostsStats?.totals.remaining_registry_entries || 0)) /
         1_000_000,
       { units: 'M' }
     ),
@@ -75,11 +68,6 @@ async function readStats() {
     contributors: humanNumber(github.data?.contributors),
     forks: humanNumber(github.data?.forks),
     releases: humanNumber(github.data?.releases),
-    // benchmarks
-    downloadSpeed: humanSpeed(latestBenchmark?.downloadThroughput),
-    uploadSpeed: humanSpeed(latestBenchmark?.uploadThroughput),
-    cpuUsage: `${humanNumber(latestBenchmark?.maxCPUPct)}%`,
-    memoryUsage: humanBytes(latestBenchmark?.maxMemBytes),
   }
 
   return stats

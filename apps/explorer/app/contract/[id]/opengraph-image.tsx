@@ -10,7 +10,7 @@ import { lowerCase } from 'lodash'
 import { siacoinToFiat } from '../../../lib/currency'
 import { CurrencyOption, currencyOptions } from '@siafoundation/react-core'
 
-export const revalidate = 60
+export const revalidate = 0
 
 export const alt = 'Contract'
 export const size = {
@@ -25,7 +25,7 @@ const currency = currencyOptions.find((c) => c.id === 'usd') as CurrencyOption
 export default async function Image({ params }) {
   const id = params?.id as string
 
-  const [c, r] = await Promise.all([
+  const [{ data: c }, { data: r }] = await Promise.all([
     getSiaCentralContract({
       params: {
         id,
@@ -41,6 +41,18 @@ export default async function Image({ params }) {
     }),
   ])
 
+  if (!c || !c.contract) {
+    return getOGImage(
+      {
+        id,
+        title: truncate(id, 30),
+        subtitle: 'contract',
+        initials: 'C',
+      },
+      size
+    )
+  }
+
   const values = [
     {
       label: 'data size',
@@ -55,10 +67,13 @@ export default async function Image({ params }) {
     },
     {
       label: 'payout',
-      value: siacoinToFiat(c.contract.payout, {
-        currency,
-        rate: r.rates.sc.usd,
-      }),
+      value: siacoinToFiat(
+        c.contract.payout,
+        r && {
+          currency,
+          rate: r.rates.sc.usd,
+        }
+      ),
     },
   ]
 

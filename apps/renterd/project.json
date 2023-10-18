@@ -6,33 +6,22 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/renterd",
-        "postcssConfig": "apps/renterd/postcss.config.js",
-        "assets": [
-          {
-            "glob": "**/*",
-            "input": "libs/design-system/src/public/",
-            "output": "/"
-          }
-        ]
+        "postcssConfig": "apps/renterd/postcss.config.js"
       },
       "configurations": {
         "development": {},
         "production": {},
-        "ci": {
-          "outputPath": "apps/renterd/dist"
-        },
-        "embed": {
-          "outputPath": "dist/apps/renterd-embed",
+        "local": {},
+        "export": {
+          "outputPath": "dist/apps/renterd-export",
           "fileReplacements": [
             {
               "replace": "apps/renterd/config/buildMode.ts",
-              "with": "apps/renterd/config/buildModeEmbed.ts"
+              "with": "apps/renterd/config/buildModeExport.ts"
             }
           ]
         }
@@ -50,27 +39,35 @@
           "buildTarget": "renterd:build:development",
           "dev": true
         },
-        "embed": {
-          "buildTarget": "renterd:build:embed",
-          "dev": true
-        },
         "production": {
           "buildTarget": "renterd:build:production",
           "dev": false
         }
       }
     },
-    "export": {
-      "executor": "@nx/next:export",
+    "container": {
+      "executor": "@nx-tools/nx-container:build",
+      "dependsOn": ["build"],
+      "defaultConfiguration": "local",
       "options": {
-        "buildTarget": "renterd:build:embed"
+        "engine": "docker",
+        "context": "./",
+        "file": "apps/renterd/Dockerfile"
+      },
+      "configurations": {
+        "local": {
+          "tags": ["siafoundation/web-renterd:latest"],
+          "push": false
+        },
+        "production": {
+          "tags": ["ghcr.io/siafoundation/web-renterd:latest"],
+          "push": true
+        }
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/apps/renterd"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/apps/renterd"],
       "options": {
         "jestConfig": "apps/renterd/jest.config.ts",
         "passWithNoTests": true
@@ -78,13 +75,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/renterd/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/renterd/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

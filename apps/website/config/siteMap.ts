@@ -146,14 +146,9 @@ export const menuSections = [
     links: [
       {
         link: webLinks.explore.mainnet,
-        title: 'Sia Foundation Explorer',
+        title: 'Siascan Explorer',
         newTab: true,
       },
-      // {
-      //   link: webLinks.siaStats,
-      //   title: 'SiaStats Explorer',
-      //   newTab: true,
-      // },
       {
         link: webLinks.storageStats,
         title: 'Sia Central Host Explorer',
@@ -165,7 +160,7 @@ export const menuSections = [
         newTab: true,
       },
       {
-        link: webLinks.explore.testnet,
+        link: webLinks.explore.testnetZen,
         title: 'Zen Testnet Explorer',
         newTab: true,
       },

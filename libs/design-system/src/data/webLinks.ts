@@ -19,8 +19,8 @@ export const webLinks = {
   },
   explore: {
     mainnet: 'https://siascan.com',
-    testnet: 'https://zen.siascan.com',
-    testnetFaucet: 'https://zen.siascan.com/faucet',
+    testnetZen: 'https://zen.siascan.com',
+    testnetZenFaucet: 'https://zen.siascan.com/faucet',
   },
   design: 'https://design.sia.tech',
   apiDocs: {
@@ -44,13 +44,13 @@ export const webLinks = {
   twitterHandle: '@sia__foundation',
   reddit: 'https://reddit.com/r/siacoin',
   forum: 'https://forum.sia.tech/',
-  forumGrants: 'https://forum.sia.tech/c/grants/8',
+  forumGrants: 'https://forum.sia.tech/c/grants/',
+  forumGrantsProposed: 'https://forum.sia.tech/c/grants/proposed/',
   merch: 'https://siagear.tech/',
   email: 'hello@sia.tech',
   benchmarks: 'https://benchmarks.sia.tech',
   storageStats: 'https://hosts.siacentral.com/',
   hostTroubleshoot: 'https://troubleshoot.siacentral.com/',
   coinmarketcap: 'https://coinmarketcap.com/currencies/siacoin/',
-  // siaStats: 'https://siastats.info',
   jobs: 'https://siafoundation.homerun.co/',
 }

@@ -23,7 +23,7 @@ import { SectionTransparent } from '../../components/SectionTransparent'
 import { useInView } from 'react-intersection-observer'
 import { cx } from 'class-variance-authority'
 import { getRenterdLatestRelease } from '../../content/releases'
-import { DownloadWidgetLarge } from '../../components/DownloadWidgetLarge'
+import { DownloadBar } from '../../components/DownloadBar'
 import { backgrounds, previews } from '../../content/assets'
 
 const title = 'renterd'
@@ -40,8 +40,8 @@ const description = (
 
 type Props = AsyncReturnType<typeof getStaticProps>['props']
 
-export default function Renterd({ version, technical, tutorials }: Props) {
-  const downloadEl = <DownloadWidgetLarge daemon={daemon} version={version} />
+export default function Renterd({ release, technical, tutorials }: Props) {
+  const downloadEl = <DownloadBar daemon={daemon} release={release} />
   const { ref: appRef, inView: appInView } = useInView()
 
   return (
@@ -285,7 +285,7 @@ export async function getStaticProps() {
     technical,
     tutorials,
     services,
-    version: release?.tag_name,
+    release,
     fallback: {
       '/api/stats': stats,
     },

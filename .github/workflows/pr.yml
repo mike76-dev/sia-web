@@ -11,7 +11,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.COMMIT_PAT }}
       - name: Setup
         uses: ./.github/actions/setup
         with:
@@ -38,12 +37,11 @@ jobs:
           args: '-race'
       - name: Build
         shell: bash
-        run: npx nx affected --target=build --configuration=ci --parallel=5
+        run: npx nx affected --target=build --configuration=production --parallel=5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          ASSETS: ${{ github.workspace }}/assets
       - name: Export
         shell: bash
         # issue with parallelism
-        run: npx nx affected --target=export --configuration=ci --parallel=1
+        run: npx nx affected --target=build --configuration=export --parallel=5

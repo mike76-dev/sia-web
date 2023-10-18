@@ -19,11 +19,11 @@ export function generateMetadata({ params }): Metadata {
   })
 }
 
-export const revalidate = 60
+export const revalidate = 0
 
 export default async function Page({ params }) {
   const id = params?.id as string
-  const a = await getSiaCentralAddress({
+  const { data: a, error } = await getSiaCentralAddress({
     params: {
       id,
     },
@@ -32,7 +32,11 @@ export default async function Page({ params }) {
     },
   })
 
-  if (a.unspent_siacoins == undefined) {
+  if (error) {
+    throw Error(error)
+  }
+
+  if (a?.unspent_siacoins == undefined) {
     return notFound()
   }
 

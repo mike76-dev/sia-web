@@ -1,7 +1,6 @@
 {
   "name": "@siafoundation/react-renterd",
   "description": " React hooks for interacting with `renterd`.",
-  "version": "0.7.0",
-  "private": true,
+  "version": "0.8.0",
   "license": "MIT"
 }
