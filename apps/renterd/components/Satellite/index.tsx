@@ -33,6 +33,7 @@ const initialValues = {
   autoRenew:      false,
   backupMetadata: false,
   autoRepair:     false,
+  proxyUploads:   false,
 }
 
 export function Satellite() {
@@ -168,6 +169,22 @@ export function Satellite() {
         }
       },
     },
+    proxyUploads: {
+      type: 'boolean',
+      category: 'settings',
+      title: 'Proxy Uploads through Satellite',
+      description: <>The files are first uploaded to satellite to save bandwidth.
+        The satellite then uploads them to the network.</>,
+      validation: {
+        validate: value => {
+          if (!value || form.getValues('backupMetadata')) {
+            return true
+          } else {
+            return 'Proxying uploads only works when and metadata backups are enabled'
+          }
+        }
+      },
+    },
   }
 
   const { openDialog } = useDialog()
@@ -210,6 +227,7 @@ export function Satellite() {
               autoRenew: values.autoRenew,
               backupMetadata: values.backupMetadata,
               autoRepair: values.autoRepair,
+              proxyUploads: values.proxyUploads,
             },
           })
         }
@@ -247,6 +265,7 @@ export function Satellite() {
       autoRenew: settings.data?.autoRenew,
       backupMetadata: settings.data?.backupMetadata,
       autoRepair: settings.data?.autoRepair,
+      proxyUploads: settings.data?.proxyUploads,
     })
   }, [form, config.data, settings.data])
 

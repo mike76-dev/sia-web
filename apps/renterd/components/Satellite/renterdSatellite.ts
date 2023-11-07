@@ -35,7 +35,8 @@ export function useSatelliteConfigUpdate(
 export interface RenterSettings {
   autoRenew:      boolean,
   backupMetadata: boolean,
-  autoRepair:     boolean
+  autoRepair:     boolean,
+  proxyUploads:   boolean
 }
 
 const renterSettingsKey = '/satellite/settings'
