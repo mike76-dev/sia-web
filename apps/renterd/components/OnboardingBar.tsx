@@ -160,6 +160,8 @@ export function OnboardingBar() {
             />
             <Section
               title={
+                <>
+                Step 3:&nbsp;
                 <Link
                   href={routes.wallet.view}
                   onClick={() => openDialog('addressDetails')}
@@ -167,8 +169,18 @@ export function OnboardingBar() {
                   size="14"
                   underline="hover"
                 >
-                  Step 3: Fund your wallet
+                  Fund your wallet
                 </Link>
+                &nbsp;or&nbsp;
+                <Link
+                  href={routes.satellite.index}
+                  ellipsis
+                  size="14"
+                  underline="hover"
+                >
+                  enable a satellite
+                </Link>
+                </>
               }
               description={`Fund your wallet with at least ${humanSiacoin(
                 allowance
@@ -176,7 +188,7 @@ export function OnboardingBar() {
                 syncStatus.isWalletSynced
                   ? ''
                   : ' Balance will not be accurate until wallet is finished scanning.'
-              }`}
+              } Alternatively, enable a satellite.`}
               action={
                 step3Funded ? (
                   <Text color="green">
