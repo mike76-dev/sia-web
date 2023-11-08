@@ -10,6 +10,7 @@ import {
 export interface SatelliteConfig {
   enabled:    boolean,
   address:    string,
+  muxPort:    string,
   publicKey:  string,
   renterSeed: string
 }
@@ -59,6 +60,7 @@ export function useRenterSettingsUpdate(
 // struct2ts:github.com/mike76-dev/renterd-satellite/SatelliteInfo
 export interface SatelliteInfo {
   address:    string,
+  muxPort:    string,
   publicKey:  string,
   renterSeed: string
 }

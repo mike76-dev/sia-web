@@ -28,6 +28,7 @@ import { entries } from 'lodash'
 const initialValues = {
   enabled:        false,
   address:        '',
+  muxPort:        '9993',
   publicKey:      '',
   renterSeed:     '',
   autoRenew:      false,
@@ -97,6 +98,25 @@ export function Satellite() {
             }
           }
         }
+      },
+    },
+    muxPort: {
+      type: 'text',
+      category: 'config',
+      title: 'Mux Port',
+      description: (
+        <>The port number for direct file uploads.<br/>
+        <small>Default is 9993.</small></>
+      ),
+      validation: {
+        validate: {
+          required: value => {
+            if (!value && form.getValues('enabled')) return 'required'
+            let port = parseInt(value.toString())
+            if (Number.isNaN(port) || port < 0 || port > 65535) return 'wrong format'
+            return true
+          },
+        },
       },
     },
     publicKey: {
@@ -217,6 +237,7 @@ export function Satellite() {
           payload: {
             enabled: values.enabled,
             address: values.address,
+            muxPort: values.muxPort,
             publicKey: encodePK(values.publicKey),
             renterSeed: encodeSeed(values.renterSeed),
           },
@@ -260,6 +281,7 @@ export function Satellite() {
     form.reset({
       enabled: config.data?.enabled,
       address: config.data?.address,
+      muxPort: config.data?.muxPort,
       publicKey: decodePK(config.data?.publicKey || ''),
       renterSeed: decodeSeed(config.data?.renterSeed || ''),
       autoRenew: settings.data?.autoRenew,
