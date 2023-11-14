@@ -63,8 +63,7 @@ export interface SatelliteInfo {
   address:       string,
   muxPort:       string,
   publicKey:     string,
-  renterSeed:    string,
-  encryptionKey: string
+  renterSeed:    string
 }
 
 export interface SatelliteData {

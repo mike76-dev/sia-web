@@ -98,9 +98,6 @@ export function Satellite() {
               form.setValue('renterSeed', decodeSeed(satellites.data.satellites[key].renterSeed), {
                 shouldDirty: true
               })
-              form.setValue('encryptionKey', decodePK(satellites.data.satellites[key].encryptionKey), {
-                shouldDirty: false
-              })
               break
             }
           }
@@ -257,7 +254,7 @@ export function Satellite() {
             muxPort: values.muxPort,
             publicKey: encodePK(values.publicKey),
             renterSeed: encodeSeed(values.renterSeed),
-            encryptionKey: encodeEC(values.encryptionKey),
+            encryptionKey: config.data.encryptionKey,
           },
         })
         if (values.enabled) {
@@ -395,15 +392,6 @@ function encodePK(pk: string) {
     return pk
   } else {
     return 'ed25519:' + pk
-  }
-}
-
-function encodeEC(ec: string) {
-  let i = ec.indexOf(':')
-  if (i > 0) {
-    return ec
-  } else {
-    return 'key:' + ec
   }
 }
 
