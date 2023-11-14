@@ -2,6 +2,7 @@ import { Separator } from '../core/Separator'
 import { ConfigurationSiacoin } from './ConfigurationSiacoin'
 import { ConfigurationNumber } from './ConfigurationNumber'
 import { ConfigurationText } from './ConfigurationText'
+import { ConfigurationTextWithCopyButton } from './ConfigurationTextWithCopyButton'
 import { ConfigurationSwitch } from './ConfigurationSwitch'
 import { PanelMenuSetting } from '../app/PanelMenuSetting'
 import { PanelMenuSection } from '../app/PanelMenuSection'
@@ -47,6 +48,8 @@ export function ConfigurationPanel<
                 <ConfigurationSiacoin form={form} name={key} fields={fields} />
               ) : val.type === 'text' ? (
                 <ConfigurationText form={form} name={key} fields={fields} />
+              ) : val.type === 'copy' ? (
+                  <ConfigurationTextWithCopyButton form={form} name={key} fields={fields} />
               ) : val.type === 'password' ? (
                 <ConfigurationText
                   form={form}

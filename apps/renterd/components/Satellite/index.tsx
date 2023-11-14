@@ -31,6 +31,7 @@ const initialValues = {
   muxPort:        '9993',
   publicKey:      '',
   renterSeed:     '',
+  encryptionKey:  '',
   autoRenew:      false,
   backupMetadata: false,
   autoRepair:     false,
@@ -88,11 +89,17 @@ export function Satellite() {
         onChange: (event) => {
           for (const key in satellites.data.satellites) {
             if (satellites.data.satellites[key].address == event.target.value) {
+              form.setValue('muxPort', satellites.data.satellites[key].muxPort, {
+                shouldDirty: true
+              })
               form.setValue('publicKey', decodePK(satellites.data.satellites[key].publicKey), {
                 shouldDirty: true
               })
               form.setValue('renterSeed', decodeSeed(satellites.data.satellites[key].renterSeed), {
                 shouldDirty: true
+              })
+              form.setValue('encryptionKey', decodePK(satellites.data.satellites[key].encryptionKey), {
+                shouldDirty: false
               })
               break
             }
@@ -158,6 +165,16 @@ export function Satellite() {
         maxLength: 64,
         pattern: /^[a-f0-9]+$/,
       },
+    },
+    encryptionKey: {
+      type: 'copy',
+      category: 'config',
+      title: 'Encryption Key',
+      description: (
+        <>The key used to encrypt your data before sending to the satellite.</>
+      ),
+      readOnly: true,
+      validation: {},
     },
     autoRenew: {
       type: 'boolean',
@@ -240,6 +257,7 @@ export function Satellite() {
             muxPort: values.muxPort,
             publicKey: encodePK(values.publicKey),
             renterSeed: encodeSeed(values.renterSeed),
+            encryptionKey: encodeEC(values.encryptionKey),
           },
         })
         if (values.enabled) {
@@ -284,6 +302,7 @@ export function Satellite() {
       muxPort: config.data?.muxPort,
       publicKey: decodePK(config.data?.publicKey || ''),
       renterSeed: decodeSeed(config.data?.renterSeed || ''),
+      encryptionKey: decodePK(config.data?.encryptionKey || ''),
       autoRenew: settings.data?.autoRenew,
       backupMetadata: settings.data?.backupMetadata,
       autoRepair: settings.data?.autoRepair,
@@ -376,6 +395,15 @@ function encodePK(pk: string) {
     return pk
   } else {
     return 'ed25519:' + pk
+  }
+}
+
+function encodeEC(ec: string) {
+  let i = ec.indexOf(':')
+  if (i > 0) {
+    return ec
+  } else {
+    return 'key:' + ec
   }
 }
 

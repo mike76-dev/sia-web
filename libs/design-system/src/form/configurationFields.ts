@@ -15,7 +15,7 @@ export type ConfigField<
   Values extends FieldValues,
   Categories extends string
 > = {
-  type: 'number' | 'siacoin' | 'text' | 'password' | 'boolean' | 'select' | 'combo'
+  type: 'number' | 'siacoin' | 'text' | 'password' | 'boolean' | 'select' | 'combo' | 'copy'
   title: string
   actions?: React.ReactNode
   hidden?: boolean

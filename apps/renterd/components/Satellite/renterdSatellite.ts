@@ -8,11 +8,12 @@ import {
 
 // struct2ts:github.com/mike76-dev/renterd-satellite/Config
 export interface SatelliteConfig {
-  enabled:    boolean,
-  address:    string,
-  muxPort:    string,
-  publicKey:  string,
-  renterSeed: string
+  enabled:       boolean,
+  address:       string,
+  muxPort:       string,
+  publicKey:     string,
+  renterSeed:    string,
+  encryptionKey: string
 }
 
 const satelliteConfigKey = '/satellite/config'
@@ -59,10 +60,11 @@ export function useRenterSettingsUpdate(
 
 // struct2ts:github.com/mike76-dev/renterd-satellite/SatelliteInfo
 export interface SatelliteInfo {
-  address:    string,
-  muxPort:    string,
-  publicKey:  string,
-  renterSeed: string
+  address:       string,
+  muxPort:       string,
+  publicKey:     string,
+  renterSeed:    string,
+  encryptionKey: string
 }
 
 export interface SatelliteData {
