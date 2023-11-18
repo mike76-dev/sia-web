@@ -93,8 +93,16 @@ function getHostFields(host: Host, allContracts: ContractData[]) {
     netAddress: host.netAddress,
     publicKey: host.publicKey,
     lastScanSuccess: host.interactions.LastScanSuccess,
-    lastScan: host.interactions.LastScan,
-    knownSince: host.knownSince,
+    lastScan:
+      host.interactions.LastScan === '0001-01-01T00:00:00Z'
+        ? null
+        : host.interactions.LastScan,
+    knownSince:
+      host.knownSince === '0001-01-01T00:00:00Z' ? null : host.knownSince,
+    lastAnnouncement:
+      host.lastAnnouncement === '0001-01-01T00:00:00Z'
+        ? null
+        : host.lastAnnouncement,
     uptime: new BigNumber(host.interactions.Uptime || 0),
     downtime: new BigNumber(host.interactions.Downtime || 0),
     successfulInteractions: new BigNumber(

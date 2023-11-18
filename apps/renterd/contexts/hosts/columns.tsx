@@ -5,7 +5,7 @@ import {
   ValueNum,
   Tooltip,
   LoadingDots,
-  ValueSc,
+  ValueScFiat,
 } from '@siafoundation/design-system'
 import {
   WarningSquareFilled16,
@@ -27,7 +27,7 @@ import {
   workerRhpScanRoute,
 } from '@siafoundation/react-renterd'
 import BigNumber from 'bignumber.js'
-import React from 'react'
+import React, { memo } from 'react'
 
 type HostsTableColumn = TableColumn<
   TableColumnId,
@@ -233,7 +233,7 @@ export const columns: HostsTableColumn[] = (
         if (isPending) {
           return <LoadingDots />
         }
-        const ago = formatDistance(new Date(data.lastScan), new Date(), {
+        const ago = formatDistance(new Date(data.lastScan || 0), new Date(), {
           addSuffix: true,
         })
         let message = ''
@@ -261,14 +261,16 @@ export const columns: HostsTableColumn[] = (
               <div className="mt-[5px]">
                 <Text color={color}>{icon}</Text>
               </div>
-              <div className="flex flex-col">
-                <Text size="12" noWrap>
-                  {ago}
-                </Text>
-                <Text color="subtle" size="10" noWrap>
-                  {format(new Date(data.lastScan), 'Pp')}
-                </Text>
-              </div>
+              {data.lastScan && (
+                <div className="flex flex-col">
+                  <Text size="12" noWrap>
+                    {ago}
+                  </Text>
+                  <Text color="subtle" size="10" noWrap>
+                    {format(new Date(data.lastScan), 'Pp')}
+                  </Text>
+                </div>
+              )}
             </div>
           </Tooltip>
         )
@@ -329,17 +331,17 @@ export const columns: HostsTableColumn[] = (
       ),
     },
     {
-      id: 'knownSince',
-      label: 'known since',
+      id: 'lastAnnouncement',
+      label: 'last announcement',
       category: 'general',
       render: ({ data }) => {
         return (
           <div className="flex flex-col">
             <Text size="12" noWrap>
-              {formatDistance(new Date(), new Date(data.knownSince))} old
+              {formatDistance(new Date(), new Date(data.lastAnnouncement))} ago
             </Text>
             <Text color="subtle" size="10" noWrap>
-              {formatRelative(new Date(data.knownSince), new Date())}
+              {formatRelative(new Date(data.lastAnnouncement), new Date())}
             </Text>
           </div>
         )
@@ -1085,18 +1087,20 @@ type Key =
   | keyof AutopilotHost['host']['settings']
 
 function makeRenderSc(section: 'priceTable' | 'settings', name: Key) {
-  return function RenderPriceTableNumber({ data }: { data: HostData }) {
+  return memo(function RenderPriceTableNumber({ data }: { data: HostData }) {
     if (!data[section]) {
       return null
     }
     return (
-      <ValueSc
+      <ValueScFiat
+        displayBoth
         size="12"
         value={new BigNumber(data[section][name] || 0)}
+        fixedFiat={4}
         variant="value"
       />
     )
-  }
+  })
 }
 
 function makeRenderNumber(

@@ -12,7 +12,9 @@ type Props = {
   variant?: 'change' | 'value'
   tooltip?: string
   fixed?: number
+  color?: React.ComponentProps<typeof Text>['color']
   dynamicUnits?: boolean
+  hastingUnits?: boolean
   extendedSuffix?: string
   showTooltip?: boolean
 }
@@ -23,20 +25,23 @@ export function ValueSc({
   scaleSize,
   tooltip = '',
   variant = 'change',
+  color: customColor,
   fixed = 3,
   dynamicUnits = true,
+  hastingUnits = true,
   extendedSuffix,
   showTooltip = true,
 }: Props) {
   const sign = value.isGreaterThan(0) ? '+' : value.isLessThan(0) ? '-' : ''
   const color =
-    variant === 'change'
+    customColor ||
+    (variant === 'change'
       ? value.isGreaterThan(0)
         ? 'green'
         : value.isLessThan(0)
         ? 'red'
         : 'subtle'
-      : 'contrast'
+      : 'contrast')
 
   const el = (
     <Text
@@ -52,7 +57,7 @@ export function ValueSc({
             fixed,
             dynamicUnits,
           })}`
-        : humanSiacoin(value, { fixed, dynamicUnits })}
+        : humanSiacoin(value, { fixed, dynamicUnits, hastingUnits })}
       <Text size="20" weight="medium" font="mono" ellipsis color="subtle">
         {extendedSuffix ? `${extendedSuffix}` : ''}
       </Text>

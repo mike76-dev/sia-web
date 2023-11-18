@@ -191,6 +191,7 @@ export type GougingSettings = {
   minPriceTableValidity: number
   minAccountExpiry: number
   minMaxEphemeralAccountBalance: string
+  migrationSurchargeMultiplier: number
 }
 
 export type UploadPackingSettings = {
@@ -208,6 +209,8 @@ export interface ContractSpending {
   fundAccount: Currency
 }
 
+export type ContractState = 'pending' | 'active' | 'complete' | 'failed'
+
 export interface Contract {
   id: string
   hostIP: string
@@ -222,6 +225,7 @@ export interface Contract {
   spending: ContractSpending
   totalCost: Currency
   size: number
+  state: ContractState
 }
 
 export interface Block {
@@ -248,6 +252,7 @@ export interface Host {
   publicKey: string
   netAddress: string
   knownSince: string
+  lastAnnouncement: string
   Announcements?: Announcement[]
   interactions: {
     Downtime: number
@@ -345,6 +350,7 @@ export interface AutopilotHostsConfig {
   allowRedundantIPs: boolean
   scoreOverrides: { [key: PublicKey]: number }
   maxDowntimeHours: number
+  minRecentScanFailures: number
 }
 
 export interface AutopilotContractsConfig {

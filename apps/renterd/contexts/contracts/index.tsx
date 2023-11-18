@@ -57,6 +57,7 @@ function useContractsMain() {
         return {
           id: c.id,
           contractId: c.id,
+          state: c.state,
           hostIp: c.hostIP,
           hostKey: c.hostKey,
           location: geoHosts.find((h) => h.public_key === c.hostKey)?.location,
@@ -138,15 +139,6 @@ function useContractsMain() {
     filters
   )
 
-  const datasetConfirmedCount = useMemo(() => {
-    if (!dataset) {
-      return 0
-    }
-    return dataset.filter(
-      (d) => d.contractHeightStart < syncStatus.nodeBlockHeight
-    ).length
-  }, [dataset, syncStatus.nodeBlockHeight])
-
   return {
     dataState,
     limit,
@@ -155,7 +147,6 @@ function useContractsMain() {
     error: response.error,
     pageCount: datasetPage?.length || 0,
     datasetCount: datasetFiltered?.length || 0,
-    datasetConfirmedCount,
     columns: filteredTableColumns,
     dataset,
     datasetPage,

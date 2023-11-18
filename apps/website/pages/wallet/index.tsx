@@ -20,20 +20,27 @@ import { SectionProjects } from '../../components/SectionProjects'
 import { SectionTutorials } from '../../components/SectionTutorials'
 import { CalloutWalletd } from '../../components/CalloutWalletd'
 import { SoftwareSectionCurrentGen } from '../../components/SoftwareSectionCurrentGen'
+import { getWalletdLatestRelease } from '../../content/releases'
+import { DownloadBar } from '../../components/DownloadBar'
 
 const title = 'Wallet'
 const description = 'Manage your wallet on the Sia network.'
 
 type Props = AsyncReturnType<typeof getStaticProps>['props']
 
-export default function Wallet({ technical, tutorials, projects }: Props) {
+export default function Wallet({
+  technical,
+  tutorials,
+  projects,
+  release,
+}: Props) {
   return (
     <Layout
       title={title}
       description={description}
       path={routes.wallet.index}
       heading={
-        <SectionTransparent className="pt-24 md:pt-40 pb-6 md:pb-12">
+        <SectionTransparent className="pt-24 md:pt-32 pb-0">
           <SiteHeading
             anchorLink={false}
             size="64"
@@ -46,6 +53,7 @@ export default function Wallet({ technical, tutorials, projects }: Props) {
       previewImage={previews.jungle}
     >
       <SectionGradient className="pb-20">
+        <DownloadBar daemon="walletd" release={release} testnetOnly />
         <div className="flex flex-col">
           <SiteHeading
             size="32"
@@ -61,16 +69,17 @@ export default function Wallet({ technical, tutorials, projects }: Props) {
                 },
               }}
             />
-            <CalloutWalletd />
+            <CalloutWalletd release={release} />
             <Callout
-              title="Learn how to create a Sia wallet"
+              title="Setup guide for walletd"
               background={patterns.nateSnow}
               description={
                 <>
-                  Learn how to create a Sia wallet and send and receive siacoin.
+                  Learn how to create a Sia wallet and send and receive siacoin
+                  with walletd.
                 </>
               }
-              actionTitle="Learn more"
+              actionTitle="Follow the setup guide"
               actionLink={webLinks.docs.wallet}
               actionNewTab
             />
@@ -129,17 +138,19 @@ export default function Wallet({ technical, tutorials, projects }: Props) {
 }
 
 export async function getStaticProps() {
-  const [stats, technical, tutorials, projects] = await Promise.all([
+  const [stats, technical, tutorials, projects, release] = await Promise.all([
     getStats(),
     getFeedContent(['technical'], 8),
     getWalletArticles(),
     getProjects('wallet'),
+    getWalletdLatestRelease(),
   ])
 
   const props = {
     technical,
     tutorials,
     projects,
+    release,
     fallback: {
       '/api/stats': stats,
     },

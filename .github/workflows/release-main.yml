@@ -40,22 +40,10 @@ jobs:
         run: npx nx run-many --target=test --all --parallel=5
       - name: Build for publishing
         shell: bash
-        # configuration ci will put the dists in each project directory so changesets can publish
-        # NOTE: changed from ci to production and added script for copy
         run: npx nx run-many --target=build --configuration=production --all --parallel=5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-      - name: Copy dists for publishing
-        run: ./scripts/copy-dists-for-publishing.sh
-      - name: Create Release Pull Request or Publish to NPM
-        uses: changesets/action@v1
-        with:
-          commit: 'chore: release packages'
-          publish: npm run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Containers
         shell: bash
         run: npx nx run-many --target=container --configuration=production -all --parallel=5
@@ -68,3 +56,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      # If there are changesets, then we are in PR prep mode and will
+      # update the release pull request. Note that if there are no changesets
+      # this step will be skipped because no publish script is specified.
+      - name: Update release pull request
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: release packages'
+          version: npm run version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Replace src code with dists for publishing
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: ./scripts/replace-src-with-dists-for-publishing.sh
+      # If no changesets were detected in the PR prep step then we are in
+      # release/publish mode. Check for and publish any new versions to NPM.
+      - name: Publish to NPM and create GitHub releases
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        uses: changesets/action@v1
+        with:
+          publish: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

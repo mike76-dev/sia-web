@@ -1,18 +1,21 @@
 import {
   Button,
   Text,
-  ValueSc,
+  ValueScFiat,
   TableColumn,
   ContractTimeline,
   ValueCopyable,
   stripPrefix,
   Tooltip,
   ValueNum,
+  Badge,
+  Separator,
 } from '@siafoundation/design-system'
 import { ArrowUpLeft16 } from '@siafoundation/react-icons'
 import { humanBytes, humanDate } from '@siafoundation/sia-js'
 import { ContractData, TableColumnId } from './types'
 import { ContractContextMenu } from '../../components/Contracts/ContractContextMenu'
+import { ContractState } from '@siafoundation/react-renterd'
 
 type Context = {
   currentHeight: number
@@ -97,6 +100,59 @@ export const columns: ContractsTableColumn[] = [
     },
   },
   {
+    id: 'state',
+    label: 'state',
+    category: 'general',
+    render: ({ data: { state } }) => {
+      return (
+        <Tooltip
+          content={
+            <div className="flex flex-col gap-1.5">
+              <div className="flex">
+                <Text className="flex-1" weight="medium">
+                  pending
+                </Text>
+                <Text className="flex-[2]" color="subtle">
+                  Contract has been added.
+                </Text>
+              </div>
+              <Separator className="w-full" />
+              <div className="flex">
+                <Text className="flex-1" weight="medium">
+                  active
+                </Text>
+                <Text className="flex-[2]" color="subtle">
+                  Contract has appeared on chain.
+                </Text>
+              </div>
+              <Separator className="w-full" />
+              <div className="flex">
+                <Text className="flex-1" weight="medium">
+                  complete
+                </Text>
+                <Text className="flex-[2]" color="subtle">
+                  Storage proof has appeared on chain.
+                </Text>
+              </div>
+              <Separator className="w-full" />
+              <div className="flex">
+                <Text className="flex-1" weight="medium">
+                  failed
+                </Text>
+                <Text className="flex-[2]" color="subtle">
+                  Storage proof was not submitted before the end of proof
+                  window.
+                </Text>
+              </div>
+            </div>
+          }
+        >
+          <Badge variant={getContractStateColor(state)}>{state}</Badge>
+        </Tooltip>
+      )
+    },
+  },
+  {
     id: 'timeline',
     label: 'timeline',
     category: 'time',
@@ -173,7 +229,7 @@ export const columns: ContractsTableColumn[] = [
     category: 'financial',
     contentClassName: 'w-[120px] justify-end',
     render: ({ data: { totalCost } }) => (
-      <ValueSc size="12" value={totalCost.negated()} />
+      <ValueScFiat displayBoth size="12" value={totalCost.negated()} />
     ),
   },
   {
@@ -182,7 +238,7 @@ export const columns: ContractsTableColumn[] = [
     category: 'financial',
     contentClassName: 'w-[120px] justify-end',
     render: ({ data: { spendingUploads } }) => (
-      <ValueSc size="12" value={spendingUploads.negated()} />
+      <ValueScFiat displayBoth size="12" value={spendingUploads.negated()} />
     ),
   },
   {
@@ -191,7 +247,7 @@ export const columns: ContractsTableColumn[] = [
     category: 'financial',
     contentClassName: 'w-[120px] justify-end',
     render: ({ data: { spendingDownloads } }) => (
-      <ValueSc size="12" value={spendingDownloads.negated()} />
+      <ValueScFiat displayBoth size="12" value={spendingDownloads.negated()} />
     ),
   },
   {
@@ -200,7 +256,26 @@ export const columns: ContractsTableColumn[] = [
     category: 'financial',
     contentClassName: 'w-[120px] justify-end',
     render: ({ data: { spendingFundAccount } }) => (
-      <ValueSc size="12" value={spendingFundAccount.negated()} />
+      <ValueScFiat
+        displayBoth
+        size="12"
+        value={spendingFundAccount.negated()}
+      />
     ),
   },
 ]
+
+function getContractStateColor(state: ContractState) {
+  if (state === 'active') {
+    return 'amber'
+  }
+  if (state === 'failed') {
+    return 'red'
+  }
+  if (state === 'pending') {
+    return 'amber'
+  }
+  if (state === 'complete') {
+    return 'green'
+  }
+}

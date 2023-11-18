@@ -75,13 +75,12 @@ export function getFields({
         <>The amount of upload bandwidth you plan to use each month in TB.</>
       ),
       units: 'TB/month',
-      hidden: !isAutopilotEnabled || !showAdvanced,
-      validation:
-        isAutopilotEnabled && showAdvanced
-          ? {
-              required: 'required',
-            }
-          : {},
+      hidden: !isAutopilotEnabled,
+      validation: isAutopilotEnabled
+        ? {
+            required: 'required',
+          }
+        : {},
     },
     downloadTBMonth: {
       type: 'number',
@@ -91,13 +90,12 @@ export function getFields({
         <>The amount of download bandwidth you plan to use each month in TB.</>
       ),
       units: 'TB/month',
-      hidden: !isAutopilotEnabled || !showAdvanced,
-      validation:
-        isAutopilotEnabled && showAdvanced
-          ? {
-              required: 'required',
-            }
-          : {},
+      hidden: !isAutopilotEnabled,
+      validation: isAutopilotEnabled
+        ? {
+            required: 'required',
+          }
+        : {},
     },
     allowanceMonth: {
       type: 'siacoin',
@@ -236,6 +234,28 @@ export function getFields({
         ),
         1
       )} days.`,
+      hidden: !isAutopilotEnabled || !showAdvanced,
+      validation:
+        isAutopilotEnabled && showAdvanced
+          ? {
+              required: 'required',
+            }
+          : {},
+    },
+    minRecentScanFailures: {
+      type: 'number',
+      category: 'hosts',
+      title: 'Min recent scan failures',
+      description: (
+        <>
+          The minimum number of recent scan failures that autopilot will
+          tolerate.
+        </>
+      ),
+      units: 'scans',
+      decimalsLimit: 0,
+      suggestion: advancedDefaultAutopilot.minRecentScanFailures,
+      suggestionTip: `Defaults to ${advancedDefaultAutopilot.minRecentScanFailures.toNumber()}.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
         isAutopilotEnabled && showAdvanced
@@ -392,12 +412,9 @@ export function getFields({
         )
       },
       decimalsLimitSc: scDecimalPlaces,
-      hidden: !showAdvanced,
-      validation: showAdvanced
-        ? {
-            required: 'required',
-          }
-        : {},
+      validation: {
+        required: 'required',
+      },
     },
     maxDownloadPriceTB: {
       category: 'gouging',
@@ -408,12 +425,9 @@ export function getFields({
       average: downloadAverage,
       averageTip: `Averages provided by Sia Central.`,
       decimalsLimitSc: scDecimalPlaces,
-      hidden: !showAdvanced,
-      validation: showAdvanced
-        ? {
-            required: 'required',
-          }
-        : {},
+      validation: {
+        required: 'required',
+      },
     },
     maxContractPrice: {
       category: 'gouging',
@@ -550,6 +564,32 @@ export function getFields({
                 new BigNumber(value as BigNumber).gte(1) ||
                 'must be at least 1 SC',
             },
+          }
+        : {},
+    },
+    migrationSurchargeMultiplier: {
+      category: 'gouging',
+      type: 'number',
+      title: 'Migration surcharge multiplier',
+      units: '* download price',
+      placeholder: '10',
+      decimalsLimit: 1,
+      description: (
+        <>
+          Factor that gets applied on the max download price when trying to
+          download migration-critical sectors from a host that is price gouging.
+          For example, when migrating a low-health file, if the download is
+          failing but would potentially succeed with looser gouging settings, we
+          apply the migration surcharge multiplier to overpay on every sector
+          download if it means saving the file/migration.
+        </>
+      ),
+      suggestion: new BigNumber(10),
+      suggestionTip: 'The default multiplier is 10x the download price.',
+      hidden: !showAdvanced,
+      validation: showAdvanced
+        ? {
+            required: 'required',
           }
         : {},
     },

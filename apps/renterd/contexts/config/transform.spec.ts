@@ -28,6 +28,7 @@ describe('tansforms', () => {
             hosts: {
               allowRedundantIPs: false,
               maxDowntimeHours: 1440,
+              minRecentScanFailures: 10,
               scoreOverrides: null,
             },
             contracts: {
@@ -54,6 +55,7 @@ describe('tansforms', () => {
             minMaxCollateral: '10000000000000000000000000',
             minMaxEphemeralAccountBalance: '1000000000000000000000000',
             minPriceTableValidity: 300000000000,
+            migrationSurchargeMultiplier: 10,
           },
           {
             minShards: 10,
@@ -75,6 +77,7 @@ describe('tansforms', () => {
         storageTB: new BigNumber('1'),
         allowRedundantIPs: false,
         maxDowntimeHours: new BigNumber('1440'),
+        minRecentScanFailures: new BigNumber('10'),
         defragThreshold: new BigNumber('1000'),
         defaultContractSet: 'myset',
         uploadPackingEnabled: true,
@@ -88,6 +91,7 @@ describe('tansforms', () => {
         minMaxCollateral: new BigNumber('10'),
         minMaxEphemeralAccountBalance: new BigNumber('1'),
         minPriceTableValidityMinutes: new BigNumber(5),
+        migrationSurchargeMultiplier: new BigNumber(10),
         minShards: new BigNumber(10),
         totalShards: new BigNumber(30),
         includeRedundancyMaxStoragePrice: false,
@@ -105,6 +109,7 @@ describe('tansforms', () => {
             hosts: {
               allowRedundantIPs: false,
               maxDowntimeHours: 1440,
+              minRecentScanFailures: 10,
               scoreOverrides: null,
             },
             contracts: {
@@ -131,6 +136,7 @@ describe('tansforms', () => {
             minMaxCollateral: '10000000000000000000000000',
             minMaxEphemeralAccountBalance: '1000000000000000000000000',
             minPriceTableValidity: 300000000000,
+            migrationSurchargeMultiplier: 10,
           },
           {
             minShards: 10,
@@ -152,6 +158,7 @@ describe('tansforms', () => {
         storageTB: new BigNumber('1'),
         allowRedundantIPs: false,
         maxDowntimeHours: new BigNumber('1440'),
+        minRecentScanFailures: new BigNumber('10'),
         defragThreshold: new BigNumber('1000'),
         defaultContractSet: 'myset',
         uploadPackingEnabled: true,
@@ -165,6 +172,7 @@ describe('tansforms', () => {
         minMaxCollateral: new BigNumber('10'),
         minMaxEphemeralAccountBalance: new BigNumber('1'),
         minPriceTableValidityMinutes: new BigNumber(5),
+        migrationSurchargeMultiplier: new BigNumber(10),
         minShards: new BigNumber(10),
         totalShards: new BigNumber(30),
         includeRedundancyMaxStoragePrice: true,
@@ -188,6 +196,7 @@ describe('tansforms', () => {
             storageTB: new BigNumber('1'),
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
+            minRecentScanFailures: new BigNumber('10'),
             defragThreshold: new BigNumber('1000'),
           },
           undefined
@@ -199,6 +208,7 @@ describe('tansforms', () => {
         hosts: {
           allowRedundantIPs: false,
           maxDowntimeHours: 1440,
+          minRecentScanFailures: 10,
           scoreOverrides: null,
         },
         contracts: {
@@ -228,6 +238,7 @@ describe('tansforms', () => {
             storageTB: new BigNumber('1'),
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
+            minRecentScanFailures: new BigNumber('10'),
             defragThreshold: new BigNumber('1000'),
           },
           {
@@ -255,6 +266,7 @@ describe('tansforms', () => {
           foobar: 'value',
           allowRedundantIPs: false,
           maxDowntimeHours: 1440,
+          minRecentScanFailures: 10,
           scoreOverrides: null,
         },
         contracts: {
@@ -303,6 +315,7 @@ describe('tansforms', () => {
             storageTB: new BigNumber('1'),
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
+            minRecentScanFailures: new BigNumber('10'),
             defragThreshold: new BigNumber('1000'),
             defaultContractSet: 'myset',
             uploadPackingEnabled: false,
@@ -318,6 +331,7 @@ describe('tansforms', () => {
             minPriceTableValidityMinutes: new BigNumber(5),
             minShards: new BigNumber(10),
             totalShards: new BigNumber(30),
+            migrationSurchargeMultiplier: new BigNumber(10),
             includeRedundancyMaxStoragePrice: false,
             includeRedundancyMaxUploadPrice: false,
           },
@@ -339,6 +353,7 @@ describe('tansforms', () => {
         minMaxCollateral: '10000000000000000000000000',
         minMaxEphemeralAccountBalance: '1000000000000000000000000',
         minPriceTableValidity: 300000000000,
+        migrationSurchargeMultiplier: 10,
       })
     })
 
@@ -356,6 +371,7 @@ describe('tansforms', () => {
             storageTB: new BigNumber('1'),
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
+            minRecentScanFailures: new BigNumber('10'),
             defragThreshold: new BigNumber('1000'),
             defaultContractSet: 'myset',
             uploadPackingEnabled: false,
@@ -369,6 +385,7 @@ describe('tansforms', () => {
             minMaxCollateral: new BigNumber('10'),
             minMaxEphemeralAccountBalance: new BigNumber('1'),
             minPriceTableValidityMinutes: new BigNumber(5),
+            migrationSurchargeMultiplier: new BigNumber(10),
             minShards: new BigNumber(10),
             totalShards: new BigNumber(30),
             includeRedundancyMaxStoragePrice: true,
@@ -392,6 +409,7 @@ describe('tansforms', () => {
         minMaxCollateral: '10000000000000000000000000',
         minMaxEphemeralAccountBalance: '1000000000000000000000000',
         minPriceTableValidity: 300000000000,
+        migrationSurchargeMultiplier: 10,
       })
     })
 
@@ -514,6 +532,7 @@ function buildAllResponses() {
       hosts: {
         allowRedundantIPs: false,
         maxDowntimeHours: 1440,
+        minRecentScanFailures: 10,
         scoreOverrides: null,
       },
       contracts: {
@@ -540,6 +559,7 @@ function buildAllResponses() {
       minMaxCollateral: '10000000000000000000000000',
       minMaxEphemeralAccountBalance: '1000000000000000000000000',
       minPriceTableValidity: 300000000000,
+      migrationSurchargeMultiplier: 10,
     },
     redundancy: {
       minShards: 10,

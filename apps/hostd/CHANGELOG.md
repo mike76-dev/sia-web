@@ -1,5 +1,33 @@
 # hostd
 
+## 0.26.0
+
+### Minor Changes
+
+- e04a35c7: Wallet now instructs new users to fund their wallet when there are no transactions yet.
+- 16b7df4c: The wallet balance tooltip now shows spendable confirmed and unconfirmed values.
+- 7996532c: The configuration now shows suggestions for pricing, collateral, and other settings.
+- 6fc53f46: Extremely small siacoin values will now show as hastings by default rather than 0SC.
+- e04a35c7: Wallet balance evolution graph is now hidden until at least 1 data point is available.
+
+## 0.25.0
+
+### Minor Changes
+
+- 7f020f8b: Fixed an issue where the app would error on page load.
+
+## 0.24.0
+
+### Minor Changes
+
+- d01fad01: The configuration now has an advanced mode that allows the user to view and change all settings.
+- 5d603561: New users will now see an onboarding wizard that prompts the user to complete the necessary setup steps - it also shows the status and progress of each.
+- d01fad01: The configuration page now shows the changed status on fields if the user has made a change but the server values were since updated.
+- d01fad01: The command palette now includes navigation to configuration sections.
+- 829d91df: Fixed an issue where fiat input fields values were not displaying properly.
+- c4aafc65: Data tables now refresh themselves without user interaction or refocusing the app, even more frequently if a long running operation is in progress.
+- d01fad01: The configuration is now much simpler by default, only requiring the user to set essential settings.
+
 ## 0.23.0
 
 ### Minor Changes

@@ -19,6 +19,8 @@ import { SectionTransparent } from '../../components/SectionTransparent'
 import { CalloutRenterd } from '../../components/CalloutRenterd'
 import { SectionProjects } from '../../components/SectionProjects'
 import { SectionTutorials } from '../../components/SectionTutorials'
+import { getRenterdLatestRelease } from '../../content/releases'
+import { DownloadBar } from '../../components/DownloadBar'
 
 const title = 'Rent'
 const description = 'Rent storage space on the Sia network.'
@@ -30,6 +32,7 @@ export default function Rent({
   tutorials,
   thirdParty,
   ideas,
+  release,
 }: Props) {
   return (
     <Layout
@@ -37,7 +40,7 @@ export default function Rent({
       description={description}
       path={routes.rent.index}
       heading={
-        <SectionTransparent className="pt-24 md:pt-40 pb-6 md:pb-12">
+        <SectionTransparent className="pt-24 md:pt-32 pb-0">
           <SiteHeading
             anchorLink={false}
             size="64"
@@ -50,22 +53,24 @@ export default function Rent({
       previewImage={previews.leaves}
     >
       <SectionGradient className="pb-20">
+        <DownloadBar daemon="renterd" release={release} />
         <div className="flex flex-col">
           <SiteHeading
             id="core-software"
             size="32"
             title="Core Software"
             description="Official software, developed by the Sia Foundation."
-            className="mt-12 md:mt-12"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CalloutRenterd />
+            <CalloutRenterd release={release} />
             <Callout
               size="1"
-              title="Learn how renting works"
+              title="Setup guide for renterd"
               background={patterns.bamboo}
-              description={<>Learn how to rent storage on the Sia network.</>}
-              actionTitle="Learn more"
+              description={
+                <>Learn how to rent storage on the Sia network using renterd.</>
+              }
+              actionTitle="Follow the setup guide"
               actionLink={webLinks.docs.renting}
               actionNewTab
             />
@@ -139,11 +144,12 @@ export default function Rent({
 }
 
 export async function getStaticProps() {
-  const [stats, technical, tutorials, projects] = await Promise.all([
+  const [stats, technical, tutorials, projects, release] = await Promise.all([
     getStats(),
     getFeedContent(['technical'], 8),
     getRentingArticles(),
     getProjects('renting'),
+    getRenterdLatestRelease(),
   ])
   const thirdParty = projects.filter((project) => !project.idea)
   const ideas = projects.filter((project) => project.idea)
@@ -153,6 +159,7 @@ export async function getStaticProps() {
     tutorials,
     thirdParty,
     ideas,
+    release,
     fallback: {
       '/api/stats': stats,
     },

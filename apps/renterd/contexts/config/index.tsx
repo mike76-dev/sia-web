@@ -19,6 +19,7 @@ import {
   RedundancySettings,
   UploadPackingSettings,
   useSettingUpdate,
+  useAutopilotTrigger,
 } from '@siafoundation/react-renterd'
 import { toSiacoins } from '@siafoundation/sia-js'
 import { getFields } from './fields'
@@ -339,31 +340,31 @@ export function useConfigMain() {
       maxStoragePriceTBMonth?.gt(0) &&
       storageTB?.gt(0) &&
       maxDownloadPriceTB?.gt(0) &&
-      downloadTBMonth?.gt(0) &&
-      maxUploadPriceTB?.gt(0) &&
-      uploadTBMonth?.gt(0)
+      maxUploadPriceTB?.gt(0)
     )
   }, [
     isAutopilotEnabled,
     maxStoragePriceTBMonth,
     storageTB,
     maxDownloadPriceTB,
-    downloadTBMonth,
     maxUploadPriceTB,
-    uploadTBMonth,
   ])
 
   const estimatedSpendingPerMonth = useMemo(() => {
     if (!canEstimate) {
       return new BigNumber(0)
     }
+    // if not set, just show estimate with 1 TB up/down
+    // in simple mode these are the defaults that get set anyway
+    const _downloadTBMonth = downloadTBMonth?.gt(0) ? downloadTBMonth : 1
+    const _uploadTBMonth = uploadTBMonth?.gt(0) ? uploadTBMonth : 1
     const storageCostPerMonth = includeRedundancyMaxStoragePrice
       ? maxStoragePriceTBMonth.times(storageTB)
       : maxStoragePriceTBMonth.times(redundancyMultiplier).times(storageTB)
-    const downloadCostPerMonth = maxDownloadPriceTB.times(downloadTBMonth)
+    const downloadCostPerMonth = maxDownloadPriceTB.times(_downloadTBMonth)
     const uploadCostPerMonth = includeRedundancyMaxUploadPrice
-      ? maxUploadPriceTB.times(uploadTBMonth)
-      : maxUploadPriceTB.times(redundancyMultiplier).times(uploadTBMonth)
+      ? maxUploadPriceTB.times(_uploadTBMonth)
+      : maxUploadPriceTB.times(redundancyMultiplier).times(_uploadTBMonth)
     const totalCostPerMonth = storageCostPerMonth
       .plus(downloadCostPerMonth)
       .plus(uploadCostPerMonth)
@@ -389,6 +390,7 @@ export function useConfigMain() {
     return totalCostPerMonthTB
   }, [canEstimate, estimatedSpendingPerMonth, storageTB])
 
+  const autopilotTrigger = useAutopilotTrigger()
   const mutate = useMutate()
   const onValid = useCallback(
     async (values: typeof defaultValues) => {
@@ -471,12 +473,26 @@ export function useConfigMain() {
           throw Error(configAppResponse.error)
         }
 
-        triggerSuccessToast('Configuration has been saved.')
         if (isAutopilotEnabled) {
+          // Sync default contract set if necessary. Only syncs if the setting
+          // is enabled in case the user changes in advanced mode and then
+          // goes back to simple mode.
+          // Might be simpler nice to just override in simple mode without a
+          // special setting since this is how other settings like allowance
+          // behave - but leaving for now.
           syncDefaultContractSet(finalValues.autopilotContractSet)
+
+          // Trigger the autopilot loop with new settings applied.
+          autopilotTrigger.post({
+            payload: {
+              forceScan: true,
+            },
+          })
         }
 
-        // if autopilot is being configured for the first time,
+        triggerSuccessToast('Configuration has been saved.')
+
+        // If autopilot is being configured for the first time,
         // revalidate the empty hosts list.
         if (firstTimeSettingConfig) {
           const refreshHostsAfterDelay = async () => {
@@ -509,6 +525,7 @@ export function useConfigMain() {
       redundancy,
       gouging,
       configApp,
+      autopilotTrigger,
     ]
   )
 

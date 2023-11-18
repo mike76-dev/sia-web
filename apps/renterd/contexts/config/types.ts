@@ -16,6 +16,7 @@ export const defaultAutopilot = {
   // hosts
   allowRedundantIPs: false,
   maxDowntimeHours: undefined as BigNumber | undefined,
+  minRecentScanFailures: undefined as BigNumber | undefined,
   // wallet
   defragThreshold: undefined as BigNumber | undefined,
 }
@@ -44,6 +45,7 @@ export const defaultGouging = {
   minPriceTableValidityMinutes: undefined as BigNumber | undefined,
   minAccountExpiryDays: undefined as BigNumber | undefined,
   minMaxEphemeralAccountBalance: undefined as BigNumber | undefined,
+  migrationSurchargeMultiplier: undefined as BigNumber | undefined,
 }
 
 export const defaultRedundancy = {
@@ -84,7 +86,8 @@ export const advancedDefaultAutopilot: AutopilotData = {
   amountHosts: new BigNumber(50),
   autopilotContractSet: 'autopilot',
   allowRedundantIPs: false,
-  maxDowntimeHours: new BigNumber(1440),
+  maxDowntimeHours: new BigNumber(336),
+  minRecentScanFailures: new BigNumber(10),
   defragThreshold: new BigNumber(1000),
 }
 

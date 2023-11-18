@@ -53,18 +53,16 @@ export function OnboardingBar() {
     return null
   }
 
-  const walletBalance = new BigNumber(wallet.data?.confirmed || 0)
+  const walletBalance = new BigNumber(
+    wallet.data ? wallet.data.confirmed + wallet.data.unconfirmed : 0
+  )
   const allowance = new BigNumber(autopilot.data?.contracts.allowance || 0)
 
   const satelliteEnabled = satellite.data?.enabled
 
   const step1Configured = app.autopilot.state.data?.configured
   const step2Synced = syncStatus.isSynced
-  const step3Funded =
-    app.autopilot.state.data?.configured &&
-    ((wallet.data &&
-    walletBalance.gte(allowance)) ||
-    satelliteEnabled)
+  const step3Funded = walletBalance.gt(0) || satelliteEnabled
   const step4Contracts = !notEnoughContracts.active
   const steps = [step1Configured, step2Synced, step3Funded, step4Contracts]
   const totalSteps = steps.length

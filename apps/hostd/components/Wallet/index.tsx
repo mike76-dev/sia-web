@@ -20,6 +20,7 @@ import BigNumber from 'bignumber.js'
 import { HostdSidenav } from '../HostdSidenav'
 import { HostdAuthedLayout } from '../HostdAuthedLayout'
 import { useSyncStatus } from '../../hooks/useSyncStatus'
+import { EmptyState } from './EmptyState'
 
 export function Wallet() {
   const transactions = useWalletTransactions({
@@ -104,11 +105,13 @@ export function Wallet() {
           isWalletSynced={isWalletSynced}
           syncPercent={syncPercent}
           walletScanPercent={walletScanPercent}
-          sc={
+          balanceSc={
             wallet.data
-              ? new BigNumber(wallet.data.spendable).plus(
-                  wallet.data.unconfirmed
-                )
+              ? {
+                  spendable: new BigNumber(wallet.data.spendable),
+                  unconfirmed: new BigNumber(wallet.data.unconfirmed),
+                  confirmed: new BigNumber(wallet.data.confirmed),
+                }
               : undefined
           }
           receiveSiacoin={() => openDialog('addressDetails')}
@@ -125,11 +128,17 @@ export function Wallet() {
       }
     >
       <div className="p-6 flex flex-col gap-5">
-        <BalanceEvolution
-          balances={balances}
-          isLoading={metrics.isValidating}
+        {balances?.length && balances.find((b) => b.sc) ? (
+          <BalanceEvolution
+            balances={balances}
+            isLoading={metrics.isValidating}
+          />
+        ) : null}
+        <EntityList
+          title="Transactions"
+          entities={entities.slice(0, 100)}
+          emptyState={<EmptyState />}
         />
-        <EntityList title="Transactions" entities={entities.slice(0, 100)} />
       </div>
     </HostdAuthedLayout>
   )

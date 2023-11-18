@@ -1,5 +1,26 @@
 # website
 
+## 0.45.0
+
+### Minor Changes
+
+- 6fc53f46: The navbar now includes the logo and "sia" as text.
+- 7a0f9545: The website now features an improved interactive host map.
+- 00041ed2: Downloads are now more prominent and the correct OS is preselected.
+
+## 0.44.0
+
+### Minor Changes
+
+- e8199ecf: Core software can now be downloaded from the main rent, host, and wallet pages. The copy has also been improved.
+
+## 0.43.0
+
+### Minor Changes
+
+- ed4cba35: The download selectors now dynamically show all published GitHub assets.
+- 49b02dfd: walletd downloads now specify that they are testnet only. renterd and hostd testnet downloads naming is now more clear.
+
 ## 0.42.0
 
 ### Minor Changes

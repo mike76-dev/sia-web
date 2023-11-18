@@ -18,7 +18,7 @@
         "compiler": "swc",
         "assets": [
           {
-            "glob": "libs/design-system/README.md",
+            "glob": "libs/design-system/*.md",
             "input": ".",
             "output": "."
           },
@@ -26,6 +26,16 @@
             "glob": "libs/design-system/src/public",
             "input": ".",
             "output": "."
+          },
+          {
+            "glob": "libs/design-system/src/config/*.{js,css}",
+            "input": ".",
+            "output": "src/config"
+          },
+          {
+            "glob": "libs/design-system/src/plugins/*.js",
+            "input": ".",
+            "output": "src/plugins"
           }
         ]
       },
@@ -35,7 +45,10 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/design-system/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "libs/design-system/**/*.{ts,tsx,js,jsx}",
+          "libs/design-system/package.json"
+        ]
       }
     },
     "test": {

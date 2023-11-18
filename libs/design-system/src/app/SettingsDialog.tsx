@@ -17,15 +17,22 @@ import { webLinks } from '../data/webLinks'
 import { useAppSettings } from '@siafoundation/react-core'
 import { Dialog } from '../core/Dialog'
 import { minutesInMilliseconds } from '../lib/time'
-import { CurrencySelector } from './CurrencySelector'
+import { CurrencyFiatSelector } from './CurrencyFiatSelector'
+import { CurrencyDisplaySelector } from './CurrencyDisplaySelector'
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   securityEl?: React.ReactNode
+  showGpuSetting?: boolean
 }
 
-export function SettingsDialog({ open, onOpenChange, securityEl }: Props) {
+export function SettingsDialog({
+  open,
+  onOpenChange,
+  securityEl,
+  showGpuSetting,
+}: Props) {
   const { settings, setSettings, gpu } = useAppSettings()
 
   return (
@@ -51,13 +58,31 @@ export function SettingsDialog({ open, onOpenChange, securityEl }: Props) {
                     <Information16 />
                   </Text>
                   <Heading size="20" className="flex-1">
-                    Currency
+                    Currency display
                   </Heading>
-                  <CurrencySelector />
+                  <CurrencyDisplaySelector />
                 </div>
                 <Paragraph size="14">
-                  Select a currency for price conversions from Siacoin. Requires
-                  Sia Central third-party data enabled under Privacy.
+                  Select whether you would like to see currency values in
+                  siacoin, fiat, or both. Fiat requires Sia Central third-party
+                  data enabled under Privacy.
+                </Paragraph>
+              </div>
+            </Alert>
+            <Alert>
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2 items-center">
+                  <Text>
+                    <Information16 />
+                  </Text>
+                  <Heading size="20" className="flex-1">
+                    Fiat
+                  </Heading>
+                  <CurrencyFiatSelector />
+                </div>
+                <Paragraph size="14">
+                  Select a fiat currency for price conversions from Siacoin.
+                  Requires Sia Central third-party data enabled under Privacy.
                 </Paragraph>
               </div>
             </Alert>
@@ -77,30 +102,32 @@ export function SettingsDialog({ open, onOpenChange, securityEl }: Props) {
                 </Paragraph>
               </div>
             </Alert>
-            <Alert>
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-2 items-center">
-                  <Text>
-                    <Information16 />
-                  </Text>
-                  <Heading size="20" className="flex-1">
-                    GPU
-                  </Heading>
-                  <Switch
-                    disabled={!gpu.canGpuRender}
-                    checked={gpu.canGpuRender && gpu.isGpuEnabled}
-                    onCheckedChange={gpu.setIsGpuEnabled}
-                    size="medium"
-                  />
+            {showGpuSetting && (
+              <Alert>
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-2 items-center">
+                    <Text>
+                      <Information16 />
+                    </Text>
+                    <Heading size="20" className="flex-1">
+                      GPU
+                    </Heading>
+                    <Switch
+                      disabled={!gpu.canGpuRender}
+                      checked={gpu.canGpuRender && gpu.isGpuEnabled}
+                      onCheckedChange={gpu.setIsGpuEnabled}
+                      size="medium"
+                    />
+                  </div>
+                  <Paragraph size="14">
+                    Enable features that require a GPU.{' '}
+                    {gpu.canGpuRender
+                      ? ''
+                      : 'This device does not support GPU rendering.'}
+                  </Paragraph>
                 </div>
-                <Paragraph size="14">
-                  Enable features that require a GPU.{' '}
-                  {gpu.canGpuRender
-                    ? ''
-                    : 'This device does not support GPU rendering.'}
-                </Paragraph>
-              </div>
-            </Alert>
+              </Alert>
+            )}
           </div>
         </div>
         <Separator className="w-full" />

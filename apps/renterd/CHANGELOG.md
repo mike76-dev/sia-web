@@ -1,5 +1,50 @@
 # renterd
 
+## 0.32.0
+
+### Minor Changes
+
+- e04a35c7: Wallet now instructs new users to fund their wallet when there are no transactions yet.
+- c8ae5aeb: Hosts last scan column now properly displays unscanned values rather than a very large time ago value.
+- 16b7df4c: The wallet balance tooltip now shows spendable confirmed and unconfirmed values.
+- 6fc53f46: The maxDowntimeHours setting default value is now 336.
+- 6fc53f46: Added support for the minRecentScanFailures autopilot hosts setting.
+- 35ff2dec: Siacoin and number input placeholders now match the suggested value.
+- 6fc53f46: Extremely small siacoin values will now show as hastings by default rather than 0SC.
+- e04a35c7: Fixed an issue where the wallet balance graph would not show the first data point.
+- db21136e: The autopilot loop is now triggered after settings are successfully updated.
+- a2db3b21: Files are now paginated.
+- 6fc53f46: Refined the warnings in the files feature navbar and file explorer empty states.
+- 9a065e66: Onboarding fund wallet step now requires >0 SC instead of a full allowance.
+- e04a35c7: Wallet balance evolution graph is now hidden until at least 1 data point is available.
+- 4462f129: The hosts table now has a last announcement column instead of the known since column.
+
+## 0.31.0
+
+### Minor Changes
+
+- 2a2ef002: Alerts are now more concise and show an actionable hint when available.
+- 49d7b540: Fixed an issue where the allowance does not get set the first time saving settings in simple mode.
+
+## 0.30.0
+
+### Minor Changes
+
+- 21972d75: Configuration values such as download and upload utilization are now per month instead of period.
+- 21972d75: The configuration now has an advanced mode that allows the user to view and change all settings.
+- 21972d75: The configuration is now much simpler by default, only requiring storage amount and price to be set during onboarding.
+- e7387383: Fixed an issue with the upload packing switch and updated the explanation.
+- 43f14e70: Fixed an issue where file and directory names could not contain the # symbol.
+- 21972d75: The configuration page now shows the changed status on fields if the user has made a change but the server values were since updated.
+- 21972d75: The default simple configuration automatically sets any unset advanced options to typical defaults. Settings with existing values are not changed.
+- 829d91df: Fixed an issue where fiat input fields values were not displaying properly.
+- c4aafc65: Data tables now refresh themselves without user interaction or refocusing the app, even more frequently if a long running operation is in progress.
+- 21972d75: The autopilot settings have been merged into a single configuration page.
+- 1b9e8f6d: Fixed an issue where URLs for file paths with periods would 404.
+- fc3e1d46: Fixed an issue with the hosts public key filter.
+- 21972d75: The spending estimates now show per TB and total per month.
+- 21972d75: New users will now see an onboarding wizard that prompts the user to complete the necessary setup steps - it also shows the status and progress of each.
+
 ## 0.29.0
 
 ### Minor Changes

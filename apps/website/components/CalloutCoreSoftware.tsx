@@ -6,6 +6,7 @@ import {
   Badge,
 } from '@siafoundation/design-system'
 import Image from 'next/image'
+import { GitHubRelease } from '@siafoundation/data-sources'
 
 type Props = {
   name: string
@@ -13,10 +14,12 @@ type Props = {
   description: React.ReactNode
   href?: string
   daemon?: 'renterd' | 'hostd' | 'walletd'
+  release?: GitHubRelease
   newTab?: boolean
   image?: string
   background: string
   children?: React.ReactNode
+  testnetOnly?: boolean
 }
 
 export function CalloutCoreSoftware({
@@ -45,15 +48,17 @@ export function CalloutCoreSoftware({
         <Paragraph>{description}</Paragraph>
         <div className="flex justify-between gap-4">
           {!children && (
-            <Link
-              href={href || '#'}
-              underline="accent"
-              target={newTab ? '_blank' : undefined}
-              disabled={!href}
-              size="16"
-            >
-              {href ? 'Get started' : 'Coming soon'}
-            </Link>
+            <div className="flex justify-end gap-4">
+              <Link
+                href={href}
+                underline="accent"
+                target={newTab ? '_blank' : undefined}
+                disabled={!href}
+                size="16"
+              >
+                {href ? `Learn more about the software` : 'Coming soon'}
+              </Link>
+            </div>
           )}
         </div>
         {image && (

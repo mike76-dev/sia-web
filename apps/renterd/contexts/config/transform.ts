@@ -85,6 +85,7 @@ export function transformUpAutopilot(
     hosts: {
       ...existingValues?.hosts,
       maxDowntimeHours: v.maxDowntimeHours.toNumber(),
+      minRecentScanFailures: v.minRecentScanFailures.toNumber(),
       allowRedundantIPs: v.allowRedundantIPs,
       scoreOverrides: existingValues?.hosts.scoreOverrides || null,
     },
@@ -162,6 +163,8 @@ export function transformUpGouging(
     minMaxEphemeralAccountBalance: toHastings(
       values.minMaxEphemeralAccountBalance
     ).toString(),
+    migrationSurchargeMultiplier:
+      values.migrationSurchargeMultiplier.toNumber(),
   }
 }
 
@@ -241,6 +244,7 @@ export function transformDownAutopilot(
     // hosts
     allowRedundantIPs: config.hosts.allowRedundantIPs,
     maxDowntimeHours: new BigNumber(config.hosts.maxDowntimeHours),
+    minRecentScanFailures: new BigNumber(config.hosts.minRecentScanFailures),
     // wallet
     defragThreshold: new BigNumber(config.wallet.defragThreshold),
   }
@@ -321,6 +325,7 @@ export function transformDownGouging(
       g.minMaxEphemeralAccountBalance,
       scDecimalPlaces
     ),
+    migrationSurchargeMultiplier: new BigNumber(g.migrationSurchargeMultiplier),
   }
 }
 
