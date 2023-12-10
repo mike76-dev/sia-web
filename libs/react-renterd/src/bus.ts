@@ -8,33 +8,28 @@ import {
   HookArgsSwr,
   HookArgsCallback,
   HookArgsWithPayloadSwr,
-  Currency,
-  PublicKey,
-  Transaction,
   getMainnetBlockHeight,
   getTestnetZenBlockHeight,
   delay,
 } from '@siafoundation/react-core'
 import {
-  AddObjectRequest,
+  Currency,
+  PublicKey,
+  Transaction,
+  FileContractRevision,
+  OutputID,
+  CoveredFields,
+  FileContractID,
   Block,
+} from '@siafoundation/types'
+import {
   ConsensusState,
   Contract,
-  ContractAcquireRequest,
-  ContractAcquireResponse,
-  ContractsIDAddRequest,
-  ContractsIDRenewedRequest,
+  ContractRevision,
   Host,
-  Interaction,
+  HostSettings,
   Obj,
   SiacoinElement,
-  WalletFundRequest,
-  WalletFundResponse,
-  WalletPrepareFormRequest,
-  WalletPrepareRenewRequest,
-  WalletPrepareRenewResponse,
-  WalletRedistributeRequest,
-  WalletSignRequest,
   WalletTransaction,
 } from './siaTypes'
 
@@ -178,7 +173,9 @@ export function useWalletAddresses(args?: HookArgsSwr<void, string[]>) {
 
 type WalletTransactionsParams = {
   since?: number
-  max?: number
+  before?: number
+  offset?: number
+  limit?: number
 }
 
 export function useWalletTransactions(
@@ -194,16 +191,38 @@ export function useWalletUtxos(args?: HookArgsSwr<void, SiacoinElement[]>) {
   return useGetSwr({ ...args, route: '/bus/wallet/outputs' })
 }
 
+export type WalletFundRequest = {
+  transaction: Transaction
+  amount: Currency
+}
+
+export type WalletFundResponse = {
+  transaction: Transaction
+  toSign?: OutputID[]
+  dependsOn?: Transaction[]
+}
+
 export function useWalletFund(
   args?: HookArgsCallback<void, WalletFundRequest, WalletFundResponse>
 ) {
   return usePostFunc({ ...args, route: '/bus/wallet/fund' })
 }
 
+export type WalletSignRequest = {
+  transaction: Transaction
+  toSign?: OutputID[]
+  coveredFields: CoveredFields
+}
+
 export function useWalletSign(
   args?: HookArgsCallback<void, WalletSignRequest, Transaction>
 ) {
   return usePostFunc({ ...args, route: '/bus/wallet/sign' })
+}
+
+export type WalletRedistributeRequest = {
+  amount: Currency
+  outputs: number
 }
 
 export function useWalletRedistribute(
@@ -218,10 +237,35 @@ export function useWalletDiscard(
   return usePostFunc({ ...args, route: '/bus/wallet/discard' })
 }
 
+export type WalletPrepareFormRequest = {
+  renterKey?: string
+  hostKey: string
+  renterFunds: Currency
+  renterAddress: string
+  hostCollateral: Currency
+  endHeight: number
+  hostSettings: HostSettings
+}
+
 export function useWalletPrepareForm(
   args?: HookArgsCallback<void, WalletPrepareFormRequest, Transaction[]>
 ) {
   return usePostFunc({ ...args, route: '/bus/wallet/prepare/form' })
+}
+
+export type WalletPrepareRenewRequest = {
+  contract: FileContractRevision
+  renterKey?: string
+  hostKey: string
+  renterFunds: Currency
+  renterAddress: string
+  endHeight: number
+  hostSettings: HostSettings
+}
+
+export type WalletPrepareRenewResponse = {
+  transactionSet?: Transaction[]
+  finalPayment: Currency
 }
 
 export function useWalletPrepareRenew(
@@ -290,8 +334,14 @@ export function useHost(args: HookArgsSwr<{ hostKey: string }, Host>) {
   return useGetSwr({ ...args, route: '/bus/host/:hostKey' })
 }
 
+export type HostInteractionPayload = {
+  timestamp: string
+  type: string
+  result?: string
+}
+
 export function useHostsPubkeyInteractionAdd(
-  args: HookArgsCallback<{ hostKey: string }, Interaction, never>
+  args: HookArgsCallback<{ hostKey: string }, HostInteractionPayload, never>
 ) {
   return usePostFunc({
     ...args,
@@ -365,6 +415,14 @@ export function useContracts(args?: HookArgsSwr<void, Contract[]>) {
   return useGetSwr({ ...args, route: contractsActiveRoute })
 }
 
+export type ContractAcquireRequest = {
+  Duration: number
+}
+
+export type ContractAcquireResponse = {
+  locked: boolean
+}
+
 export function useContractsAcquire(
   args: HookArgsCallback<
     { id: string },
@@ -385,10 +443,23 @@ export function useContract(args: HookArgsSwr<{ id: string }, Contract>) {
   return useGetSwr({ ...args, route: '/bus/contract/:id' })
 }
 
+export type ContractsIDAddRequest = {
+  contract: ContractRevision
+  startHeight: number
+  totalCost: Currency
+}
+
 export function useContractCreate(
   args: HookArgsCallback<{ id: string }, ContractsIDAddRequest, Contract>
 ) {
   return usePostFunc({ ...args, route: '/bus/contract/:id/new' })
+}
+
+export type ContractsIDRenewedRequest = {
+  contract: ContractRevision
+  renewedFrom: string
+  startHeight: number
+  totalCost: Currency
 }
 
 export function useContractRenew(
@@ -400,7 +471,12 @@ export function useContractRenew(
 export function useContractDelete(
   args?: HookArgsCallback<{ id: string }, void, never>
 ) {
-  return useDeleteFunc({ ...args, route: '/bus/contract/:id' })
+  return useDeleteFunc(
+    { ...args, route: '/bus/contract/:id' },
+    async (mutate) => {
+      mutate((key) => key.startsWith('/bus/contract'))
+    }
+  )
 }
 
 export function useContractsets(args?: HookArgsSwr<void, string[][]>) {
@@ -475,11 +551,18 @@ export type ObjEntry = {
   health: number
 }
 
+export type ObjectDirectoryParams = {
+  key: string
+  bucket: string
+  limit?: number
+  prefix?: string
+  offset?: number
+  sortBy?: 'name' | 'health'
+  sortDir?: 'asc' | 'desc'
+}
+
 export function useObjectDirectory(
-  args: HookArgsSwr<
-    { key: string; bucket: string; limit?: number; offset?: number },
-    { entries: ObjEntry[] }
-  >
+  args: HookArgsSwr<ObjectDirectoryParams, { entries: ObjEntry[] }>
 ) {
   return useGetSwr({ ...args, route: '/bus/objects/:key' })
 }
@@ -497,6 +580,11 @@ export function useObjectSearch(
   >
 ) {
   return useGetSwr({ ...args, route: '/bus/search/objects' })
+}
+
+export type AddObjectRequest = {
+  object: Obj
+  usedContracts: { [key: PublicKey]: FileContractID }
 }
 
 export function useObjectAdd(
@@ -526,6 +614,7 @@ export function useObjectDelete(
 
 type ObjectsStats = {
   numObjects: number // number of objects
+  minHealth: number // minimum health across all objects
   totalObjectsSize: number // size of all objects
   totalSectorsSize: number // uploaded size of all objects
   totalUploadedSize: number // uploaded size of all objects including redundant sectors
@@ -610,3 +699,101 @@ export function useAlertsDismiss(
 export function useSlabObjects(args: HookArgsSwr<{ key: string }, ObjEntry[]>) {
   return useGetSwr({ ...args, route: '/bus/slab/:key/objects' })
 }
+
+// metrics
+
+export type MetricsParams = {
+  start: string
+  interval: number
+  n: number
+}
+
+export type ContractMetric = {
+  timestamp: string
+  contractID: string
+  hostKey: string
+  remainingCollateral: string
+  remainingFunds: string
+  revisionNumber: number
+  uploadSpending: string
+  downloadSpending: string
+  fundAccountSpending: string
+  deleteSpending: string
+  listSpending: string
+}
+
+export type ContractMetricsParams = MetricsParams & {
+  contractID?: string
+  hostKey?: string
+}
+
+export function useMetricsContract(
+  args: HookArgsSwr<ContractMetricsParams, ContractMetric[]>
+) {
+  return useGetSwr({ ...args, route: '/bus/metric/contract' })
+}
+
+export type ContractSetMetric = {
+  contracts: number
+  name: string
+  timestamp: string
+}
+
+export type ContractSetMetricsParams = MetricsParams & {
+  name: string
+}
+
+export function useMetricsContractSet(
+  args: HookArgsSwr<ContractSetMetricsParams, ContractSetMetric[]>
+) {
+  return useGetSwr({ ...args, route: '/bus/metric/contractset' })
+}
+
+export type ContractSetChurnMetric = {
+  direction: string
+  contractID: string
+  name: string
+  reason: string
+  timestamp: string
+}
+
+export type ContractSetChurnMetricsParams = MetricsParams & {
+  name: string
+  direction?: string
+  reason?: string
+}
+
+export function useMetricsContractSetChurn(
+  args: HookArgsSwr<ContractSetChurnMetricsParams, ContractSetChurnMetric[]>
+) {
+  return useGetSwr({ ...args, route: '/bus/metric/churn' })
+}
+
+export type WalletMetric = {
+  timestamp: string
+  confirmed: string
+  spendable: string
+  unconfirmed: string
+}
+
+export type WalletMetricsParams = MetricsParams
+
+export function useMetricsWallet(
+  args: HookArgsSwr<WalletMetricsParams, WalletMetric[]>
+) {
+  return useGetSwr({ ...args, route: '/bus/metric/wallet' })
+}
+
+// export type PerformanceMetric = {
+//   action: string
+//   hostKey: string
+//   origin: string
+//   duration: number
+//   timestamp: string
+// }
+
+// export type PerformanceMetricsParams = MetricsParams & {
+//   action: string
+//   hostKey: string
+//   origin: string
+// }

@@ -4,7 +4,7 @@ import {
   Paragraph,
   triggerToast,
 } from '@siafoundation/design-system'
-import { toHastings } from '@siafoundation/sia-js'
+import { toHastings } from '@siafoundation/units'
 import BigNumber from 'bignumber.js'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -25,8 +25,8 @@ const validationSchema = Yup.object().shape({
       'Must be greater than 0 SC',
       (val) => !new BigNumber(val || 0).isZero()
     )
-    .test('less than 1000', 'Must be 1,000 SC or less', (val) =>
-      new BigNumber(val || 0).lte(1000)
+    .test('less than 1000', 'Must be 50,000 SC or less', (val) =>
+      new BigNumber(val || 0).lte(50_000)
     ),
 })
 

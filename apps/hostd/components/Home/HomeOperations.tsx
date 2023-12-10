@@ -5,7 +5,7 @@ import {
   DatumCardConfigurable,
   DatumScrollArea,
 } from '@siafoundation/design-system'
-import { humanNumber } from '@siafoundation/sia-js'
+import { humanNumber } from '@siafoundation/units'
 import { useMetrics } from '../../contexts/metrics'
 
 export function HomeOperations() {
@@ -35,26 +35,6 @@ export function HomeOperations() {
             enabledModes={['total', 'average', 'latest']}
             format={humanNumber}
           />
-          <DatumCardConfigurable
-            category="operations"
-            label="registry reads"
-            color={operations.config.data['registryReads'].color}
-            value={operations.stats['registryReads']}
-            defaultMode="total"
-            isLoading={operations.isLoading}
-            enabledModes={['total', 'average', 'latest']}
-            format={humanNumber}
-          />
-          <DatumCardConfigurable
-            category="operations"
-            label="registry writes"
-            color={operations.config.data['registryWrites'].color}
-            value={operations.stats['registryWrites']}
-            defaultMode="total"
-            isLoading={operations.isLoading}
-            enabledModes={['total', 'average', 'latest']}
-            format={humanNumber}
-          />
         </DatumScrollArea>
         <ChartXY
           id="operations"
@@ -62,7 +42,6 @@ export function HomeOperations() {
           data={operations.data}
           config={operations.config}
           isLoading={operations.isLoading}
-          chartType={operations.chartType}
           actionsLeft={
             <>
               <Text font="mono" weight="semibold">

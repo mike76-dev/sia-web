@@ -6,7 +6,6 @@ import {
   Tooltip,
   EntityList,
 } from '@siafoundation/design-system'
-import { humanBytes, humanNumber } from '@siafoundation/sia-js'
 import { useMemo } from 'react'
 import { routes } from '../../config/routes'
 import { ContentLayout } from '../ContentLayout'
@@ -19,6 +18,8 @@ import {
 } from '@siafoundation/sia-central'
 import { hashToAvatar } from '../../lib/avatar'
 import {
+  humanBytes,
+  humanNumber,
   getDownloadCost,
   getStorageCost,
   getUploadCost,
@@ -212,7 +213,7 @@ export function Home({
         <div>
           <BlockList
             title="Latest blocks"
-            blocks={reverse(sortBy(blocks, 'timestamp')).map((block) => ({
+            dataset={reverse(sortBy(blocks, 'timestamp')).map((block) => ({
               height: block.height,
               timestamp: block.timestamp,
               href: routes.block.view.replace(':id', String(block.height)),

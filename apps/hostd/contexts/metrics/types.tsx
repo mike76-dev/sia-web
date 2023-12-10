@@ -5,14 +5,8 @@ import {
 } from '@siafoundation/design-system'
 
 export type RevenueKeys =
-  | 'potential'
-  | 'earned'
   | 'rpcPotential'
   | 'rpc'
-  | 'registryWritePotential'
-  | 'registryWrite'
-  | 'registryReadPotential'
-  | 'registryRead'
   | 'egressPotential'
   | 'egress'
   | 'ingressPotential'
@@ -47,18 +41,12 @@ export type StorageKeys =
   | 'physicalSectors'
   | 'tempSectors'
   | 'contractSectors'
-  | 'registryEntries'
-  | 'maxRegistryEntries'
 
 export type StorageCategories = 'storage used' | 'storage capacity'
 
 export type BandwidthKeys = 'ingress' | 'egress'
 
-export type OperationsKeys =
-  | 'storageReads'
-  | 'storageWrites'
-  | 'registryReads'
-  | 'registryWrites'
+export type OperationsKeys = 'storageReads' | 'storageWrites'
 
 export type BandwidthCategories = 'ingress' | 'egress'
 
@@ -116,17 +104,17 @@ export const dataTimeSpanOptions: {
 }[] = [
   {
     label: '1D',
-    interval: '5m',
+    interval: '15m',
     value: '1',
   },
   {
     label: '7D',
-    interval: '15m',
+    interval: 'hourly',
     value: '7',
   },
   {
     label: '1M',
-    interval: 'hourly',
+    interval: 'daily',
     value: '30',
   },
   {

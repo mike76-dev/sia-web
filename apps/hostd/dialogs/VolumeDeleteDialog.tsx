@@ -14,7 +14,7 @@ import {
   FieldText,
 } from '@siafoundation/design-system'
 import { useVolume, useVolumeDelete } from '@siafoundation/react-hostd'
-import { humanBytes } from '@siafoundation/sia-js'
+import { humanBytes } from '@siafoundation/units'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDialog } from '../contexts/dialog'
@@ -74,7 +74,7 @@ export function VolumeDeleteDialog({ trigger, open, onOpenChange }: Props) {
     async (values: typeof defaultValues) => {
       const response = await volumeDelete.delete({
         params: {
-          id: volume.data?.ID,
+          id: volume.data?.id,
           force: values.force,
         },
       })

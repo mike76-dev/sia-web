@@ -1,5 +1,23 @@
 # hostd
 
+## 0.28.0
+
+### Minor Changes
+
+- 1f858150: Revenue metrics no longer show negative potential on the bar graph.
+- 1f858150: Metrics no longer include registry related data.
+- f74dc260: Wallet transactions are now paginated.
+- 1f858150: Earned revenue stat cards are now clearly labeled as earned.
+
+## 0.27.0
+
+### Minor Changes
+
+- 2003a885: The revenue graph is now a bar stack, much more clearly showing earned vs potential revenue.
+- 2003a885: The metrics graphs now show a y-axis.
+- b72ef30f: Currency display can now be configured to siacoin, fiat, or both along with a preference for when only one can be displayed.
+- 5308806e: App preferences no longer list unused GPU setting.
+
 ## 0.26.0
 
 ### Minor Changes

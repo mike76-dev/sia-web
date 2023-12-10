@@ -1,12 +1,13 @@
 {
   "name": "@siafoundation/design-system",
   "description": "React-based design system used across Sia apps and websites",
-  "version": "0.59.0",
+  "version": "0.61.0",
   "license": "MIT",
   "dependencies": {
     "@siafoundation/react-icons": "^0.1.0",
-    "@siafoundation/sia-js": "^0.11.0",
     "@siafoundation/react-core": "^0.15.0",
+    "@siafoundation/units": "^0.1.3",
+    "@siafoundation/types": "^0.0.1",
     "@visx/group": "2.17.0",
     "@visx/react-spring": "2.18.0",
     "@visx/glyph": "2.17.0",
@@ -43,7 +44,6 @@
     "react-dropzone": "^14.2.3",
     "@radix-ui/react-radio-group": "^1.0.0",
     "tailwindcss": "3.2.7",
-    "@next/font": "13.1.1",
     "tailwind-scrollbar": "^2.0.1",
     "tailwindcss-text-fill": "^0.2.0",
     "tailwindcss-shadow-fill": "^1.0.1",

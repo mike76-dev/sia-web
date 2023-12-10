@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { TooltipProvider } from '../hooks/tooltip'
 import { AppSettingsProvider, CoreProvider } from '@siafoundation/react-core'
-import { rootClasses } from '../config/css'
 import { Toaster } from '../lib/toast'
 
 export function ClientSide({ children }: { children: React.ReactNode }) {
@@ -18,6 +17,7 @@ export function ClientSide({ children }: { children: React.ReactNode }) {
 }
 
 type Props = {
+  className?: string
   passwordProtectRequestHooks?: boolean
   fallback?: Record<string, unknown>
   children: React.ReactNode
@@ -25,6 +25,7 @@ type Props = {
 }
 
 export function NextAppCsr({
+  className,
   passwordProtectRequestHooks,
   fallback,
   children,
@@ -39,7 +40,7 @@ export function NextAppCsr({
               lockRoutes={lockRoutes}
               passwordProtectRequestHooks={passwordProtectRequestHooks}
             >
-              <div id="root" className={rootClasses}>
+              <div id="root" className={className}>
                 <Toaster />
                 {children}
               </div>

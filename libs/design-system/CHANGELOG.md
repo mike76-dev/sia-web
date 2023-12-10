@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.61.0
+
+### Minor Changes
+
+- f74dc260: EntityList props refactored.
+
+## 0.60.0
+
+### Minor Changes
+
+- 2003a885: The ChartXY API has been refactored.
+
 ## 0.59.0
 
 ### Minor Changes

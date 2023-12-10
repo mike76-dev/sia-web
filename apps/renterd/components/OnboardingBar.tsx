@@ -22,12 +22,12 @@ import { useNotEnoughContracts } from './Files/checks/useNotEnoughContracts'
 import { useAutopilotConfig, useWallet } from '@siafoundation/react-renterd'
 import { useSatelliteConfig } from './Satellite/renterdSatellite'
 import BigNumber from 'bignumber.js'
-import { humanSiacoin } from '@siafoundation/sia-js'
+import { humanSiacoin } from '@siafoundation/units'
 import { useAppSettings } from '@siafoundation/react-core'
 import useLocalStorageState from 'use-local-storage-state'
 
 export function OnboardingBar() {
-  const { isUnlocked } = useAppSettings()
+  const { isUnlockedAndAuthedRoute } = useAppSettings()
   const app = useApp()
   const { openDialog } = useDialog()
   const wallet = useWallet()
@@ -49,7 +49,7 @@ export function OnboardingBar() {
   const syncStatus = useSyncStatus()
   const notEnoughContracts = useNotEnoughContracts()
 
-  if (!isUnlocked || app.autopilot.status !== 'on') {
+  if (!isUnlockedAndAuthedRoute || app.autopilot.status !== 'on') {
     return null
   }
 

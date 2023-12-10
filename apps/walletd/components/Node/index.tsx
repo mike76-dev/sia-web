@@ -27,6 +27,10 @@ export function Node() {
   })
   const { openDialog } = useDialog()
 
+  const transactionCount = txPool.data
+    ? txPool.data.transactions.length + txPool.data.v2Transactions.length
+    : 0
+
   return (
     <WalletdAuthedLayout
       routes={routes}
@@ -46,17 +50,20 @@ export function Node() {
             // comment={!state.data?.synced ? 'Syncing' : undefined}
           />
           <DatumCard label="Connected peers" value={peers.data?.length} />
-          <DatumCard label="Transactions in pool" value={txPool.data?.length} />
+          <DatumCard label="Transactions in pool" value={transactionCount} />
         </div>
         <div className="flex flex-wrap gap-7">
           <div className="flex-1">
             <PeerList
+              isLoading={peers.isValidating}
               peers={peers.data?.map((p) => p.addr)}
               connectPeer={() => openDialog('connectPeer')}
             />
           </div>
           {/* <div className="flex-1">
-            <TxPoolList transactions={txPool.data} />
+            <TxPoolList
+              isLoading={txPool.isValidating}
+              transactions={txPool.data} />
           </div> */}
         </div>
       </div>

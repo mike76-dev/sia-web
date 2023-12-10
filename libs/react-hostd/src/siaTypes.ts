@@ -6,11 +6,14 @@ import {
   Signature,
   Currency,
   FileContractID,
-} from '@siafoundation/react-core'
+} from '@siafoundation/types'
 
 export interface WalletTransaction {
-  ID: string
-  index: string // ChainIndex
+  id: string
+  index: {
+    id: string
+    height: number
+  }
   inflow: Currency
   outflow: Currency
   source: string

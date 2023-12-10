@@ -4,11 +4,12 @@ import {
   ValueCopyable,
   LoadingDots,
   ValueScFiat,
+  ValueSf,
 } from '@siafoundation/design-system'
-import { humanDate } from '@siafoundation/sia-js'
-import { EventData, TableColumnId } from './types'
+import { humanDate } from '@siafoundation/units'
+import { CellContext, EventData, TableColumnId } from './types'
 
-type EventsTableColumn = TableColumn<TableColumnId, EventData, never> & {
+type EventsTableColumn = TableColumn<TableColumnId, EventData, CellContext> & {
   fixed?: boolean
   category?: string
 }
@@ -26,12 +27,37 @@ export const columns: EventsTableColumn[] = [
   //   label: 'ID',
   //   category: 'general',
   //   fixed: true,
-  //   render: ({ data: { id } }) => {
+  //   render: ({ data: { id }, context }) => {
   //     return (
-  //       <ValueCopyable size="12" maxLength={20} value={id} type="transaction" />
+  //       <ValueCopyable
+  //         size="12"
+  //         maxLength={20}
+  //         value={id}
+  //         type="transaction"
+  //         siascanUrl={context.siascanUrl}
+  //       />
   //     )
   //   },
   // },
+  {
+    id: 'transactionId',
+    label: 'transaction ID',
+    category: 'general',
+    render: ({ data: { transactionId }, context }) => {
+      if (!transactionId) {
+        return null
+      }
+      return (
+        <ValueCopyable
+          size="12"
+          value={transactionId}
+          label="transaction ID"
+          type="transaction"
+          siascanUrl={context.siascanUrl}
+        />
+      )
+    },
+  },
   {
     id: 'type',
     label: 'type',
@@ -68,21 +94,6 @@ export const columns: EventsTableColumn[] = [
     },
   },
   {
-    id: 'maturityHeight',
-    label: 'maturity height',
-    category: 'general',
-    render: ({ data: { maturityHeight } }) => {
-      if (!maturityHeight) {
-        return null
-      }
-      return (
-        <Text size="12" ellipsis>
-          {maturityHeight.toLocaleString()}
-        </Text>
-      )
-    },
-  },
-  {
     id: 'timestamp',
     label: 'timestamp',
     category: 'general',
@@ -106,11 +117,18 @@ export const columns: EventsTableColumn[] = [
     label: 'amount',
     category: 'general',
     contentClassName: 'w-[120px] justify-end',
-    render: ({ data: { amount } }) => {
-      if (!amount) {
+    render: ({ data: { amountSc, amountSf } }) => {
+      if (!amountSc) {
         return null
       }
-      return <ValueScFiat displayBoth size="12" value={amount} />
+      return (
+        <div className="flex flex-col gap-2">
+          {!amountSc.isZero() && (
+            <ValueScFiat displayBoth size="12" value={amountSc} />
+          )}
+          {!!amountSf && <ValueSf size="12" value={amountSf} />}
+        </div>
+      )
     },
   },
   {
@@ -126,60 +144,21 @@ export const columns: EventsTableColumn[] = [
     },
   },
   {
-    id: 'transactionId',
-    label: 'transaction ID',
-    category: 'general',
-    render: ({ data: { transactionId } }) => {
-      if (!transactionId) {
-        return null
-      }
-      return (
-        <ValueCopyable size="12" value={transactionId} label="transaction ID" />
-      )
-    },
-  },
-  {
     id: 'contractId',
     label: 'contract ID',
     category: 'general',
-    render: ({ data: { contractId } }) => {
+    render: ({ data: { contractId }, context }) => {
       if (!contractId) {
         return null
       }
-      return <ValueCopyable size="12" value={contractId} label="contract ID" />
-    },
-  },
-  {
-    id: 'outputId',
-    label: 'output ID',
-    category: 'general',
-    render: ({ data: { outputId } }) => {
-      if (!outputId) {
-        return null
-      }
-      return <ValueCopyable size="12" value={outputId} label="output ID" />
-    },
-  },
-  {
-    id: 'netAddress',
-    label: 'net address',
-    category: 'general',
-    render: ({ data: { netAddress } }) => {
-      if (!netAddress) {
-        return null
-      }
-      return <ValueCopyable size="12" value={netAddress} type="ip" />
-    },
-  },
-  {
-    id: 'publicKey',
-    label: 'public key',
-    category: 'general',
-    render: ({ data: { publicKey } }) => {
-      if (!publicKey) {
-        return null
-      }
-      return <ValueCopyable size="12" value={publicKey} label="public key" />
+      return (
+        <ValueCopyable
+          size="12"
+          value={contractId}
+          label="contract ID"
+          siascanUrl={context.siascanUrl}
+        />
+      )
     },
   },
 ]

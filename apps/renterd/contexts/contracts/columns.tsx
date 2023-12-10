@@ -12,7 +12,7 @@ import {
   Separator,
 } from '@siafoundation/design-system'
 import { ArrowUpLeft16 } from '@siafoundation/react-icons'
-import { humanBytes, humanDate } from '@siafoundation/sia-js'
+import { humanBytes, humanDate } from '@siafoundation/units'
 import { ContractData, TableColumnId } from './types'
 import { ContractContextMenu } from '../../components/Contracts/ContractContextMenu'
 import { ContractState } from '@siafoundation/react-renterd'
@@ -23,6 +23,7 @@ type Context = {
     startHeight: number
     endHeight: number
   }
+  siascanUrl: string
 }
 
 type ContractsTableColumn = TableColumn<
@@ -48,14 +49,19 @@ export const columns: ContractsTableColumn[] = [
     id: 'contractId',
     label: 'contract ID',
     category: 'general',
-    render: ({ data: { id, isRenewed, renewedFrom } }) => {
+    render: ({
+      data: { id, isRenewed, renewedFrom },
+      context: { siascanUrl },
+    }) => {
       // const { label, color } = getStatus(row)
       return (
         <div className="flex flex-col gap-1 w-full">
           <ValueCopyable
             size="12"
             value={stripPrefix(id)}
+            type="contract"
             label="contract ID"
+            siascanUrl={siascanUrl}
           />
           {isRenewed && (
             <Tooltip content="Renewed from" align="start">
@@ -66,7 +72,9 @@ export const columns: ContractsTableColumn[] = [
                 <ValueCopyable
                   color="subtle"
                   size="10"
+                  type="contract"
                   value={stripPrefix(renewedFrom)}
+                  siascanUrl={siascanUrl}
                   label="contract ID"
                 />
               </div>
@@ -80,13 +88,13 @@ export const columns: ContractsTableColumn[] = [
     id: 'hostIp',
     label: 'host address',
     category: 'general',
-    render: ({ data: { hostIp } }) => {
+    render: ({ data: { hostIp }, context: { siascanUrl } }) => {
       return (
         <ValueCopyable
           size="12"
           value={hostIp}
-          type="ip"
-          label="host address"
+          type="hostIp"
+          siascanUrl={siascanUrl}
         />
       )
     },
@@ -95,8 +103,15 @@ export const columns: ContractsTableColumn[] = [
     id: 'hostKey',
     label: 'host public key',
     category: 'general',
-    render: ({ data: { hostKey } }) => {
-      return <ValueCopyable size="12" value={hostKey} label="host public key" />
+    render: ({ data: { hostKey }, context: { siascanUrl } }) => {
+      return (
+        <ValueCopyable
+          size="12"
+          value={hostKey}
+          type="hostPublicKey"
+          siascanUrl={siascanUrl}
+        />
+      )
     },
   },
   {

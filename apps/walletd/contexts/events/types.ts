@@ -1,39 +1,38 @@
 import BigNumber from 'bignumber.js'
 
+export type CellContext = {
+  siascanUrl: string
+}
+
 export type EventData = {
   id: string
+  transactionId?: string
   timestamp: number
   height?: number
-  maturityHeight?: number
   pending: boolean
   type: string
   fee?: BigNumber
-  amount?: BigNumber
-  transactionId?: string
+  amountSc?: BigNumber
+  amountSf?: number
   contractId?: string
-  outputId?: string
-  netAddress?: string
-  publicKey?: string
 }
 
 export type TableColumnId =
   // | 'actions'
   // | 'id'
+  | 'transactionId'
   | 'type'
   | 'height'
-  | 'maturityHeight'
   | 'timestamp'
   | 'amount'
   | 'fee'
   | 'transactionId'
   | 'contractId'
-  | 'outputId'
-  | 'netAddress'
-  | 'publicKey'
 
 export const columnsDefaultVisible: TableColumnId[] = [
   // 'actions',
   // 'id',
+  'transactionId',
   'type',
   'height',
   'timestamp',

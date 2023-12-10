@@ -1,5 +1,22 @@
 # walletd
 
+## 0.14.0
+
+### Minor Changes
+
+- f3b50183: The send siacoin and siafund features now support specifying custom change and claim addresses.
+- ccf9e177: Ledger wallets now support sending siafunds.
+- ccf9e177: Seed wallets now support sending siafunds.
+- ccf9e177: Event balances are now calculated with only relevant transaction components.
+- ccf9e177: The ledger generate addresses dialog now shows a close action if no new addresses have been generated.
+
+## 0.13.0
+
+### Minor Changes
+
+- b72ef30f: Currency display can now be configured to siacoin, fiat, or both along with a preference for when only one can be displayed.
+- 5308806e: App preferences no longer list unused GPU setting.
+
 ## 0.12.0
 
 ### Minor Changes

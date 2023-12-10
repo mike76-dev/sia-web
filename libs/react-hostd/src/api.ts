@@ -6,17 +6,19 @@ import {
   HookArgsSwr,
   HookArgsCallback,
   HookArgsWithPayloadSwr,
-  FileContractID,
-  PublicKey,
   getTestnetZenBlockHeight,
   getMainnetBlockHeight,
-  Currency,
   usePutSwr,
   useDeleteFunc,
   delay,
-  TransactionID,
   usePatchFunc,
 } from '@siafoundation/react-core'
+import {
+  FileContractID,
+  PublicKey,
+  Currency,
+  TransactionID,
+} from '@siafoundation/types'
 import useSWR from 'swr'
 import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
 
@@ -28,7 +30,7 @@ export type StateHost = {
   network: 'Mainnet' | 'Zen Testnet'
   version: string
   commit: string
-  OS: string
+  os: string
   buildTime: string
 }
 
@@ -44,7 +46,7 @@ export function useStateHost(args?: HookArgsSwr<void, StateHost>) {
 export type StateConsensus = {
   chainIndex: {
     height: number
-    ID: string
+    id: string
   }
   synced: boolean
 }
@@ -358,7 +360,7 @@ export type DNSNoIPOptions = {
 
 // AWS
 export type DNSAWSOptions = {
-  ID: string
+  id: string
   secret: string
   zoneID: string
 }
@@ -456,7 +458,7 @@ export function useSettingsDdns(
 // volumes
 
 export type Volume = {
-  ID: number
+  id: number
   localPath: string
   usedSectors: number
   totalSectors: number

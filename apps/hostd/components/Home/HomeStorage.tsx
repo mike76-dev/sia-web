@@ -5,7 +5,7 @@ import {
   DatumCardConfigurable,
   DatumScrollArea,
 } from '@siafoundation/design-system'
-import { humanBytes } from '@siafoundation/sia-js'
+import { humanBytes } from '@siafoundation/units'
 import { useMetrics } from '../../contexts/metrics'
 
 export function HomeStorage() {
@@ -16,7 +16,7 @@ export function HomeStorage() {
       <DatumScrollArea>
         <DatumCardConfigurable
           category="storage"
-          label="storage (physical)"
+          label="storage - physical"
           color={storage.config.data['physicalSectors'].color}
           value={storage.stats['physicalSectors']}
           defaultMode="latest"
@@ -26,9 +26,19 @@ export function HomeStorage() {
         />
         <DatumCardConfigurable
           category="storage"
-          label="registry"
-          color={storage.config.data['registryEntries'].color}
-          value={storage.stats['registryEntries']}
+          label="storage - contract"
+          color={storage.config.data['contractSectors'].color}
+          value={storage.stats['contractSectors']}
+          defaultMode="latest"
+          isLoading={storage.isLoading}
+          enabledModes={['latest', 'average']}
+          format={humanBytes}
+        />
+        <DatumCardConfigurable
+          category="storage"
+          label="storage - temp"
+          color={storage.config.data['tempSectors'].color}
+          value={storage.stats['tempSectors']}
           defaultMode="latest"
           isLoading={storage.isLoading}
           enabledModes={['latest', 'average']}
@@ -41,7 +51,6 @@ export function HomeStorage() {
         data={storage.data}
         config={storage.config}
         isLoading={storage.isLoading}
-        chartType={storage.chartType}
         actionsLeft={
           <>
             <Text font="mono" weight="semibold">

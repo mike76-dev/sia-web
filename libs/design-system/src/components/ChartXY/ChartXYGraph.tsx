@@ -7,10 +7,9 @@ import { ChartXYProps } from './useChartXY'
 import { Separator } from '../../core/Separator'
 import { PatternLines } from '@visx/pattern'
 import { cx } from 'class-variance-authority'
-import { rootClasses } from '../../config/css'
 import { groupBy } from 'lodash'
 import { ChartConfig, ChartPoint } from './types'
-import { humanDate } from '@siafoundation/sia-js'
+import { humanDate } from '@siafoundation/units'
 
 export function ChartXYGraph<Key extends string, Cat extends string>({
   id,
@@ -113,7 +112,7 @@ export function ChartXYGraph<Key extends string, Cat extends string>({
         numTicks={numTicks}
       />
       {renderBarStack && (
-        <BarStack offset={stackOffset}>
+        <BarStack offset={config.stackOffset}>
           {enabledGraph.map((key) => (
             <BarSeries
               key={key}
@@ -159,7 +158,7 @@ export function ChartXYGraph<Key extends string, Cat extends string>({
       {renderAreaStack && (
         <AreaStack
           curve={curve}
-          offset={stackOffset}
+          offset={config.stackOffset}
           renderLine={stackOffset !== 'wiggle'}
         >
           {enabledGraph.map((key) => (
@@ -217,12 +216,21 @@ export function ChartXYGraph<Key extends string, Cat extends string>({
         }
         orientation={yAxisOrientation}
         numTicks={numTicks}
-        tickLength={0}
-        rangePadding={0}
+        tickLength={12}
+        // rangePadding={0}
         animationTrajectory={animationTrajectory}
         // values don't make sense in stream graph
         // tickFormat={stackOffset === 'wiggle' ? () => '' : undefined}
-        tickFormat={() => ''}
+        tickFormat={config.formatTickY}
+        tickTransform={`translate(-300px, 0)`}
+        tickLabelProps={(p) => ({
+          ...p,
+          fill: theme.labels.color,
+          fontFamily: theme.labels.fontFamily,
+          // x: '-34px',
+          fontWeight: '500',
+          fontSize: '8',
+        })}
       />
       {showTooltip && (
         <Tooltip<ChartPoint<Key>>
@@ -266,7 +274,7 @@ export function ChartXYGraph<Key extends string, Cat extends string>({
             ) as [Cat, KeyOption[]][]
 
             return (
-              <div className={cx(rootClasses, 'flex flex-col gap-2 py-1')}>
+              <div className={cx('flex flex-col gap-2 py-1')}>
                 <Text
                   font="mono"
                   size="12"

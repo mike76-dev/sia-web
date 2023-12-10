@@ -1,16 +1,17 @@
 import {
-  bytesToMB,
-  MBToBytes,
-  monthsToBlocks,
-} from '@siafoundation/design-system'
-import {
   DNSAWSOptions,
   DNSCloudflareOptions,
   DNSDuckDNSOptions,
   DNSNoIPOptions,
   HostSettings,
 } from '@siafoundation/react-hostd'
-import { toHastings, toSiacoins } from '@siafoundation/sia-js'
+import {
+  bytesToMB,
+  MBToBytes,
+  monthsToBlocks,
+  toHastings,
+  toSiacoins,
+} from '@siafoundation/units'
 import {
   humanBaseRpcPrice,
   humanEgressPrice,
@@ -45,7 +46,7 @@ export function transformUp(
   // DNS AWS
   if (values.dnsProvider === 'route53') {
     dnsOptions = {
-      ID: values.dnsAwsId,
+      id: values.dnsAwsId,
       secret: values.dnsAwsSecret,
       zoneID: values.dnsAwsZoneId,
     } as DNSAWSOptions
@@ -144,7 +145,7 @@ export function transformDown(s: HostSettings): SettingsData {
   // DNS AWS
   if (s.ddns.provider === 'route53') {
     dnsOptions = {
-      dnsAwsId: s.ddns.options['ID'],
+      dnsAwsId: s.ddns.options['id'],
       dnsAwsSecret: s.ddns.options['secret'],
       dnsAwsZoneId: s.ddns.options['zoneID'],
     }

@@ -1,18 +1,26 @@
 import {
-  blockHeightToTime,
   useTableState,
   getContractsTimeRangeBlockHeight,
   useDatasetEmptyState,
   useClientFilters,
   useClientFilteredDataset,
   minutesInMilliseconds,
+  daysInMilliseconds,
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
 import { useContracts as useContractsData } from '@siafoundation/react-renterd'
-import { createContext, useContext, useMemo } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import BigNumber from 'bignumber.js'
 import {
   ContractData,
+  GraphMode,
+  ViewMode,
   columnsDefaultVisible,
   defaultSortField,
   sortOptions,
@@ -20,10 +28,16 @@ import {
 import { columns } from './columns'
 import { useSiaCentralHosts } from '@siafoundation/react-sia-central'
 import { useSyncStatus } from '../../hooks/useSyncStatus'
+import { useSiascanUrl } from '../../hooks/useSiascanUrl'
+import { blockHeightToTime } from '@siafoundation/units'
+import { useContractMetrics } from './useContractMetrics'
+import { useContractSetMetrics } from './useContractSetMetrics'
 
 const defaultLimit = 50
 
 function useContractsMain() {
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [graphMode, setGraphMode] = useState<GraphMode>('spending')
   const router = useRouter()
   const limit = Number(router.query.limit || defaultLimit)
   const offset = Number(router.query.offset || 0)
@@ -42,6 +56,19 @@ function useContractsMain() {
     ? syncStatus.nodeBlockHeight
     : syncStatus.estimatedBlockHeight
 
+  const [selectedContractId, setSelectedContractId] = useState<string>()
+  const selectContract = useCallback(
+    (id: string) => {
+      if (selectedContractId === id) {
+        setSelectedContractId(undefined)
+        return
+      }
+      setSelectedContractId(id)
+      setViewMode('detail')
+      setGraphMode('spending')
+    },
+    [selectedContractId, setSelectedContractId, setViewMode]
+  )
   const dataset = useMemo<ContractData[] | null>(() => {
     if (!response.data) {
       return null
@@ -56,6 +83,7 @@ function useContractsMain() {
         const endTime = blockHeightToTime(currentHeight, endHeight)
         return {
           id: c.id,
+          onClick: () => selectContract(c.id),
           contractId: c.id,
           state: c.state,
           hostIp: c.hostIP,
@@ -80,7 +108,12 @@ function useContractsMain() {
         }
       }) || []
     return data
-  }, [response.data, geoHosts, currentHeight])
+  }, [response.data, geoHosts, currentHeight, selectContract])
+
+  const selectedContract = useMemo(
+    () => dataset?.find((d) => d.id === selectedContractId),
+    [dataset, selectedContractId]
+  )
 
   const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
     useClientFilters<ContractData>()
@@ -139,6 +172,30 @@ function useContractsMain() {
     filters
   )
 
+  const siascanUrl = useSiascanUrl()
+
+  const cellContext = useMemo(
+    () => ({
+      currentHeight: syncStatus.estimatedBlockHeight,
+      contractsTimeRange,
+      siascanUrl,
+    }),
+    [syncStatus.estimatedBlockHeight, contractsTimeRange, siascanUrl]
+  )
+
+  const thirtyDaysAgo = new Date().getTime() - daysInMilliseconds(30)
+  const { contractMetrics: allContractsSpendingMetrics } = useContractMetrics({
+    start: thirtyDaysAgo,
+  })
+  const { contractMetrics: selectedContractSpendingMetrics } =
+    useContractMetrics({
+      contractId: selectedContractId,
+      start: selectedContract?.startTime || 0,
+      disabled: !selectedContract,
+    })
+  const { contractSetMetrics: contractSetCountMetrics } =
+    useContractSetMetrics()
+
   return {
     dataState,
     limit,
@@ -146,14 +203,12 @@ function useContractsMain() {
     isLoading: response.isLoading,
     error: response.error,
     pageCount: datasetPage?.length || 0,
-    datasetCount: datasetFiltered?.length || 0,
+    datasetCount: dataset?.length || 0,
+    datasetFilteredCount: datasetFiltered?.length || 0,
     columns: filteredTableColumns,
     dataset,
+    cellContext,
     datasetPage,
-    cellContext: {
-      currentHeight: syncStatus.estimatedBlockHeight,
-      contractsTimeRange,
-    },
     configurableColumns,
     enabledColumns,
     sortableColumns,
@@ -171,6 +226,15 @@ function useContractsMain() {
     resetFilters,
     sortDirection,
     resetDefaultColumnVisibility,
+    viewMode,
+    setViewMode,
+    graphMode,
+    setGraphMode,
+    selectedContract,
+    selectContract,
+    allContractsSpendingMetrics,
+    selectedContractSpendingMetrics,
+    contractSetCountMetrics,
   }
 }
 

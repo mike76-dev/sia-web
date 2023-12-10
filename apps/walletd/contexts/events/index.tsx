@@ -16,6 +16,7 @@ import {
   useMemo,
 } from 'react'
 import {
+  CellContext,
   EventData,
   columnsDefaultVisible,
   defaultSortField,
@@ -24,6 +25,7 @@ import {
 import { columns } from './columns'
 import { useRouter } from 'next/router'
 import BigNumber from 'bignumber.js'
+import { useSiascanUrl } from '../../hooks/useSiascanUrl'
 
 const defaultLimit = 100
 
@@ -74,26 +76,52 @@ export function useEventsMain() {
       return null
     }
     const dataTxPool: EventData[] = responseTxPool.data.map((e) => ({
-      id: e.ID,
+      id: e.id,
+      transactionId: e.id,
       timestamp: 0,
       pending: true,
-      type: e.Type,
-      amount: new BigNumber(e.Received).minus(e.Sent),
+      type: e.type,
+      amount: new BigNumber(e.received).minus(e.sent),
     }))
     const dataEvents: EventData[] = responseEvents.data.map((e, index) => {
-      let amount = new BigNumber(0)
-      if (e.type === 'siacoin transfer') {
-        const inputsTotal =
-          e.val?.inputs?.reduce(
-            (acc, o) => acc.plus(o.value),
-            new BigNumber(0)
-          ) || new BigNumber(0)
-        const outputsTotal =
-          e.val?.outputs?.reduce(
-            (acc, o) => acc.plus(o.value),
-            new BigNumber(0)
-          ) || new BigNumber(0)
-        amount = outputsTotal.minus(inputsTotal)
+      let amountSc = new BigNumber(0)
+      let amountSf = 0
+      if (e.type === 'transaction') {
+        const inputsScTotal =
+          e.val?.siacoinInputs?.reduce((acc, o) => {
+            if (e.relevant.includes(o.siacoinOutput.address)) {
+              return acc.plus(o.siacoinOutput.value)
+            }
+            return acc
+          }, new BigNumber(0)) || new BigNumber(0)
+        const outputsScTotal =
+          e.val?.siacoinOutputs?.reduce((acc, o) => {
+            if (e.relevant.includes(o.siacoinOutput.address)) {
+              return acc.plus(o.siacoinOutput.value)
+            }
+            return acc
+          }, new BigNumber(0)) || new BigNumber(0)
+        amountSc = outputsScTotal.minus(inputsScTotal)
+
+        const inputsSfTotal =
+          e.val?.siafundInputs?.reduce((acc, o) => {
+            if (e.relevant.includes(o.siafundElement.siafundOutput.address)) {
+              return acc + o.siafundElement.siafundOutput.value
+            }
+            return acc
+          }, 0) || 0
+        const outputsSfTotal =
+          e.val?.siafundOutputs?.reduce((acc, o) => {
+            if (e.relevant.includes(o.siafundOutput.address)) {
+              return acc + o.siafundOutput.value
+            }
+            return acc
+          }, 0) || 0
+        amountSf = outputsSfTotal - inputsSfTotal
+      }
+
+      if (e.type === 'miner payout') {
+        amountSc = new BigNumber(e.val.siacoinOutput.siacoinOutput.value)
       }
 
       const id = String(index)
@@ -103,30 +131,18 @@ export function useEventsMain() {
         timestamp: new Date(e.timestamp).getTime(),
         height: e.index.height,
         pending: false,
-        amount,
-      }
-      if ('maturityHeight' in e.val) {
-        res.maturityHeight = e.val.maturityHeight
+        amountSc,
+        amountSf,
       }
       if ('fee' in e.val) {
         res.fee = new BigNumber(e.val.fee)
       }
-      if ('contractID' in e.val) {
-        res.contractId = e.val.contractID
+      if ('fileContract' in e.val) {
+        res.contractId = e.val.fileContract.id
       }
-      if ('transactionID' in e.val) {
-        res.id += e.val.transactionID
-        res.transactionId = e.val.transactionID
-      }
-      if ('outputID' in e.val) {
-        res.id += e.val.outputID
-        res.outputId = e.val.outputID
-      }
-      if ('netAddress' in e.val) {
-        res.netAddress = e.val.netAddress
-      }
-      if ('publicKey' in e.val) {
-        res.publicKey = e.val.publicKey
+      if ('id' in e.val) {
+        res.id += e.val.id
+        res.transactionId = e.val.id
       }
       return res
     })
@@ -167,12 +183,21 @@ export function useEventsMain() {
 
   const dataState = useDatasetEmptyState(dataset, isValidating, error, filters)
 
+  const siascanUrl = useSiascanUrl()
+  const cellContext = useMemo<CellContext>(
+    () => ({
+      siascanUrl,
+    }),
+    [siascanUrl]
+  )
+
   return {
     dataState,
     error: responseEvents.error,
     pageCount: dataset?.length || 0,
     columns: filteredTableColumns,
     dataset,
+    cellContext,
     configurableColumns,
     enabledColumns,
     sortableColumns,

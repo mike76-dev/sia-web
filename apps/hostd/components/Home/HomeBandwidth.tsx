@@ -5,7 +5,7 @@ import {
   DatumCardConfigurable,
   DatumScrollArea,
 } from '@siafoundation/design-system'
-import { humanBytes } from '@siafoundation/sia-js'
+import { humanBytes } from '@siafoundation/units'
 import { useMetrics } from '../../contexts/metrics'
 
 export function HomeBandwidth() {
@@ -39,7 +39,6 @@ export function HomeBandwidth() {
         data={bandwidth.data}
         config={bandwidth.config}
         isLoading={bandwidth.isLoading}
-        chartType={bandwidth.chartType}
         actionsLeft={
           <>
             <Text font="mono" weight="semibold">

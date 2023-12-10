@@ -1,5 +1,36 @@
 # renterd
 
+## 0.34.0
+
+### Minor Changes
+
+- 57339114: The file stats overall health now uses the min health reported by the object stats endpoint.
+- 63aef996: Wallet transactions are now paginated.
+- 56aece36: Files can now be sorted by name and health, ascending or descending.
+- 40419ce8: File uploads are now disabled if the blockchain is not fully synced.
+- eae7d2f7: File warnings are now a simple warning icon next to the stats and are explained in a popover.
+- eae7d2f7: Selecting a file search result now navigates to the directory and applies a file name filter.
+- eae7d2f7: The bucket empty state now has a button for navigating back to the buckets list.
+- eae7d2f7: Files in the current directory can now be filtered.
+
+### Patch Changes
+
+- f57ac167: Fixed an issue where the filtered contract count was being used in the onboarding checks.
+
+## 0.33.0
+
+### Minor Changes
+
+- 5958be26: The configuration now has zen-specific suggested/default values for number of contract hosts and shard values.
+- 69a696ca: The bucket context menu now allows you to edit the bucket policy and toggle the read access between public and private.
+- f0403c7e: The simple configuration mode now shows download and upload estimates and pricing.
+- b72ef30f: Currency display can now be configured to siacoin, fiat, or both along with a preference for when only one can be displayed.
+- d34b0a4f: Fixed an issue with file search where selecting a file would navigate to the path without the bucket.
+- 1af82db8: The configuration now includes a setting for a migration surcharge multiplier which allows you to set a factor for increasing the max download price when trying to repair critically low health sectors.
+- f0403c7e: The contract count shown in onboarding will update more quickly as it now includes pending contracts.
+- f3e8cfe9: The contracts table now includes a column for state that shows: pending, active, complete, or failed.
+- 141a7e44: The contract list now updates after a contract is deleted.
+
 ## 0.32.0
 
 ### Minor Changes

@@ -10,7 +10,7 @@ import {
   EntityList,
   EntityListItemProps,
 } from '@siafoundation/design-system'
-import { humanNumber } from '@siafoundation/sia-js'
+import { humanNumber } from '@siafoundation/units'
 import { ExplorerDatum, DatumProps } from '../ExplorerDatum'
 import { useMemo, useState } from 'react'
 import { routes } from '../../config/routes'
@@ -152,10 +152,10 @@ export function Address({ id, address }: Props) {
           <TabsTrigger value="utxos">Unspent outputs</TabsTrigger>
         </TabsList>
         <TabsContent value="transactions">
-          <EntityList entities={transactions} />
+          <EntityList dataset={transactions} />
         </TabsContent>
         <TabsContent value="utxos">
-          <EntityList entities={utxos} />
+          <EntityList dataset={utxos} />
         </TabsContent>
       </Tabs>
     </ContentLayout>

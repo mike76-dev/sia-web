@@ -11,12 +11,7 @@ import {
 } from '@siafoundation/design-system'
 import BigNumber from 'bignumber.js'
 import React from 'react'
-import {
-  defaultValues,
-  advancedDefaultAutopilot,
-  advancedDefaultContractSet,
-  advancedDefaultGouging,
-} from './types'
+import { defaultValues, SettingsData } from './types'
 
 export const scDecimalPlaces = 6
 
@@ -31,6 +26,7 @@ type Categories =
 
 type GetFields = {
   isAutopilotEnabled: boolean
+  advancedDefaults?: SettingsData
   showAdvanced: boolean
   redundancyMultiplier: BigNumber
   includeRedundancyMaxStoragePrice: boolean
@@ -43,6 +39,7 @@ type GetFields = {
 
 export function getFields({
   isAutopilotEnabled,
+  advancedDefaults,
   showAdvanced,
   redundancyMultiplier,
   includeRedundancyMaxStoragePrice,
@@ -120,8 +117,8 @@ export function getFields({
       title: 'Period',
       description: <>The length of the storage contracts.</>,
       units: 'weeks',
-      suggestion: advancedDefaultAutopilot.periodWeeks,
-      suggestionTip: `Typically ${advancedDefaultAutopilot.periodWeeks} weeks.`,
+      suggestion: advancedDefaults?.periodWeeks,
+      suggestionTip: `Typically ${advancedDefaults?.periodWeeks} weeks.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
         isAutopilotEnabled && showAdvanced
@@ -142,8 +139,8 @@ export function getFields({
       ),
       units: 'weeks',
       decimalsLimit: 6,
-      suggestion: advancedDefaultAutopilot.renewWindowWeeks,
-      suggestionTip: `Typically ${advancedDefaultAutopilot.renewWindowWeeks} weeks.`,
+      suggestion: advancedDefaults?.renewWindowWeeks,
+      suggestionTip: `Typically ${advancedDefaults?.renewWindowWeeks} weeks.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
         isAutopilotEnabled && showAdvanced
@@ -159,8 +156,8 @@ export function getFields({
       description: <>The number of hosts to create contracts with.</>,
       units: 'hosts',
       decimalsLimit: 0,
-      suggestion: advancedDefaultAutopilot.amountHosts,
-      suggestionTip: `Typically ${advancedDefaultAutopilot.amountHosts} hosts.`,
+      suggestion: advancedDefaults?.amountHosts,
+      suggestionTip: `Typically ${advancedDefaults?.amountHosts} hosts.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
         isAutopilotEnabled && showAdvanced
@@ -179,12 +176,40 @@ export function getFields({
           the same as the default contract set.
         </>
       ),
-      placeholder: advancedDefaultAutopilot.autopilotContractSet,
-      suggestion: advancedDefaultAutopilot.autopilotContractSet,
+      placeholder: advancedDefaults?.autopilotContractSet,
+      suggestion: advancedDefaults?.autopilotContractSet,
       suggestionTip: (
         <>
           The default contract set is{' '}
-          <Code>{advancedDefaultAutopilot.autopilotContractSet}</Code>.
+          <Code>{advancedDefaults?.autopilotContractSet}</Code>.
+        </>
+      ),
+      hidden: !isAutopilotEnabled || !showAdvanced,
+      validation:
+        isAutopilotEnabled && showAdvanced
+          ? {
+              required: 'required',
+            }
+          : {},
+    },
+    prune: {
+      type: 'boolean',
+      category: 'storage',
+      title: 'Prune sector roots',
+      description: (
+        <>
+          When enabled, autopilot will try to prune deleted sector roots from
+          contracts one contract at a time, for a max duration of 10 minutes per
+          contract. For old hosts this process takes quite a while, while for
+          new hosts it is fast. For new hosts pruning effectively deletes data
+          from the contract, allowing the renter to stop paying for storage they
+          are not using.
+        </>
+      ),
+      suggestion: advancedDefaults?.prune,
+      suggestionTip: (
+        <>
+          The default value is <Code>{advancedDefaults?.prune}</Code>.
         </>
       ),
       hidden: !isAutopilotEnabled || !showAdvanced,
@@ -207,9 +232,9 @@ export function getFields({
           same IP subnet. The subnets used are /16 for IPv4, and /64 for IPv6.
         </>
       ),
-      suggestion: advancedDefaultAutopilot.allowRedundantIPs,
+      suggestion: advancedDefaults?.allowRedundantIPs,
       suggestionTip: `Defaults to ${
-        advancedDefaultAutopilot.allowRedundantIPs ? 'on' : 'off'
+        advancedDefaults?.allowRedundantIPs ? 'on' : 'off'
       }.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation: {},
@@ -225,12 +250,12 @@ export function getFields({
         </>
       ),
       units: 'hours',
-      suggestion: advancedDefaultAutopilot.maxDowntimeHours,
-      suggestionTip: `Defaults to ${advancedDefaultAutopilot.maxDowntimeHours
+      suggestion: advancedDefaults?.maxDowntimeHours,
+      suggestionTip: `Defaults to ${advancedDefaults?.maxDowntimeHours
         .toNumber()
         .toLocaleString()} which is ${toFixedMax(
         new BigNumber(
-          hoursInDays(advancedDefaultAutopilot.maxDowntimeHours.toNumber())
+          hoursInDays(advancedDefaults?.maxDowntimeHours.toNumber())
         ),
         1
       )} days.`,
@@ -254,8 +279,8 @@ export function getFields({
       ),
       units: 'scans',
       decimalsLimit: 0,
-      suggestion: advancedDefaultAutopilot.minRecentScanFailures,
-      suggestionTip: `Defaults to ${advancedDefaultAutopilot.minRecentScanFailures.toNumber()}.`,
+      suggestion: advancedDefaults?.minRecentScanFailures,
+      suggestionTip: `Defaults to ${advancedDefaults?.minRecentScanFailures.toNumber()}.`,
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
         isAutopilotEnabled && showAdvanced
@@ -274,7 +299,7 @@ export function getFields({
         <>The threshold after which autopilot will defrag wallet outputs.</>
       ),
       units: 'outputs',
-      suggestion: advancedDefaultAutopilot.defragThreshold,
+      suggestion: advancedDefaults?.defragThreshold,
       suggestionTip: 'Defaults to 1,000.',
       hidden: !isAutopilotEnabled || !showAdvanced,
       validation:
@@ -290,8 +315,8 @@ export function getFields({
       category: 'contractset',
       type: 'text',
       title: 'Default contract set',
-      placeholder: advancedDefaultContractSet.defaultContractSet,
-      suggestion: advancedDefaultContractSet.defaultContractSet,
+      placeholder: advancedDefaults?.defaultContractSet,
+      suggestion: advancedDefaults?.defaultContractSet,
       suggestionTip: (
         <>
           Autopilot users will typically want to keep this the same as the
@@ -487,7 +512,7 @@ export function getFields({
       ),
       units: 'blocks',
       decimalsLimit: 0,
-      suggestion: advancedDefaultGouging.hostBlockHeightLeeway,
+      suggestion: advancedDefaults?.hostBlockHeightLeeway,
       suggestionTip: 'The recommended value is 6 blocks.',
       hidden: !showAdvanced,
       validation: showAdvanced
@@ -600,6 +625,8 @@ export function getFields({
       category: 'redundancy',
       title: 'Min shards',
       description: <>The min amount of shards needed to reconstruct a slab.</>,
+      suggestion: advancedDefaults?.minShards,
+      suggestionTip: `Typically ${advancedDefaults?.minShards} shards.`,
       units: 'shards',
       hidden: !showAdvanced,
       validation: showAdvanced
@@ -619,6 +646,8 @@ export function getFields({
       category: 'redundancy',
       title: 'Total shards',
       description: <>The total amount of shards for each slab.</>,
+      suggestion: advancedDefaults?.totalShards,
+      suggestionTip: `Typically ${advancedDefaults?.totalShards} shards.`,
       units: 'shards',
       hidden: !showAdvanced,
       validation: showAdvanced

@@ -1,13 +1,8 @@
 import {
-  blocksToWeeks,
-  bytesToTB,
-  weeksToBlocks,
   daysInNanoseconds,
   minutesInNanoseconds,
-  monthsToBlocks,
   nanosecondsInDays,
   nanosecondsInMinutes,
-  TBToBytes,
   toFixedMax,
 } from '@siafoundation/design-system'
 import {
@@ -17,13 +12,21 @@ import {
   RedundancySettings,
   UploadPackingSettings,
 } from '@siafoundation/react-renterd'
-import { toHastings, toSiacoins } from '@siafoundation/sia-js'
+import {
+  toHastings,
+  toSiacoins,
+  blocksToWeeks,
+  bytesToTB,
+  weeksToBlocks,
+  monthsToBlocks,
+  TBToBytes,
+} from '@siafoundation/units'
 import BigNumber from 'bignumber.js'
 import {
   AutopilotData,
   scDecimalPlaces,
   SettingsData,
-  advancedDefaultAutopilot,
+  getAdvancedDefaultAutopilot,
   ConfigAppData,
   ContractSetData,
   defaultConfigApp,
@@ -46,6 +49,7 @@ const filterUndefinedKeys = (obj: Record<string, unknown>) => {
 
 // up
 export function transformUpAutopilot(
+  network: 'Mainnet' | 'Zen Testnet',
   values: AutopilotData,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   existingValues: AutopilotConfig | undefined
@@ -53,7 +57,7 @@ export function transformUpAutopilot(
   // merge suggestions with values, if advanced values are required they will
   // be added before this function is called and will override suggestions
   const v: AutopilotData = {
-    ...advancedDefaultAutopilot,
+    ...getAdvancedDefaultAutopilot(network),
     ...filterUndefinedKeys(values),
   }
 
@@ -81,6 +85,7 @@ export function transformUpAutopilot(
         ).toFixed(0)
       ),
       storage: TBToBytes(v.storageTB).toNumber(),
+      prune: v.prune,
     },
     hosts: {
       ...existingValues?.hosts,
@@ -230,6 +235,7 @@ export function transformDownAutopilot(
     )
   )
   const storageTB = bytesToTB(new BigNumber(config.contracts.storage))
+  const prune = config.contracts.prune
 
   return {
     // contracts
@@ -241,6 +247,7 @@ export function transformDownAutopilot(
     downloadTBMonth,
     uploadTBMonth,
     storageTB,
+    prune,
     // hosts
     allowRedundantIPs: config.hosts.allowRedundantIPs,
     maxDowntimeHours: new BigNumber(config.hosts.maxDowntimeHours),

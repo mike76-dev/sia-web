@@ -8,7 +8,6 @@ import toast, {
 } from 'react-hot-toast'
 import { cx } from 'class-variance-authority'
 import { panelStyles } from '../core/Panel'
-import { rootClasses } from '../config/css'
 import React from 'react'
 import { Text } from '../core/Text'
 
@@ -71,7 +70,6 @@ export function buildToastOptions({
     position: 'top-center',
     duration: 6_000,
     className: cx(
-      rootClasses,
       panelStyles(),
       'font-sans font-normal',
       'text-gray-1100 dark:text-white',

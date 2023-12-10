@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js'
 
 export type ContractData = {
   id: string
+  onClick: () => void
   hostIp: string
   hostKey: string
   state: ContractState
@@ -135,3 +136,24 @@ export const sortOptions: {
     category: 'financial',
   },
 ]
+
+export type ViewMode = 'list' | 'detail'
+export type GraphMode = 'spending' | 'count'
+
+export type ChartContractKey =
+  | 'uploadSpending'
+  | 'listSpending'
+  | 'deleteSpending'
+  | 'fundAccountSpending'
+  | 'remainingCollateral'
+  | 'remainingFunds'
+
+export type ChartContractCategory = 'funding' | 'spending'
+
+export type ChartContractSetKey = 'contracts'
+
+export type ChartContractSetCategory = never
+
+export type ChartContractSetChurnKey = 'contracts'
+
+export type ChartContractSetChurnCategory = never

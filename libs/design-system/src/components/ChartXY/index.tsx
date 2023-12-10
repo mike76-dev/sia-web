@@ -21,7 +21,7 @@ export type { Chart, ChartPoint, ChartData, ChartStats, ChartConfig, ChartType }
 
 type Props<Key extends string, Cat extends string> = {
   id: string
-  height: number
+  height: string | number
   data: ChartData<Key>
   isLoading?: boolean
   config: ChartConfig<Key, Cat>
@@ -30,6 +30,7 @@ type Props<Key extends string, Cat extends string> = {
   stackOffset?: StackOffset
   actionsRight?: React.ReactNode
   actionsLeft?: React.ReactNode
+  emptyState?: React.ReactNode
   allowConfiguration?: boolean
   variant?: 'panel' | 'ghost'
 }
@@ -42,20 +43,11 @@ export function ChartXY<Key extends string, Cat extends string>({
   actionsLeft,
   isLoading,
   actionsRight,
-  chartType = 'areastack',
-  curveType = 'linear',
-  stackOffset = 'none',
+  emptyState,
   variant = 'panel',
   allowConfiguration = true,
 }: Props<Key, Cat>) {
-  const props = useChartXY<Key, Cat>(
-    id,
-    data,
-    config,
-    chartType,
-    curveType,
-    stackOffset
-  )
+  const props = useChartXY<Key, Cat>(id, data, config)
 
   const body = (
     <>
@@ -72,6 +64,8 @@ export function ChartXY<Key extends string, Cat extends string>({
             <div className="flex items-center justify-center h-full">
               <LoadingDots className="scale-150" />
             </div>
+          ) : data.length === 0 && emptyState ? (
+            emptyState
           ) : (
             <ChartXYGraph {...props} width={width} height={height} />
           )

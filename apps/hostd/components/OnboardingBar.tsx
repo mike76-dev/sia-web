@@ -19,13 +19,13 @@ import { routes } from '../config/routes'
 import { useDialog } from '../contexts/dialog'
 import { useSettings, useWallet } from '@siafoundation/react-hostd'
 import BigNumber from 'bignumber.js'
-import { humanSiacoin, toHastings } from '@siafoundation/sia-js'
+import { toHastings } from '@siafoundation/units'
 import { useAppSettings } from '@siafoundation/react-core'
 import { useVolumes } from '../contexts/volumes'
 import useLocalStorageState from 'use-local-storage-state'
 
 export function OnboardingBar() {
-  const { isUnlocked } = useAppSettings()
+  const { isUnlockedAndAuthedRoute } = useAppSettings()
   const { openDialog } = useDialog()
   const { dataset: volumes } = useVolumes()
   const settings = useSettings()
@@ -38,14 +38,15 @@ export function OnboardingBar() {
   )
   const syncStatus = useSyncStatus()
 
-  if (!isUnlocked) {
+  if (!isUnlockedAndAuthedRoute) {
     return null
   }
 
-  const walletBalance = new BigNumber(wallet.data?.confirmed || 0)
-  const minimumBalance = toHastings(5_000)
-
-  const step1Funded = wallet.data && walletBalance.gte(minimumBalance)
+  const walletBalance = new BigNumber(
+    wallet.data ? wallet.data.confirmed + wallet.data.unconfirmed : 0
+  )
+  const minimumBalance = toHastings(0)
+  const step1Funded = wallet.data && walletBalance.gt(minimumBalance)
   const step2Volumes = volumes?.length > 0
   const step3Configured = settings.data?.acceptingContracts
   const step4Synced = syncStatus.isSynced
@@ -98,9 +99,7 @@ export function OnboardingBar() {
                   Step 1: Fund your wallet
                 </Link>
               }
-              description={`Fund your wallet with at least ${humanSiacoin(
-                minimumBalance
-              )} siacoin to cover required contract collateral.${
+              description={`Fund your wallet with siacoin to cover required contract collateral.${
                 syncStatus.isWalletSynced
                   ? ''
                   : ' Balance will not be accurate until wallet is finished scanning.'

@@ -1,25 +1,46 @@
 import {
-  useClientFilteredDataset,
-  useClientFilters,
   useDatasetEmptyState,
+  useServerFilters,
   useTableState,
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
 import { createContext, useCallback, useContext, useMemo } from 'react'
 import { columns } from './columns'
+import { defaultSortField, columnsDefaultVisible, sortOptions } from './types'
 import {
-  defaultSortField,
-  columnsDefaultVisible,
-  ObjectData,
-  sortOptions,
-} from './types'
-import { FullPath, FullPathSegments, pathSegmentsToPath } from './paths'
+  FullPath,
+  FullPathSegments,
+  getDirectorySegmentsFromPath,
+  getFilename,
+  pathSegmentsToPath,
+} from './paths'
 import { useUploads } from './uploads'
 import { useDownloads } from './downloads'
 import { useDataset } from './dataset'
 
 function useFilesMain() {
+  const {
+    configurableColumns,
+    enabledColumns,
+    sortableColumns,
+    toggleColumnVisibility,
+    setColumnsVisible,
+    setColumnsHidden,
+    toggleSort,
+    setSortDirection,
+    setSortField,
+    sortField,
+    sortDirection,
+    resetDefaultColumnVisibility,
+  } = useTableState('renterd/v0/objects', {
+    columns,
+    columnsDefaultVisible,
+    sortOptions,
+    defaultSortField,
+  })
   const router = useRouter()
+  const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
+    useServerFilters()
 
   // [bucket, key, directory]
   const activeDirectory = useMemo<FullPathSegments>(
@@ -57,44 +78,16 @@ function useFilesMain() {
   const { limit, offset, response, dataset } = useDataset({
     activeDirectoryPath,
     uploadsList,
-  })
-
-  const {
-    configurableColumns,
-    enabledColumns,
-    sortableColumns,
-    toggleColumnVisibility,
-    setColumnsVisible,
-    setColumnsHidden,
-    toggleSort,
-    setSortDirection,
-    setSortField,
     sortField,
     sortDirection,
-    resetDefaultColumnVisibility,
-  } = useTableState('renterd/v0/objects', {
-    columns,
-    columnsDefaultVisible,
-    sortOptions,
-    defaultSortField,
-  })
-
-  const { filters, setFilter, removeFilter, removeLastFilter, resetFilters } =
-    useClientFilters<ObjectData>()
-
-  const datasetFiltered = useClientFilteredDataset({
-    dataset,
     filters,
-    sortField,
-    sortDirection,
   })
 
-  const pageCount = datasetFiltered?.length || 0
   const datasetPage = useMemo(() => {
-    if (!datasetFiltered) {
+    if (!dataset) {
       return null
     }
-    if (activeDirectory.length > 0 && datasetFiltered.length > 0) {
+    if (activeDirectory.length > 0 && dataset.length > 0) {
       return [
         {
           id: '..',
@@ -102,14 +95,14 @@ function useFilesMain() {
           path: '..',
           type: 'directory',
         },
-        ...datasetFiltered,
+        ...dataset,
       ]
     }
-    return datasetFiltered
+    return dataset
     // Purposely do not include activeDirectory - we only want to update
     // when new data fetching is complete.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasetFiltered])
+  }, [dataset])
 
   const filteredTableColumns = useMemo(
     () =>
@@ -120,7 +113,7 @@ function useFilesMain() {
   )
 
   const dataState = useDatasetEmptyState(
-    datasetFiltered,
+    dataset,
     response.isValidating,
     response.error,
     filters
@@ -130,6 +123,21 @@ function useFilesMain() {
   const isViewingRootOfABucket = activeDirectory.length === 1
   const isViewingABucket = activeDirectory.length > 0
 
+  const navigateToFile = useCallback(
+    (path: string) => {
+      setActiveDirectory(() => [
+        activeBucket,
+        ...getDirectorySegmentsFromPath(path),
+      ])
+      setFilter({
+        id: 'fileNamePrefix',
+        label: '',
+        value: getFilename(path),
+      })
+    },
+    [activeBucket, setActiveDirectory, setFilter]
+  )
+
   return {
     isViewingBuckets,
     isViewingABucket,
@@ -138,12 +146,12 @@ function useFilesMain() {
     activeDirectory,
     setActiveDirectory,
     activeDirectoryPath,
+    navigateToFile,
     dataState,
     limit,
     offset,
     datasetPage,
-    pageCount,
-    datasetCount: datasetFiltered?.length || 0,
+    pageCount: dataset?.length || 0,
     columns: filteredTableColumns,
     uploadFiles,
     uploadsList,

@@ -5,11 +5,15 @@ import {
   formatChartData,
   getDataIntervalLabelFormatter,
   getTimeRange,
-  MiBToBytes,
   minutesInMilliseconds,
   ValueScFiat,
 } from '@siafoundation/design-system'
-import { humanBytes, humanNumber } from '@siafoundation/sia-js'
+import {
+  MiBToBytes,
+  humanBytes,
+  humanNumber,
+  humanSiacoin,
+} from '@siafoundation/units'
 import { useCallback, useMemo } from 'react'
 import { chartConfigs } from '../../config/charts'
 import { useMetricsPeriod } from '@siafoundation/react-hostd'
@@ -116,42 +120,45 @@ function useMetricsMain() {
   })
 
   const revenue = useMemo<Chart<RevenueKeys, RevenueCategories>>(() => {
-    const data = formatChartData(
+    const dataWithNegatives = formatChartData(
       metricsPeriod.data?.map((m) => ({
         storagePotential: Number(m.revenue.potential.storage),
         ingressPotential: Number(m.revenue.potential.ingress),
         egressPotential: Number(m.revenue.potential.egress),
-        registryReadPotential: Number(m.revenue.potential.registryRead),
-        registryWritePotential: Number(m.revenue.potential.registryWrite),
         rpcPotential: Number(m.revenue.potential.rpc),
         storage: Number(m.revenue.earned.storage),
         ingress: Number(m.revenue.earned.ingress),
         egress: Number(m.revenue.earned.egress),
-        registryRead: Number(m.revenue.earned.registryRead),
-        registryWrite: Number(m.revenue.earned.registryWrite),
         rpc: Number(m.revenue.earned.rpc),
         // not enabled on graph, but used for stats
         potential: new BigNumber(m.revenue.potential.storage)
           .plus(m.revenue.potential.ingress)
           .plus(m.revenue.potential.egress)
-          .plus(m.revenue.potential.registryRead)
-          .plus(m.revenue.potential.registryWrite)
           .plus(m.revenue.potential.rpc)
           .toNumber(),
         earned: new BigNumber(m.revenue.earned.storage)
           .plus(m.revenue.earned.ingress)
           .plus(m.revenue.earned.egress)
-          .plus(m.revenue.earned.registryRead)
-          .plus(m.revenue.earned.registryWrite)
           .plus(m.revenue.earned.rpc)
           .toNumber(),
         timestamp: new Date(m.timestamp).getTime(),
       })),
       'delta'
     )
-    const stats = computeChartStats(data)
+    const stats = computeChartStats(dataWithNegatives)
+    const dataWithoutNegatives = dataWithNegatives.map((m) => ({
+      storagePotential: Math.max(m.storagePotential, 0),
+      ingressPotential: Math.max(m.ingressPotential, 0),
+      egressPotential: Math.max(m.egressPotential, 0),
+      rpcPotential: Math.max(m.rpcPotential, 0),
+      storage: Math.max(m.storage, 0),
+      ingress: Math.max(m.ingress, 0),
+      egress: Math.max(m.egress, 0),
+      rpc: Math.max(m.rpc, 0),
+      timestamp: new Date(m.timestamp).getTime(),
+    }))
     return {
-      data,
+      data: dataWithoutNegatives,
       stats,
       config: {
         enabledGraph: [
@@ -161,28 +168,16 @@ function useMetricsMain() {
           'ingressPotential',
           'egress',
           'egressPotential',
-          'registryRead',
-          'registryReadPotential',
-          'registryWrite',
-          'registryWritePotential',
           'rpc',
           'rpcPotential',
         ],
         enabledTip: [
-          // include the totals in the tip
-          'potential',
-          'earned',
-
           'storage',
           'storagePotential',
           'ingress',
           'ingressPotential',
           'egress',
           'egressPotential',
-          'registryRead',
-          'registryReadPotential',
-          'registryWrite',
-          'registryWritePotential',
           'rpc',
           'rpcPotential',
         ],
@@ -253,10 +248,16 @@ function useMetricsMain() {
         formatComponent: function ({ value }) {
           return <ValueScFiat variant="value" value={new BigNumber(value)} />
         },
+        formatTickY: (v) =>
+          humanSiacoin(v, {
+            fixed: 0,
+            dynamicUnits: true,
+          }),
         formatTimestamp,
         disableAnimations,
+        chartType: 'barstack',
+        stackOffset: 'diverging',
       },
-      chartType: 'line',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -289,9 +290,16 @@ function useMetricsMain() {
           return <ValueScFiat variant="value" value={new BigNumber(value)} />
         },
         formatTimestamp,
+        formatTickY: (v) =>
+          humanSiacoin(v, {
+            fixed: 0,
+            dynamicUnits: true,
+          }),
         disableAnimations,
+        chartType: 'area',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'area',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -354,9 +362,16 @@ function useMetricsMain() {
           return <ValueScFiat variant="value" value={new BigNumber(value)} />
         },
         formatTimestamp,
+        formatTickY: (v) =>
+          humanSiacoin(v, {
+            fixed: 0,
+            dynamicUnits: true,
+          }),
         disableAnimations,
+        chartType: 'line',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'line',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -391,9 +406,12 @@ function useMetricsMain() {
         },
         format: (v) => `${v} contracts`,
         formatTimestamp,
+        formatTickY: (v) => humanNumber(v),
         disableAnimations,
+        chartType: 'areastack',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'areastack',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -403,8 +421,6 @@ function useMetricsMain() {
       metricsPeriod.data
         ?.map((m) => ({
           maxSectors: MiBToBytes(m.storage.totalSectors).times(4).toNumber(),
-          registryEntries: m.registry.entries * 113,
-          maxRegistryEntries: m.registry.maxEntries * 113,
           tempSectors: MiBToBytes(m.storage.tempSectors).times(4).toNumber(),
           physicalSectors: MiBToBytes(m.storage.physicalSectors)
             .times(4)
@@ -426,17 +442,13 @@ function useMetricsMain() {
           'contractSectors',
           'physicalSectors',
           'tempSectors',
-          'registryEntries',
           'maxSectors',
-          'maxRegistryEntries',
         ],
         enabledTip: [
           'contractSectors',
           'physicalSectors',
           'tempSectors',
-          'registryEntries',
           'maxSectors',
-          'maxRegistryEntries',
         ],
         categories: ['storage used', 'storage capacity'],
         data: {
@@ -445,20 +457,10 @@ function useMetricsMain() {
             'storage capacity',
             'sectors'
           ),
-          maxRegistryEntries: configCategoryLabel<StorageCategories>(
-            chartConfigs.capacityRegistry,
-            'storage capacity',
-            'registry'
-          ),
           physicalSectors: configCategoryLabel<StorageCategories>(
             chartConfigs.storagePhysical,
             'storage used',
             'sectors physical'
-          ),
-          registryEntries: configCategoryLabel<StorageCategories>(
-            chartConfigs.registry,
-            'storage used',
-            'registry (max)'
           ),
           tempSectors: configCategoryLabel<StorageCategories>(
             chartConfigs.sectorsTemp,
@@ -473,9 +475,12 @@ function useMetricsMain() {
         },
         format: (v) => humanBytes(v),
         formatTimestamp,
+        formatTickY: (v) => humanBytes(v, { fixed: 0 }),
         disableAnimations,
+        chartType: 'line',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'line',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -485,8 +490,6 @@ function useMetricsMain() {
       metricsPeriod.data?.map((m) => ({
         storageReads: m.storage.reads,
         storageWrites: m.storage.writes,
-        registryReads: m.registry.reads,
-        registryWrites: m.registry.writes,
         timestamp: new Date(m.timestamp).getTime(),
       })),
       'delta'
@@ -496,29 +499,20 @@ function useMetricsMain() {
       data,
       stats,
       config: {
-        enabledGraph: [
-          'storageReads',
-          'storageWrites',
-          'registryReads',
-          'registryWrites',
-        ],
-        enabledTip: [
-          'storageReads',
-          'storageWrites',
-          'registryReads',
-          'registryWrites',
-        ],
+        enabledGraph: ['storageReads', 'storageWrites'],
+        enabledTip: ['storageReads', 'storageWrites'],
         data: {
-          registryReads: chartConfigs.registryReads,
-          registryWrites: chartConfigs.registryWrites,
           storageReads: chartConfigs.storageReads,
           storageWrites: chartConfigs.storageWrites,
         },
         format: (v) => humanNumber(v),
+        formatTickY: (v) => humanNumber(v),
         formatTimestamp,
         disableAnimations,
+        chartType: 'line',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'line',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])
@@ -545,9 +539,15 @@ function useMetricsMain() {
         },
         format: (v) => humanBytes(v),
         formatTimestamp,
+        formatTickY: (v) =>
+          humanBytes(v, {
+            fixed: 0,
+          }),
         disableAnimations,
+        chartType: 'line',
+        curveType: 'linear',
+        stackOffset: 'none',
       },
-      chartType: 'line',
       isLoading: metricsPeriod.isValidating,
     }
   }, [metricsPeriod, formatTimestamp])

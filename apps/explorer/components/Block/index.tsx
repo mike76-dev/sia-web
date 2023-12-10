@@ -1,5 +1,5 @@
 import { Badge, Tooltip, EntityList } from '@siafoundation/design-system'
-import { humanNumber } from '@siafoundation/sia-js'
+import { humanNumber } from '@siafoundation/units'
 import { ExplorerDatum, DatumProps } from '../ExplorerDatum'
 import { useMemo } from 'react'
 import { routes } from '../../config/routes'
@@ -63,7 +63,7 @@ export function Block({ block }: Props) {
     >
       <EntityList
         title={`Transactions (${block.transactions?.length || 0})`}
-        entities={block.transactions?.map((tx) => ({
+        dataset={block.transactions?.map((tx) => ({
           hash: tx.id,
           label: 'transaction',
           initials: 'T',
