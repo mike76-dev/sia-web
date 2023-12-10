@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js'
 
 export function toFixedMax(val: BigNumber, limit: number) {
-  return val.decimalPlaces() > limit ? val.toFixed(limit) : val.toString()
+  let dp = val.decimalPlaces()
+  return dp && dp > limit ? val.toFixed(limit) : val.toString()
 }
 
 // to precision for values less than 1, otherwise to fixed
@@ -22,7 +23,8 @@ export function toFixedOrPrecision(
     return v.precision(digits)
   }
   if (dynamicFixed) {
-    return v.decimalPlaces() > digits ? v.toFormat(digits) : v.toFormat()
+    let dp = v.decimalPlaces()
+    return dp && dp > digits ? v.toFormat(digits) : v.toFormat()
   }
   return v.toFormat(digits)
 }
