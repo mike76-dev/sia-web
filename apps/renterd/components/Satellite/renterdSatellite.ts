@@ -13,6 +13,7 @@ export interface SatelliteConfig {
   muxPort:       string,
   publicKey:     string,
   renterSeed:    string,
+  encrypt:       boolean,
   encryptionKey: string
 }
 

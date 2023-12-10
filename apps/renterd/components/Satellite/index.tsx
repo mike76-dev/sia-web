@@ -31,6 +31,7 @@ const initialValues = {
   muxPort:        '9993',
   publicKey:      '',
   renterSeed:     '',
+  encrypt:        false,
   encryptionKey:  '',
   autoRenew:      false,
   backupMetadata: false,
@@ -163,6 +164,16 @@ export function Satellite() {
         pattern: /^[a-f0-9]+$/,
       },
     },
+    encrypt: {
+      type: 'boolean',
+      category: 'config',
+      title: 'Encrypt Data',
+      description: (
+        <>Check if you want the data to be encrypted before sending to the satellite.<br/>
+        If the data is not encrypted, the satellite operator can access it.</>
+      ),
+      validation: {},
+    },
     encryptionKey: {
       type: 'copy',
       category: 'config',
@@ -254,6 +265,7 @@ export function Satellite() {
             muxPort: values.muxPort,
             publicKey: encodePK(values.publicKey),
             renterSeed: encodeSeed(values.renterSeed),
+            encrypt: values.encrypt,
             encryptionKey: config.data.encryptionKey,
           },
         })
@@ -299,6 +311,7 @@ export function Satellite() {
       muxPort: config.data?.muxPort,
       publicKey: decodePK(config.data?.publicKey || ''),
       renterSeed: decodeSeed(config.data?.renterSeed || ''),
+      encrypt: config.data?.encrypt,
       encryptionKey: decodePK(config.data?.encryptionKey || ''),
       autoRenew: settings.data?.autoRenew,
       backupMetadata: settings.data?.backupMetadata,
