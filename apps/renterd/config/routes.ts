@@ -27,6 +27,9 @@ export const routes = {
   node: {
     index: '/node',
   },
+  satellite: {
+    index: '/satellite',
+  },
   login: '/login',
 }
 

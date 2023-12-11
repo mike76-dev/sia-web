@@ -6,6 +6,7 @@ import {
   BarsProgressIcon,
   BellIcon,
 } from '@siafoundation/react-icons'
+import { SatelliteIcon } from './Satellite/icon'
 import { useAlerts } from '@siafoundation/react-renterd'
 import { cx } from 'class-variance-authority'
 import { routes } from '../config/routes'
@@ -33,6 +34,9 @@ export function RenterdSidenav() {
       </SidenavItem>
       <SidenavItem title="Hosts" route={routes.hosts.index}>
         <DatabaseIcon />
+      </SidenavItem>
+      <SidenavItem title="Satellite" route={routes.satellite.index}>
+        <SatelliteIcon />
       </SidenavItem>
       <div className="relative">
         {!!alertCount && onlyInfoAlerts && (

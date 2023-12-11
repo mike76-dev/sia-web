@@ -20,6 +20,7 @@ import { routes } from '../config/routes'
 import { useDialog } from '../contexts/dialog'
 import { useNotEnoughContracts } from './Files/checks/useNotEnoughContracts'
 import { useAutopilotConfig, useWallet } from '@siafoundation/react-renterd'
+import { useSatelliteConfig } from './Satellite/renterdSatellite'
 import BigNumber from 'bignumber.js'
 import { humanSiacoin } from '@siafoundation/units'
 import { useAppSettings } from '@siafoundation/react-core'
@@ -30,6 +31,7 @@ export function OnboardingBar() {
   const app = useApp()
   const { openDialog } = useDialog()
   const wallet = useWallet()
+  const satellite = useSatelliteConfig()
   const autopilot = useAutopilotConfig({
     config: {
       swr: {
@@ -56,9 +58,11 @@ export function OnboardingBar() {
   )
   const allowance = new BigNumber(autopilot.data?.contracts.allowance || 0)
 
+  const satelliteEnabled = satellite.data?.enabled
+
   const step1Configured = app.autopilot.state.data?.configured
   const step2Synced = syncStatus.isSynced
-  const step3Funded = walletBalance.gt(0)
+  const step3Funded = walletBalance.gt(0) || satelliteEnabled
   const step4Contracts = !notEnoughContracts.active
   const steps = [step1Configured, step2Synced, step3Funded, step4Contracts]
   const totalSteps = steps.length
@@ -154,6 +158,8 @@ export function OnboardingBar() {
             />
             <Section
               title={
+                <>
+                Step 3:&nbsp;
                 <Link
                   href={routes.wallet.view}
                   onClick={() => openDialog('addressDetails')}
@@ -161,8 +167,18 @@ export function OnboardingBar() {
                   size="14"
                   underline="hover"
                 >
-                  Step 3: Fund your wallet
+                  Fund your wallet
                 </Link>
+                &nbsp;or&nbsp;
+                <Link
+                  href={routes.satellite.index}
+                  ellipsis
+                  size="14"
+                  underline="hover"
+                >
+                  enable a satellite
+                </Link>
+                </>
               }
               description={`Fund your wallet with at least ${humanSiacoin(
                 allowance
@@ -170,7 +186,7 @@ export function OnboardingBar() {
                 syncStatus.isWalletSynced
                   ? ''
                   : ' Balance will not be accurate until wallet is finished scanning.'
-              }`}
+              } Alternatively, enable a satellite.`}
               action={
                 step3Funded ? (
                   <Text color="green">
