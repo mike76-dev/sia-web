@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.62.1
+
+### Patch Changes
+
+- Updated dependencies [e211222d]
+  - @siafoundation/units@0.2.0
+
+## 0.62.0
+
+### Minor Changes
+
+- bfa6b96b: Fixed an issue where number fields would not properly handle user input starting with a decimal separator.
+- 64ca2b2b: The alerts dialog now has an "all" filter.
+
 ## 0.61.0
 
 ### Minor Changes
