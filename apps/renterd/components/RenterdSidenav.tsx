@@ -38,6 +38,7 @@ export function RenterdSidenav() {
       </SidenavItem>
       <SidenavItem title="S3 authentication keypairs" route={routes.keys.index}>
         <KeyIcon />
+      </SidenavItem>
       <SidenavItem title="Satellite" route={routes.satellite.index}>
         <SatelliteIcon />
       </SidenavItem>
