@@ -1,8 +1,8 @@
 'use client'
 
 import { cx } from 'class-variance-authority'
-import { uniq } from 'lodash'
-import { useRouter } from 'next/router'
+import { uniq } from '@technically/lodash'
+import { usePagesRouter } from '@siafoundation/next'
 import { useCallback, useMemo } from 'react'
 import { Badge } from '../core/Badge'
 import { Text } from '../core/Text'
@@ -31,7 +31,7 @@ export function ContentGallery({
   gapClassName,
   columnClassName,
 }: Props) {
-  const router = useRouter()
+  const router = usePagesRouter()
   const activeFilter = (filterable ? router.query[filterable] : undefined) as
     | string
     | undefined

@@ -1,11 +1,11 @@
 {
   "name": "@siafoundation/react-sia-central",
   "description": "React hooks for interacting with the Sia Central API.",
-  "version": "0.0.3",
+  "version": "2.0.2",
   "license": "MIT",
-  "dependencies": {
-    "@siafoundation/react-core": "^0.15.0",
-    "@siafoundation/sia-central": "^0.1.0"
+  "peerDependencies": {
+    "@siafoundation/react-core": "^1.0.2",
+    "@siafoundation/sia-central": "^0.3.2"
   },
   "types": "./src/index.d.ts"
 }

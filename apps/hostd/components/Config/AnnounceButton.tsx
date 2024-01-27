@@ -1,12 +1,18 @@
 import {
   Button,
   Paragraph,
+  minutesInMilliseconds,
   triggerErrorToast,
   triggerSuccessToast,
 } from '@siafoundation/design-system'
 import { Bullhorn16 } from '@siafoundation/react-icons'
 import { useDialog } from '../../contexts/dialog'
-import { useSettingsAnnounce, useTxPoolFee } from '@siafoundation/react-hostd'
+import {
+  useSettings,
+  useSettingsAnnounce,
+  useStateHost,
+  useTxPoolFee,
+} from '@siafoundation/react-hostd'
 import { humanSiacoin } from '@siafoundation/units'
 import { useCallback } from 'react'
 import BigNumber from 'bignumber.js'
@@ -15,6 +21,17 @@ export function AnnounceButton() {
   const { openConfirmDialog } = useDialog()
   const txpoolFee = useTxPoolFee()
   const settingsAnnounce = useSettingsAnnounce()
+  const host = useStateHost()
+  const settings = useSettings({
+    config: {
+      swr: {
+        refreshInterval: minutesInMilliseconds(1),
+      },
+    },
+  })
+
+  const needsToAnnounce =
+    host.data?.lastAnnouncement?.address !== settings.data?.netAddress
 
   const triggerConfirm = useCallback(
     () =>
@@ -45,6 +62,7 @@ export function AnnounceButton() {
 
           if (response.error) {
             triggerErrorToast('Error announcing host.')
+            return
           }
           triggerSuccessToast('Successfully broadcast host announcement.')
         },
@@ -54,9 +72,9 @@ export function AnnounceButton() {
 
   return (
     <Button
-      variant="accent"
       tip="Announce host address"
       onClick={triggerConfirm}
+      disabled={!needsToAnnounce}
     >
       <Bullhorn16 />
       Announce

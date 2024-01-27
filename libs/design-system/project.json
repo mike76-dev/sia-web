@@ -6,7 +6,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/design-system",
@@ -14,8 +14,9 @@
         "project": "libs/design-system/package.json",
         "entryFile": "libs/design-system/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/design-system/rollup.config.js",
         "assets": [
           {
             "glob": "libs/design-system/*.md",
@@ -28,35 +29,28 @@
             "output": "."
           },
           {
-            "glob": "libs/design-system/src/config/*.{js,css}",
+            "glob": "libs/design-system/src/style/*",
             "input": ".",
-            "output": "src/config"
+            "output": "."
           },
           {
-            "glob": "libs/design-system/src/plugins/*.js",
+            "glob": "libs/design-system/src/style/plugins/*",
             "input": ".",
-            "output": "src/plugins"
+            "output": "plugins"
           }
         ]
       },
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/design-system/**/*.{ts,tsx,js,jsx}",
-          "libs/design-system/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/design-system"],
       "options": {
-        "jestConfig": "libs/design-system/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/design-system/jest.config.ts"
       }
     }
   }

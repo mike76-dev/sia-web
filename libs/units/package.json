@@ -1,14 +1,16 @@
 {
   "name": "@siafoundation/units",
   "description": "Methods and types for interacting with the Sia Central API.",
-  "version": "0.2.0",
+  "version": "2.0.2",
   "license": "MIT",
+  "peerDependencies": {
+    "@siafoundation/sia-central": "^0.3.2",
+    "@siafoundation/react-core": "^1.0.2",
+    "bignumber.js": "^9.0.2"
+  },
   "dependencies": {
-    "@siafoundation/sia-central": "^0.1.0",
-    "bignumber.js": "^9.0.2",
-    "@siafoundation/react-core": "^0.15.0",
-    "blakejs": "^1.2.1",
-    "lodash": "^4.17.21"
+    "@technically/lodash": "^4.17.0",
+    "blakejs": "^1.2.1"
   },
   "types": "./src/index.d.ts"
 }

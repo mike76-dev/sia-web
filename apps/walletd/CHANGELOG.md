@@ -1,5 +1,17 @@
 # walletd
 
+## 0.16.0
+
+### Minor Changes
+
+- 0fc1c36c: Fixed an issue with the copy to clipboard feature.
+
+## 0.15.5
+
+### Patch Changes
+
+- e24c8935: esm support
+
 ## 0.15.0
 
 ### Minor Changes

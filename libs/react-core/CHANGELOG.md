@@ -1,5 +1,40 @@
 # @siafoundation/react-core
 
+## 1.0.2
+
+### Patch Changes
+
+- Reconfigure rollup.
+- Updated dependencies
+  - @siafoundation/next@0.1.2
+
+## 1.0.1
+
+### Patch Changes
+
+- Preserve modules and directives.
+- Updated dependencies
+  - @siafoundation/next@0.1.1
+
+## 1.0.0
+
+### Minor Changes
+
+- d8528c8e: Package build and bundling has been updated.
+
+### Patch Changes
+
+- Updated dependencies [d8528c8e]
+  - @siafoundation/next@0.1.0
+
+## 0.16.11
+
+### Patch Changes
+
+- e24c8935: esm support
+- Updated dependencies [e24c8935]
+  - @siafoundation/next@0.0.6
+
 ## 0.15.0
 
 ### Minor Changes

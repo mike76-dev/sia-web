@@ -14,9 +14,9 @@
         "project": "libs/react-icons/package.json",
         "entryFile": "libs/react-icons/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "format": ["esm", "cjs"],
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/react-icons/rollup.config.js",
         "assets": [
           {
             "glob": "libs/react-icons/*.md",
@@ -28,21 +28,14 @@
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/react-icons/**/*.{ts,tsx,js,jsx}",
-          "libs/react-icons/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/react-icons"],
       "options": {
-        "jestConfig": "libs/react-icons/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/react-icons/jest.config.ts"
       }
     }
   }

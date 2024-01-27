@@ -1,4 +1,4 @@
-import { debounce } from 'lodash'
+import { debounce } from '@technically/lodash'
 import { AutopilotHost } from './autopilot'
 import { Host, HostSettings } from './siaTypes'
 import {

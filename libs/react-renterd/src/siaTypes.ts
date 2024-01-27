@@ -145,12 +145,19 @@ export type ContractSpending = {
   fundAccount: Currency
 }
 
+export type S3AuthenticationSettings = {
+  v4Keypairs: {
+    [key: string]: string
+  }
+}
+
 export type ContractState = 'pending' | 'active' | 'complete' | 'failed'
 
 export type Contract = {
   id: string
   hostIP: string
   hostKey: string
+  contractSets?: string[]
   proofHeight: number
   revisionHeight: number
   revisionNumber: number
@@ -194,10 +201,6 @@ export type SiacoinElement = {
   maturityHeight: number
 }
 
-export type AutopilotWalletConfig = {
-  defragThreshold: number
-}
-
 export type AutopilotHostsConfig = {
   allowRedundantIPs: boolean
   scoreOverrides: { [key: PublicKey]: number }
@@ -218,7 +221,6 @@ export type AutopilotContractsConfig = {
 }
 
 export type AutopilotConfig = {
-  wallet: AutopilotWalletConfig
   hosts: AutopilotHostsConfig
   contracts: AutopilotContractsConfig
 }

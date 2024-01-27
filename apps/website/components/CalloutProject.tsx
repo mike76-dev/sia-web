@@ -6,7 +6,7 @@ import {
   webLinks,
   WebDomain,
 } from '@siafoundation/design-system'
-import { random } from 'lodash'
+import { random } from '@technically/lodash'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -17,6 +17,7 @@ type Props = {
   title: string
   subtitle: React.ReactNode
   link?: string
+  linkText?: string
   image?: string
   background: string
   idea?: boolean
@@ -27,6 +28,7 @@ export function CalloutProject({
   title,
   subtitle,
   link,
+  linkText,
   image,
   background,
   idea,
@@ -57,7 +59,7 @@ export function CalloutProject({
                 underline="accent"
                 color="contrast"
               >
-                Apply for a Grant
+                {linkText || `Apply for a grant related to ${title}`}
               </Link>
             ) : (
               <Link
@@ -65,7 +67,7 @@ export function CalloutProject({
                 underline="accent"
                 color="contrast"
               >
-                Apply for a Grant
+                {linkText || `Apply for a grant related to ${title}`}
               </Link>
             )
           ) : (
@@ -77,7 +79,7 @@ export function CalloutProject({
                   target={externalLink ? '_blank' : undefined}
                   color="contrast"
                 >
-                  Learn more
+                  {linkText || `Learn more about ${title}`}
                 </Link>
               </div>
               {externalLink && (

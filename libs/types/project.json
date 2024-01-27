@@ -14,8 +14,9 @@
         "project": "libs/types/package.json",
         "entryFile": "libs/types/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/types/rollup.config.js",
         "assets": [
           {
             "glob": "libs/types/*.md",
@@ -27,21 +28,14 @@
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/types/**/*.{ts,tsx,js,jsx}",
-          "libs/types/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/types"],
       "options": {
-        "jestConfig": "libs/types/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/types/jest.config.ts"
       }
     }
   }

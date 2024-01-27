@@ -14,8 +14,9 @@
         "project": "libs/sia-central/package.json",
         "entryFile": "libs/sia-central/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/sia-central/rollup.config.js",
         "assets": [
           {
             "glob": "libs/sia-central/*.md",
@@ -27,21 +28,14 @@
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/sia-central/**/*.{ts,tsx,js,jsx}",
-          "libs/sia-central/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/sia-central"],
       "options": {
-        "jestConfig": "libs/sia-central/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/sia-central/jest.config.ts"
       }
     }
   }

@@ -1,5 +1,60 @@
 # renterd
 
+## 0.44.0
+
+### Minor Changes
+
+- 55c5f9c9: The file stats now only show health once there is more than 0 bytes of file data.
+
+## 0.43.0
+
+### Minor Changes
+
+- 891abb0e: S3 authentication keypairs can now be created and managed directly from the UI. Closes https://github.com/SiaFoundation/web/issues/430
+
+## 0.42.0
+
+### Minor Changes
+
+- f5b44630: The total file count now includes in-progress uploads.
+- 7635e79d: Fixed an issue displaying the contract sets column data on the contracts explorer.
+- d2161c5e: The renterd file count stats tooltip description is now more accurate.
+- fa1297bf: The configuration page now has menu options to download or copy an image of the current configuration for easier sharing.
+- e470c163: Fixed an issue where siacoin and numeric input values would jump to an incorrect value.
+- cc7b1500: Contracts can now be filtered by contract set.
+
+## 0.41.0
+
+### Minor Changes
+
+- 0fc1c36c: Fixed an issue with the copy to clipboard feature.
+
+## 0.40.0
+
+### Minor Changes
+
+- 2aff994b: Remove the wallet defrag threshold setting.
+
+## 0.39.0
+
+### Minor Changes
+
+- 1a8caef5: The contracts table now has a contract sets column that shows all the sets each contract is in.
+- e24c8935: The reported average redundancy factor now takes into account multipart uploads.
+
+### Patch Changes
+
+- e24c8935: esm support
+
+## 0.37.0
+
+### Minor Changes
+
+- 0d805084: The wallet balance shown on the wallet page is now spendable plus unconfirmed.
+- 00a3ce62: The contract funding and spending graph now shows a data point for brand new contracts.
+- f2145a38: The default suggested pricing for new users is now based on Sia Central averages.
+- 74553598: Fixed an issue where currency was displayed with too many decimals.
+
 ## 0.36.0
 
 ### Minor Changes

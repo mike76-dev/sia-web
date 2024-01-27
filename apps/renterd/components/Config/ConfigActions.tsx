@@ -9,6 +9,7 @@ import {
 } from '@siafoundation/design-system'
 import { Reset16, Save16, Settings16 } from '@siafoundation/react-icons'
 import { useConfig } from '../../contexts/config'
+import { ConfigContextMenu } from './ConfigContextMenu'
 
 export function ConfigActions() {
   const {
@@ -16,7 +17,7 @@ export function ConfigActions() {
     changeCount,
     shouldSyncDefaultContractSet,
     setShouldSyncDefaultContractSet,
-    revalidateAndResetFormData,
+    revalidateAndResetForm,
     form,
   } = useConfig()
 
@@ -31,7 +32,7 @@ export function ConfigActions() {
         tip="Reset all changes"
         icon="contrast"
         disabled={!changeCount}
-        onClick={revalidateAndResetFormData}
+        onClick={revalidateAndResetForm}
       >
         <Reset16 />
       </Button>
@@ -72,6 +73,7 @@ export function ConfigActions() {
           </div>
         </Popover>
       </ControlGroup>
+      <ConfigContextMenu />
     </div>
   )
 }

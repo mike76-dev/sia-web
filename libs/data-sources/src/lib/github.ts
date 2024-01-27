@@ -1,5 +1,5 @@
 import Axios from 'axios'
-import { orderBy } from 'lodash'
+import { orderBy } from '@technically/lodash'
 import { buildErrorResponse500 } from './error'
 import { AsyncDataSourceResponse } from './types'
 

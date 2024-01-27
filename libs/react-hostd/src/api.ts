@@ -18,6 +18,7 @@ import {
   PublicKey,
   Currency,
   TransactionID,
+  ChainIndex,
 } from '@siafoundation/types'
 import useSWR from 'swr'
 import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
@@ -25,13 +26,20 @@ import { Contract, ContractStatus, WalletTransaction } from './siaTypes'
 // state
 
 export type StateHost = {
+  name?: string
   publicKey: string
   walletAddress: string
   network: 'Mainnet' | 'Zen Testnet'
   version: string
   commit: string
   os: string
+  startTime: string
   buildTime: string
+  lastAnnouncement?: {
+    index: ChainIndex
+    publicKey: string
+    address: string
+  }
 }
 
 export const stateHostKey = '/state/host'
@@ -300,8 +308,7 @@ type RevenueMetrics = {
 
 // DataMetrics is a collection of metrics related to data usage.
 type DataMetrics = {
-  rhp2: Data
-  rhp3: Data
+  rhp: Data
 }
 
 type Metrics = {

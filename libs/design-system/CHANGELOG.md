@@ -1,5 +1,98 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- Reorganize plugin structure.
+
+## 2.0.4
+
+### Patch Changes
+
+- Add missing theme file.
+
+## 2.0.3
+
+### Patch Changes
+
+- Reconfigure rollup.
+- Updated dependencies
+  - @siafoundation/next@0.1.2
+  - @siafoundation/react-core@1.0.2
+  - @siafoundation/react-icons@0.2.2
+  - @siafoundation/react-sia-central@2.0.2
+  - @siafoundation/types@0.1.2
+  - @siafoundation/units@2.0.2
+
+## 2.0.2
+
+### Patch Changes
+
+- Preserve modules and directives.
+- Updated dependencies
+  - @siafoundation/next@0.1.1
+  - @siafoundation/react-core@1.0.1
+  - @siafoundation/react-icons@0.2.1
+  - @siafoundation/react-sia-central@2.0.1
+  - @siafoundation/types@0.1.1
+  - @siafoundation/units@2.0.1
+
+## 2.0.0
+
+### Minor Changes
+
+- d8528c8e: Package build and bundling has been updated.
+
+### Patch Changes
+
+- Updated dependencies [d8528c8e]
+  - @siafoundation/next@0.1.0
+  - @siafoundation/react-core@1.0.0
+  - @siafoundation/react-icons@0.2.0
+  - @siafoundation/react-sia-central@2.0.0
+  - @siafoundation/types@0.1.0
+  - @siafoundation/units@2.0.0
+
+## 1.1.0
+
+### Minor Changes
+
+- 0fc1c36c: Fixed an issue with the copy to clipboard feature.
+
+## 1.0.16
+
+### Patch Changes
+
+- e24c8935: esm support
+- Updated dependencies [e24c8935]
+  - @siafoundation/next@0.0.6
+  - @siafoundation/react-core@0.16.11
+  - @siafoundation/react-icons@0.1.6
+  - @siafoundation/react-sia-central@1.0.6
+  - @siafoundation/types@0.0.7
+  - @siafoundation/units@1.0.6
+
+## 1.0.0
+
+### Minor Changes
+
+- a4964540: Refactor hooks used in server synced configuration features.
+
+### Patch Changes
+
+- Updated dependencies [d0c8a592]
+  - @siafoundation/react-core@0.16.0
+  - @siafoundation/react-sia-central@1.0.0
+  - @siafoundation/units@1.0.0
+
+## 0.63.0
+
+### Minor Changes
+
+- 00a3ce62: ChartXY no longer adds padding point for barstack and bargroup.
+- f2145a38: Added useServerSyncedForm.
+
 ## 0.62.1
 
 ### Patch Changes

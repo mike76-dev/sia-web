@@ -5,6 +5,7 @@ import {
   FileContractIcon,
   BarsProgressIcon,
   BellIcon,
+  KeyIcon,
 } from '@siafoundation/react-icons'
 import { SatelliteIcon } from './Satellite/icon'
 import { useAlerts } from '@siafoundation/react-renterd'
@@ -35,6 +36,8 @@ export function RenterdSidenav() {
       <SidenavItem title="Hosts" route={routes.hosts.index}>
         <DatabaseIcon />
       </SidenavItem>
+      <SidenavItem title="S3 authentication keypairs" route={routes.keys.index}>
+        <KeyIcon />
       <SidenavItem title="Satellite" route={routes.satellite.index}>
         <SatelliteIcon />
       </SidenavItem>

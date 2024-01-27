@@ -1,7 +1,7 @@
 'use client'
 
 import { useAppSettings } from '@siafoundation/react-core'
-import { useRouter } from 'next/router'
+import { usePagesRouter } from '@siafoundation/next'
 import axios, { AxiosError } from 'axios'
 import { getRedirectRouteFromQuery } from './AppAuthedLayout/useConnAndPassLock'
 import { useForm } from 'react-hook-form'
@@ -16,7 +16,7 @@ import { RecentlyViewed16, Settings16 } from '@siafoundation/react-icons'
 import { Button } from '../core/Button'
 import { Panel } from '../core/Panel'
 import { ControlGroup } from '../core/ControlGroup'
-import { sortBy } from 'lodash'
+import { sortBy } from '@technically/lodash'
 
 function getDefaultValues(api: string) {
   return {
@@ -121,7 +121,7 @@ type Props = {
 }
 
 export function AppLogin({ appName, route, routes }: Props) {
-  const router = useRouter()
+  const router = usePagesRouter()
   const { settings, setSettings } = useAppSettings()
   const { allowCustomApi } = settings
 

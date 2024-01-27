@@ -14,8 +14,9 @@
         "project": "libs/react-renterd/package.json",
         "entryFile": "libs/react-renterd/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/react-renterd/rollup.config.js",
         "assets": [
           {
             "glob": "libs/react-renterd/*.md",
@@ -27,21 +28,14 @@
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/react-renterd/**/*.{ts,tsx,js,jsx}",
-          "libs/react-renterd/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/react-renterd"],
       "options": {
-        "jestConfig": "libs/react-renterd/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/react-renterd/jest.config.ts"
       }
     }
   }

@@ -18,8 +18,6 @@ export const defaultAutopilot = {
   allowRedundantIPs: false,
   maxDowntimeHours: undefined as BigNumber | undefined,
   minRecentScanFailures: undefined as BigNumber | undefined,
-  // wallet
-  defragThreshold: undefined as BigNumber | undefined,
 }
 
 export const defaultContractSet = {
@@ -30,7 +28,7 @@ export const defaultUploadPacking = {
   uploadPackingEnabled: true,
 }
 
-export const defaultConfigApp = {
+export const defaultDisplay = {
   includeRedundancyMaxStoragePrice: true,
   includeRedundancyMaxUploadPrice: true,
 }
@@ -65,14 +63,14 @@ export const defaultValues = {
   ...defaultGouging,
   // redundancy
   ...defaultRedundancy,
-  // config app
-  ...defaultConfigApp,
+  // config display
+  ...defaultDisplay,
 }
 
 export type AutopilotData = typeof defaultAutopilot
 export type ContractSetData = typeof defaultContractSet
 export type UploadPackingData = typeof defaultUploadPacking
-export type ConfigAppData = typeof defaultConfigApp
+export type DisplayData = typeof defaultDisplay
 export type GougingData = typeof defaultGouging
 export type RedundancyData = typeof defaultRedundancy
 export type SettingsData = typeof defaultValues
@@ -98,7 +96,6 @@ export function getAdvancedDefaultAutopilot(
           allowRedundantIPs: false,
           maxDowntimeHours: new BigNumber(336),
           minRecentScanFailures: new BigNumber(10),
-          defragThreshold: new BigNumber(1000),
           prune: true,
         }
       : {
@@ -109,7 +106,6 @@ export function getAdvancedDefaultAutopilot(
           allowRedundantIPs: false,
           maxDowntimeHours: new BigNumber(336),
           minRecentScanFailures: new BigNumber(10),
-          defragThreshold: new BigNumber(1000),
           prune: true,
         }),
   }
@@ -120,8 +116,8 @@ export const advancedDefaultContractSet: ContractSetData = {
   defaultContractSet: 'autopilot',
 }
 
-export const advancedDefaultConfigApp: ConfigAppData = {
-  ...defaultConfigApp,
+export const advancedDefaultDisplay: DisplayData = {
+  ...defaultDisplay,
 }
 
 export const advancedDefaultUploadPacking: UploadPackingData = {
@@ -152,7 +148,7 @@ export function getAdvancedDefaults(
   return {
     ...getAdvancedDefaultAutopilot(network),
     ...advancedDefaultContractSet,
-    ...advancedDefaultConfigApp,
+    ...advancedDefaultDisplay,
     ...advancedDefaultUploadPacking,
     ...advancedDefaultGouging,
     ...getAdvancedDefaultRedundancy(network),

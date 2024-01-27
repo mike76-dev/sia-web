@@ -20,11 +20,8 @@ describe('tansforms', () => {
   describe('down', () => {
     it('default works', () => {
       expect(
-        transformDown(
-          {
-            wallet: {
-              defragThreshold: 1000,
-            },
+        transformDown({
+          autopilot: {
             hosts: {
               allowRedundantIPs: false,
               maxDowntimeHours: 1440,
@@ -43,9 +40,9 @@ describe('tansforms', () => {
               prune: true,
             },
           },
-          { default: 'myset' },
-          { enabled: true },
-          {
+          contractSet: { default: 'myset' },
+          uploadPacking: { enabled: true },
+          gouging: {
             hostBlockHeightLeeway: 4,
             maxContractPrice: '20000000000000000000000000',
             maxDownloadPrice: '1004310000000000000000000000',
@@ -58,15 +55,15 @@ describe('tansforms', () => {
             minPriceTableValidity: 300000000000,
             migrationSurchargeMultiplier: 10,
           },
-          {
+          redundancy: {
             minShards: 10,
             totalShards: 30,
           },
-          {
+          display: {
             includeRedundancyMaxStoragePrice: false,
             includeRedundancyMaxUploadPrice: false,
-          }
-        )
+          },
+        })
       ).toEqual({
         autopilotContractSet: 'autopilot',
         allowanceMonth: new BigNumber('500'),
@@ -80,7 +77,6 @@ describe('tansforms', () => {
         allowRedundantIPs: false,
         maxDowntimeHours: new BigNumber('1440'),
         minRecentScanFailures: new BigNumber('10'),
-        defragThreshold: new BigNumber('1000'),
         defaultContractSet: 'myset',
         uploadPackingEnabled: true,
         hostBlockHeightLeeway: new BigNumber(4),
@@ -101,13 +97,50 @@ describe('tansforms', () => {
       } as SettingsData)
     })
 
+    it('default works with first time user overrides', () => {
+      const values = transformDown({
+        autopilot: undefined,
+        contractSet: undefined,
+        uploadPacking: {
+          enabled: false,
+        },
+        gouging: {
+          hostBlockHeightLeeway: 4,
+          maxContractPrice: '20000000000000000000000000',
+          maxDownloadPrice: '1004310000000000000000000000',
+          maxRPCPrice: '99970619000000000000000000',
+          maxStoragePrice: '210531181019',
+          maxUploadPrice: '1000232323000000000000000000',
+          minAccountExpiry: 86400000000000,
+          minMaxCollateral: '10000000000000000000000000',
+          minMaxEphemeralAccountBalance: '1000000000000000000000000',
+          minPriceTableValidity: 300000000000,
+          migrationSurchargeMultiplier: 10,
+        },
+        redundancy: {
+          minShards: 10,
+          totalShards: 30,
+        },
+        display: undefined,
+        averages: {
+          settings: {
+            download_price: (4e24).toString(),
+            storage_price: (4e24).toString(),
+            upload_price: (4e24).toString(),
+          },
+        },
+      })
+      expect(values.maxUploadPriceTB).toEqual(new BigNumber('12000000000000'))
+      expect(values.maxDownloadPriceTB).toEqual(new BigNumber('4000000000000'))
+      expect(values.maxStoragePriceTBMonth).toEqual(
+        new BigNumber('51840000000000000')
+      )
+    })
+
     it('with include redundancy for storage and upload', () => {
       expect(
-        transformDown(
-          {
-            wallet: {
-              defragThreshold: 1000,
-            },
+        transformDown({
+          autopilot: {
             hosts: {
               allowRedundantIPs: false,
               maxDowntimeHours: 1440,
@@ -126,9 +159,9 @@ describe('tansforms', () => {
               prune: true,
             },
           },
-          { default: 'myset' },
-          { enabled: true },
-          {
+          contractSet: { default: 'myset' },
+          uploadPacking: { enabled: true },
+          gouging: {
             hostBlockHeightLeeway: 4,
             maxContractPrice: '20000000000000000000000000',
             maxDownloadPrice: '1004310000000000000000000000',
@@ -141,15 +174,15 @@ describe('tansforms', () => {
             minPriceTableValidity: 300000000000,
             migrationSurchargeMultiplier: 10,
           },
-          {
+          redundancy: {
             minShards: 10,
             totalShards: 30,
           },
-          {
+          display: {
             includeRedundancyMaxStoragePrice: true,
             includeRedundancyMaxUploadPrice: true,
-          }
-        )
+          },
+        })
       ).toEqual({
         autopilotContractSet: 'autopilot',
         allowanceMonth: new BigNumber('6006'),
@@ -162,7 +195,6 @@ describe('tansforms', () => {
         allowRedundantIPs: false,
         maxDowntimeHours: new BigNumber('1440'),
         minRecentScanFailures: new BigNumber('10'),
-        defragThreshold: new BigNumber('1000'),
         defaultContractSet: 'myset',
         uploadPackingEnabled: true,
         hostBlockHeightLeeway: new BigNumber(4),
@@ -203,14 +235,10 @@ describe('tansforms', () => {
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
             minRecentScanFailures: new BigNumber('10'),
-            defragThreshold: new BigNumber('1000'),
           },
           undefined
         )
       ).toEqual({
-        wallet: {
-          defragThreshold: 1000,
-        },
         hosts: {
           allowRedundantIPs: false,
           maxDowntimeHours: 1440,
@@ -247,13 +275,9 @@ describe('tansforms', () => {
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
             minRecentScanFailures: new BigNumber('10'),
-            defragThreshold: new BigNumber('1000'),
           },
           {
             foobar1: 'value',
-            wallet: {
-              foobar: 'value',
-            },
             contracts: {
               foobar: 'value',
               period: 7777,
@@ -266,10 +290,6 @@ describe('tansforms', () => {
         )
       ).toEqual({
         foobar1: 'value',
-        wallet: {
-          foobar: 'value',
-          defragThreshold: 1000,
-        },
         hosts: {
           foobar: 'value',
           allowRedundantIPs: false,
@@ -308,10 +328,8 @@ describe('tansforms', () => {
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
             minRecentScanFailures: new BigNumber('10'),
-            defragThreshold: new BigNumber('1000'),
           },
           {
-            wallet: {},
             contracts: {
               period: 7777,
             },
@@ -320,9 +338,6 @@ describe('tansforms', () => {
           } as any
         )
       ).toEqual({
-        wallet: {
-          defragThreshold: 1000,
-        },
         hosts: {
           allowRedundantIPs: false,
           maxDowntimeHours: 1440,
@@ -377,7 +392,6 @@ describe('tansforms', () => {
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
             minRecentScanFailures: new BigNumber('10'),
-            defragThreshold: new BigNumber('1000'),
             defaultContractSet: 'myset',
             uploadPackingEnabled: false,
             hostBlockHeightLeeway: new BigNumber(4),
@@ -434,7 +448,6 @@ describe('tansforms', () => {
             allowRedundantIPs: false,
             maxDowntimeHours: new BigNumber('1440'),
             minRecentScanFailures: new BigNumber('10'),
-            defragThreshold: new BigNumber('1000'),
             defaultContractSet: 'myset',
             uploadPackingEnabled: false,
             hostBlockHeightLeeway: new BigNumber(4),
@@ -506,8 +519,8 @@ describe('tansforms', () => {
         redundancy,
         display,
       } = buildAllResponses()
-      let settings = transformDown(
-        {
+      let settings = transformDown({
+        autopilot: {
           ...autopilot,
           contracts: {
             ...autopilot.contracts,
@@ -519,16 +532,16 @@ describe('tansforms', () => {
         uploadPacking,
         gouging,
         redundancy,
-        display
-      )
+        display,
+      })
       expect(settings.downloadTBMonth).toEqual(new BigNumber('92.72'))
       // a little different due to rounding
       expect(
         transformUpAutopilot('Mainnet', settings, autopilot).contracts.download
       ).toEqual(91088814814815)
 
-      settings = transformDown(
-        {
+      settings = transformDown({
+        autopilot: {
           ...autopilot,
           contracts: {
             ...autopilot.contracts,
@@ -540,8 +553,8 @@ describe('tansforms', () => {
         uploadPacking,
         gouging,
         redundancy,
-        display
-      )
+        display,
+      })
       expect(settings.downloadTBMonth).toEqual(new BigNumber('92.72'))
       // using the rounded value results in same value
       expect(
@@ -588,9 +601,6 @@ describe('tansforms', () => {
 function buildAllResponses() {
   return {
     autopilot: {
-      wallet: {
-        defragThreshold: 1000,
-      },
       hosts: {
         allowRedundantIPs: false,
         maxDowntimeHours: 1440,

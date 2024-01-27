@@ -14,9 +14,9 @@
         "project": "libs/fonts/package.json",
         "entryFile": "libs/fonts/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
-        "format": ["esm", "cjs"],
-        "compiler": "swc",
+        "compiler": "tsc",
+        "outputFileName": "index.js",
+        "rollupConfig": "libs/fonts/rollup.config.js",
         "assets": [
           {
             "glob": "libs/fonts/*.md",
@@ -28,21 +28,14 @@
       "configurations": {}
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "libs/fonts/**/*.{ts,tsx,js,jsx}",
-          "libs/fonts/package.json"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/fonts"],
       "options": {
-        "jestConfig": "libs/fonts/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/fonts/jest.config.ts"
       }
     }
   }

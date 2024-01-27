@@ -7,7 +7,7 @@ import {
   EntityList,
   DatumSkeleton,
 } from '@siafoundation/design-system'
-import { times } from 'lodash'
+import { times } from '@technically/lodash'
 import { ContentLayout } from '../ContentLayout'
 
 export function AddressSkeleton() {

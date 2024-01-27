@@ -1,5 +1,25 @@
 # website
 
+## 0.48.0
+
+### Minor Changes
+
+- 40df7ab3: The roadmap page layout has been updated.
+- 40df7ab3: Header spacing has been updated for markdown based content.
+
+## 0.47.0
+
+### Minor Changes
+
+- 0fc1c36c: Fixed an issue with the copy to clipboard feature.
+- 2757ad9a: Improve links with more verbose text.
+
+## 0.46.4
+
+### Patch Changes
+
+- e24c8935: esm support
+
 ## 0.46.0
 
 ### Minor Changes

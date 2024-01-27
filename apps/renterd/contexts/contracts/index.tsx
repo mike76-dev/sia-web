@@ -8,7 +8,10 @@ import {
   daysInMilliseconds,
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
-import { useContracts as useContractsData } from '@siafoundation/react-renterd'
+import {
+  useContracts as useContractsData,
+  useContractSets,
+} from '@siafoundation/react-renterd'
 import {
   createContext,
   useCallback,
@@ -32,6 +35,7 @@ import { useSiascanUrl } from '../../hooks/useSiascanUrl'
 import { blockHeightToTime } from '@siafoundation/units'
 import { useContractMetrics } from './useContractMetrics'
 import { useContractSetMetrics } from './useContractSetMetrics'
+import { useContractSetSettings } from '../../hooks/useContractSetSettings'
 
 const defaultLimit = 50
 
@@ -88,6 +92,7 @@ function useContractsMain() {
           state: c.state,
           hostIp: c.hostIP,
           hostKey: c.hostKey,
+          contractSets: c.contractSets,
           location: geoHosts.find((h) => h.public_key === c.hostKey)?.location,
           timeline: startTime,
           startTime,
@@ -174,13 +179,20 @@ function useContractsMain() {
 
   const siascanUrl = useSiascanUrl()
 
+  const contractSetSettings = useContractSetSettings()
   const cellContext = useMemo(
     () => ({
       currentHeight: syncStatus.estimatedBlockHeight,
+      defaultSet: contractSetSettings.data?.default,
       contractsTimeRange,
       siascanUrl,
     }),
-    [syncStatus.estimatedBlockHeight, contractsTimeRange, siascanUrl]
+    [
+      syncStatus.estimatedBlockHeight,
+      contractsTimeRange,
+      siascanUrl,
+      contractSetSettings.data,
+    ]
   )
 
   const thirtyDaysAgo = new Date().getTime() - daysInMilliseconds(30)
@@ -195,6 +207,8 @@ function useContractsMain() {
     })
   const { contractSetMetrics: contractSetCountMetrics } =
     useContractSetMetrics()
+
+  const contractSets = useContractSets()
 
   return {
     dataState,
@@ -235,6 +249,7 @@ function useContractsMain() {
     allContractsSpendingMetrics,
     selectedContractSpendingMetrics,
     contractSetCountMetrics,
+    contractSets,
   }
 }
 

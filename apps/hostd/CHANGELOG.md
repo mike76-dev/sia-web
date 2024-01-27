@@ -1,5 +1,65 @@
 # hostd
 
+## 0.36.0
+
+### Minor Changes
+
+- 8f8a17f3: Update the net address placeholder value to show port 9982.
+
+## 0.35.0
+
+### Minor Changes
+
+- 4dbb448d: Fixed an error with "lastAnnouncement" that occurs the first time the configuration is saved.
+
+## 0.34.0
+
+### Minor Changes
+
+- 0aaec351: Fixed an issue where the app would not navigate when the metrics data interval was set to ALL.
+- de517fcf: Fixed the free space calculation in the resize volume dialog. Closes https://github.com/SiaFoundation/hostd/issues/241
+- 7b03a9f9: Fixed an issue where where the lack of a host announcement would crash the UI. Closes https://github.com/SiaFoundation/hostd/issues/271
+
+### Patch Changes
+
+- 23008657: Fixed an issue where the base RPC and sector access price calculation was off by 10.
+
+## 0.33.0
+
+### Minor Changes
+
+- fa1297bf: The configuration page now has menu options to download or copy an image of the current configuration for easier sharing.
+- e470c163: Fixed an issue where siacoin and numeric input values would jump to an incorrect value.
+- 7484cbc0: The announce button is now disabled unless the net address does not match the last announcement. Closes https://github.com/SiaFoundation/hostd/issues/248
+
+## 0.32.0
+
+### Minor Changes
+
+- 0fc1c36c: Fixed an issue with the copy to clipboard feature.
+
+## 0.31.4
+
+### Patch Changes
+
+- e24c8935: esm support
+
+## 0.31.0
+
+### Minor Changes
+
+- c65b3667: Metrics intervals for 1Y and ALL are now weekly and monthly.
+- d0c8a592: Refactored internal dependencies.
+
+## 0.30.0
+
+### Minor Changes
+
+- cbce1a89: Fix bug where announcement error shows both a success and error toast.
+- b84074f3: Data metrics no longer use RHP version specific data.
+- 0d805084: The wallet balance shown on the wallet page is now spendable plus unconfirmed.
+- 74553598: Fixed an issue where currency was displayed with too many decimals.
+
 ## 0.29.0
 
 ### Minor Changes
