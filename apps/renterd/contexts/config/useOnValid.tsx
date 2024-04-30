@@ -4,26 +4,18 @@ import {
 } from '@siafoundation/design-system'
 import { useCallback } from 'react'
 import {
-  autopilotHostsKey,
   useAutopilotConfigUpdate,
   useAutopilotTrigger,
   useBusState,
   useSettingUpdate,
-} from '@siafoundation/react-renterd'
-import { SettingsData, defaultValues } from './types'
-import {
-  transformUpAutopilot,
-  transformUpDisplay,
-  transformUpContractSet,
-  transformUpGouging,
-  transformUpRedundancy,
-  transformUpUploadPacking,
-} from './transform'
+} from '@siafoundation/renterd-react'
+import { defaultValues } from './types'
+import { transformUp } from './transformUp'
 import { delay, useMutate } from '@siafoundation/react-core'
-import { configDisplaySettingsKey } from '../../hooks/useConfigDisplaySettings'
 import { Resources } from './resources'
 import { useSyncContractSet } from './useSyncContractSet'
 import BigNumber from 'bignumber.js'
+import { autopilotHostsRoute } from '@siafoundation/renterd-types'
 
 export function useOnValid({
   resources,
@@ -53,26 +45,21 @@ export function useOnValid({
       ) {
         return
       }
+      const firstTimeSettingConfig =
+        isAutopilotEnabled && !resources.autopilot.data
       try {
-        const calculatedValues: Partial<SettingsData> = {}
-        if (isAutopilotEnabled && !showAdvanced) {
-          calculatedValues.allowanceMonth = estimatedSpendingPerMonth
-        }
+        const { finalValues, payloads } = transformUp({
+          resources,
+          renterdState: renterdState.data,
+          isAutopilotEnabled,
+          showAdvanced,
+          estimatedSpendingPerMonth,
+          values,
+        })
 
-        const finalValues = {
-          ...values,
-          ...calculatedValues,
-        }
-
-        const firstTimeSettingConfig =
-          isAutopilotEnabled && !resources.autopilot.data
-        const autopilotResponse = isAutopilotEnabled
+        const autopilotResponse = payloads.autopilot
           ? await autopilotUpdate.put({
-              payload: transformUpAutopilot(
-                renterdState.data.network,
-                finalValues,
-                resources.autopilot.data
-              ),
+              payload: payloads.autopilot,
             })
           : undefined
 
@@ -81,46 +68,30 @@ export function useOnValid({
           uploadPackingResponse,
           gougingResponse,
           redundancyResponse,
-          configAppResponse,
         ] = await Promise.all([
           settingUpdate.put({
             params: {
               key: 'contractset',
             },
-            payload: transformUpContractSet(
-              finalValues,
-              resources.contractSet.data
-            ),
+            payload: payloads.contractSet,
           }),
           settingUpdate.put({
             params: {
               key: 'uploadpacking',
             },
-            payload: transformUpUploadPacking(
-              finalValues,
-              resources.uploadPacking.data
-            ),
+            payload: payloads.uploadPacking,
           }),
           settingUpdate.put({
             params: {
               key: 'gouging',
             },
-            payload: transformUpGouging(finalValues, resources.gouging.data),
+            payload: payloads.gouging,
           }),
           settingUpdate.put({
             params: {
               key: 'redundancy',
             },
-            payload: transformUpRedundancy(
-              finalValues,
-              resources.redundancy.data
-            ),
-          }),
-          settingUpdate.put({
-            params: {
-              key: configDisplaySettingsKey,
-            },
-            payload: transformUpDisplay(finalValues, resources.display.data),
+            payload: payloads.redundancy,
           }),
         ])
 
@@ -138,9 +109,6 @@ export function useOnValid({
         }
         if (redundancyResponse.error) {
           throw Error(redundancyResponse.error)
-        }
-        if (configAppResponse.error) {
-          throw Error(configAppResponse.error)
         }
 
         if (isAutopilotEnabled) {
@@ -160,23 +128,26 @@ export function useOnValid({
           })
         }
 
-        triggerSuccessToast('Configuration has been saved.')
+        triggerSuccessToast({ title: 'Configuration has been saved' })
 
         // If autopilot is being configured for the first time,
         // revalidate the empty hosts list.
         if (firstTimeSettingConfig) {
           const refreshHostsAfterDelay = async () => {
             await delay(5_000)
-            mutate((key) => key.startsWith(autopilotHostsKey))
+            mutate((key) => key.startsWith(autopilotHostsRoute))
             await delay(5_000)
-            mutate((key) => key.startsWith(autopilotHostsKey))
+            mutate((key) => key.startsWith(autopilotHostsRoute))
           }
           refreshHostsAfterDelay()
         }
 
         await revalidateAndResetForm()
       } catch (e) {
-        triggerErrorToast((e as Error).message)
+        triggerErrorToast({
+          title: 'Error updating configuration',
+          body: (e as Error).message,
+        })
         console.log(e)
       }
     },

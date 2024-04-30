@@ -2,7 +2,7 @@
 import {
   Code,
   ConfigFields,
-  FieldSwitch,
+  Separator,
   Text,
   Tooltip,
   hoursInDays,
@@ -11,7 +11,9 @@ import {
 } from '@siafoundation/design-system'
 import BigNumber from 'bignumber.js'
 import React from 'react'
-import { defaultValues, SettingsData } from './types'
+import { RecommendationItem, SettingsData } from './types'
+import { humanSiacoin, toHastings } from '@siafoundation/units'
+import { Information16 } from '@carbon/icons-react'
 
 export const scDecimalPlaces = 6
 
@@ -28,27 +30,35 @@ type GetFields = {
   isAutopilotEnabled: boolean
   advancedDefaults?: SettingsData
   showAdvanced: boolean
+  maxStoragePriceTBMonth: BigNumber
+  maxUploadPriceTB: BigNumber
+  minShards: BigNumber
+  totalShards: BigNumber
   redundancyMultiplier: BigNumber
-  includeRedundancyMaxStoragePrice: boolean
-  includeRedundancyMaxUploadPrice: boolean
   storageAverage?: BigNumber
   uploadAverage?: BigNumber
   downloadAverage?: BigNumber
   contractAverage?: BigNumber
+  recommendations: Partial<Record<keyof SettingsData, RecommendationItem>>
 }
+
+export type Fields = ReturnType<typeof getFields>
 
 export function getFields({
   isAutopilotEnabled,
   advancedDefaults,
   showAdvanced,
+  maxStoragePriceTBMonth,
+  maxUploadPriceTB,
+  minShards,
+  totalShards,
   redundancyMultiplier,
-  includeRedundancyMaxStoragePrice,
-  includeRedundancyMaxUploadPrice,
   storageAverage,
   uploadAverage,
   downloadAverage,
   contractAverage,
-}: GetFields): ConfigFields<typeof defaultValues, Categories> {
+  recommendations,
+}: GetFields): ConfigFields<SettingsData, Categories> {
   return {
     // storage
     storageTB: {
@@ -284,6 +294,32 @@ export function getFields({
             }
           : {},
     },
+    minProtocolVersion: {
+      type: 'text',
+      category: 'hosts',
+      title: 'Min protocol version',
+      description: (
+        <>
+          The minimum protocol version that autopilot will consider when forming
+          contracts with hosts.
+        </>
+      ),
+      suggestion: advancedDefaults?.minProtocolVersion,
+      suggestionTip: `Defaults to ${advancedDefaults?.minProtocolVersion}.`,
+      hidden: !isAutopilotEnabled || !showAdvanced,
+      validation:
+        isAutopilotEnabled && showAdvanced
+          ? {
+              required: 'required',
+              validate: {
+                version: (value: string) => {
+                  const regex = /^\d+\.\d+\.\d+$/
+                  return regex.test(value) || 'must be a valid version number'
+                },
+              },
+            }
+          : {},
+    },
 
     // contract
     defaultContractSet: {
@@ -336,37 +372,53 @@ export function getFields({
       category: 'gouging',
       type: 'siacoin',
       title: 'Max storage price',
-      description: <>The max allowed price to store 1 TB per month.</>,
+      description: (
+        <>
+          The max allowed price a host is allowed to charge to store 1 TB worth
+          of data per month.
+        </>
+      ),
       units: 'SC/TB/month',
       average: storageAverage,
-      averageTip: getAverageTip(
-        includeRedundancyMaxStoragePrice,
-        redundancyMultiplier
-      ),
-      after: function After({ form, fields }) {
+      averageTip: 'Averages provided by Sia Central.',
+      suggestion: recommendations.maxStoragePriceTBMonth?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
+      after: function After() {
+        if (!maxStoragePriceTBMonth || !minShards || !totalShards) {
+          return null
+        }
         return (
-          <Tooltip
-            align="start"
-            side="bottom"
-            content={getRedundancyTip(
-              includeRedundancyMaxStoragePrice,
-              redundancyMultiplier
-            )}
-          >
-            <div>
-              <FieldSwitch
-                size="small"
-                form={form}
-                fields={fields}
-                name="includeRedundancyMaxStoragePrice"
-                group={false}
-              >
-                <Text size="12" weight="medium">
-                  Including {redundancyMultiplier.toFixed(1)}x redundancy
+          <>
+            <Separator />
+            <Tooltip
+              align="start"
+              side="bottom"
+              content={
+                <>
+                  Price per TB/month when factoring in the configured{' '}
+                  {minShards.toString()} of {totalShards.toString()} redundancy.
+                </>
+              }
+            >
+              <div className="flex gap-1 items-center relative overflow-hidden">
+                <Text className="flex relative">
+                  <Information16 />
                 </Text>
-              </FieldSwitch>
-            </div>
-          </Tooltip>
+                <Text size="12" ellipsis>
+                  {humanSiacoin(
+                    toHastings(maxStoragePriceTBMonth).times(
+                      redundancyMultiplier
+                    ),
+                    {
+                      fixed: 0,
+                      dynamicUnits: false,
+                    }
+                  )}
+                  /TB/month with redundancy
+                </Text>
+              </div>
+            </Tooltip>
+          </>
         )
       },
       decimalsLimitSc: scDecimalPlaces,
@@ -378,37 +430,51 @@ export function getFields({
       category: 'gouging',
       type: 'siacoin',
       title: 'Max upload price',
-      description: <>The max allowed price to upload 1 TB.</>,
-      units: 'SC/TB/month',
-      average: uploadAverage,
-      averageTip: getAverageTip(
-        includeRedundancyMaxUploadPrice,
-        redundancyMultiplier
+      description: (
+        <>
+          The max allowed price a host is allowed to charge for uploading 1 TB
+          worth of data.
+        </>
       ),
-      after: function After({ form, fields }) {
+      units: 'SC/TB',
+      average: uploadAverage,
+      averageTip: 'Averages provided by Sia Central.',
+      suggestion: recommendations.maxUploadPriceTB?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
+      after: function After() {
+        if (!maxUploadPriceTB || !minShards || !totalShards) {
+          return null
+        }
         return (
-          <Tooltip
-            align="start"
-            side="bottom"
-            content={getRedundancyTip(
-              includeRedundancyMaxUploadPrice,
-              redundancyMultiplier
-            )}
-          >
-            <div>
-              <FieldSwitch
-                size="small"
-                form={form}
-                fields={fields}
-                name="includeRedundancyMaxUploadPrice"
-                group={false}
-              >
-                <Text size="12" weight="medium">
-                  Including {redundancyMultiplier.toFixed(1)}x redundancy
+          <>
+            <Separator />
+            <Tooltip
+              align="start"
+              side="bottom"
+              content={
+                <>
+                  Price per TB when factoring in the configured{' '}
+                  {minShards.toString()} of {totalShards.toString()} redundancy.
+                </>
+              }
+            >
+              <div className="flex gap-1 items-center relative overflow-hidden">
+                <Text className="flex relative">
+                  <Information16 />
                 </Text>
-              </FieldSwitch>
-            </div>
-          </Tooltip>
+                <Text size="12" ellipsis>
+                  {humanSiacoin(
+                    toHastings(maxUploadPriceTB).times(redundancyMultiplier),
+                    {
+                      fixed: 0,
+                      dynamicUnits: false,
+                    }
+                  )}
+                  /TB with redundancy
+                </Text>
+              </div>
+            </Tooltip>
+          </>
         )
       },
       decimalsLimitSc: scDecimalPlaces,
@@ -421,9 +487,11 @@ export function getFields({
       type: 'siacoin',
       title: 'Max download price',
       description: <>The max allowed price to download 1 TB.</>,
-      units: 'SC/TB/month',
+      units: 'SC/TB',
       average: downloadAverage,
       averageTip: `Averages provided by Sia Central.`,
+      suggestion: recommendations.maxDownloadPriceTB?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       decimalsLimitSc: scDecimalPlaces,
       validation: {
         required: 'required',
@@ -438,6 +506,8 @@ export function getFields({
       decimalsLimitSc: scDecimalPlaces,
       tipsDecimalsLimitSc: 3,
       hidden: !showAdvanced,
+      suggestion: recommendations.maxContractPrice?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       validation: showAdvanced
         ? {
             required: 'required',
@@ -454,21 +524,8 @@ export function getFields({
       units: 'SC/million',
       decimalsLimitSc: scDecimalPlaces,
       hidden: !showAdvanced,
-      validation: showAdvanced
-        ? {
-            required: 'required',
-          }
-        : {},
-    },
-    minMaxCollateral: {
-      category: 'gouging',
-      type: 'siacoin',
-      title: 'Min max collateral',
-      description: (
-        <>The min value for max collateral in the host's price settings.</>
-      ),
-      decimalsLimitSc: scDecimalPlaces,
-      hidden: !showAdvanced,
+      suggestion: recommendations.maxRpcPriceMillion?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       validation: showAdvanced
         ? {
             required: 'required',
@@ -487,8 +544,15 @@ export function getFields({
       ),
       units: 'blocks',
       decimalsLimit: 0,
-      suggestion: advancedDefaults?.hostBlockHeightLeeway,
-      suggestionTip: 'The recommended value is 6 blocks.',
+      ...(recommendations.hostBlockHeightLeeway
+        ? {
+            suggestion: recommendations.hostBlockHeightLeeway?.targetValue,
+            suggestionTip: 'This value will help you match with more hosts.',
+          }
+        : {
+            suggestion: advancedDefaults?.hostBlockHeightLeeway,
+            suggestionTip: 'The recommended value is 6 blocks.',
+          }),
       hidden: !showAdvanced,
       validation: showAdvanced
         ? {
@@ -510,6 +574,8 @@ export function getFields({
         <>The min accepted value for `Validity` in the host's price settings.</>
       ),
       hidden: !showAdvanced,
+      suggestion: recommendations.minPriceTableValidityMinutes?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       validation: showAdvanced
         ? {
             required: 'required',
@@ -533,6 +599,8 @@ export function getFields({
         </>
       ),
       hidden: !showAdvanced,
+      suggestion: recommendations.minAccountExpiryDays?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       validation: showAdvanced
         ? {
             required: 'required',
@@ -556,6 +624,8 @@ export function getFields({
       ),
       decimalsLimitSc: scDecimalPlaces,
       hidden: !showAdvanced,
+      suggestion: recommendations.minMaxEphemeralAccountBalance?.targetValue,
+      suggestionTip: 'This value will help you match with more hosts.',
       validation: showAdvanced
         ? {
             required: 'required',
@@ -584,8 +654,16 @@ export function getFields({
           download if it means saving the file/migration.
         </>
       ),
-      suggestion: new BigNumber(10),
-      suggestionTip: 'The default multiplier is 10x the download price.',
+      ...(recommendations.migrationSurchargeMultiplier
+        ? {
+            suggestion:
+              recommendations.migrationSurchargeMultiplier?.targetValue,
+            suggestionTip: 'This value will help you match with more hosts.',
+          }
+        : {
+            suggestion: new BigNumber(10),
+            suggestionTip: 'The default multiplier is 10x the download price.',
+          }),
       hidden: !showAdvanced,
       validation: showAdvanced
         ? {
@@ -639,50 +717,5 @@ export function getFields({
           }
         : {},
     },
-
-    // hidden fields used by other config options
-    includeRedundancyMaxStoragePrice: {
-      type: 'boolean',
-      title: 'Include redundancy',
-      validation: {},
-    },
-    includeRedundancyMaxUploadPrice: {
-      type: 'boolean',
-      title: 'Include redundancy',
-      validation: {},
-    },
   }
-}
-
-function getAverageTip(
-  includeRedundancy: boolean,
-  redundancyMultiplier: BigNumber
-) {
-  if (includeRedundancy) {
-    return `The average price is adjusted for ${redundancyMultiplier.toFixed(
-      1
-    )}x redundancy. Averages provided by Sia Central.`
-  }
-  return `The average price is not adjusted for redundancy. Averages provided by Sia Central.`
-}
-
-function getRedundancyTip(
-  includeRedundancy: boolean,
-  redundancyMultiplier: BigNumber
-) {
-  if (includeRedundancy) {
-    return (
-      <div className="flex flex-col gap-1">
-        <Text color="subtle">
-          Specified max price includes the cost of{' '}
-          {redundancyMultiplier.toFixed(1)}x redundancy.
-        </Text>
-        <Text color="subtle">
-          Redundancy is calculated from the ratio of data shards:{' '}
-          <Code>total shards / min shards</Code>.
-        </Text>
-      </div>
-    )
-  }
-  return `Specified max price does not include redundancy.`
 }

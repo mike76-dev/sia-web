@@ -1,11 +1,9 @@
-import {
-  getSiaCentralBlockLatest,
-  getSiaCentralHostsNetworkMetrics,
-} from '@siafoundation/sia-central'
 import { getOGImage } from '../components/OGImage'
-import { network, siaCentralApi } from '../config'
+import { network } from '../config'
 import { humanBytes } from '@siafoundation/units'
 import { PreviewValue } from '../components/OGImage/Preview'
+import { siaCentral } from '../config/siaCentral'
+import { to } from '@siafoundation/request'
 
 export const revalidate = 0
 
@@ -18,20 +16,12 @@ export const size = {
 export const contentType = 'image/png'
 
 export default async function Image() {
-  const [{ data: metrics }, { data: latestBlock }] = await Promise.all([
-    getSiaCentralHostsNetworkMetrics({
-      config: {
-        api: siaCentralApi,
-      },
-    }),
-    getSiaCentralBlockLatest({
-      config: {
-        api: siaCentralApi,
-      },
-    }),
+  const [[metrics], [latestBlock]] = await Promise.all([
+    to(siaCentral.hostsNetworkMetrics()),
+    to(siaCentral.blockLatest()),
   ])
 
-  const lastBlockHeight = Number(latestBlock?.block.height || 0)
+  const lastBlockHeight = Number(latestBlock?.block?.height || 0)
 
   const values: PreviewValue[] = []
   if (latestBlock) {
@@ -61,8 +51,8 @@ export default async function Image() {
       title: 'siascan',
       subtitle:
         network === 'mainnet'
-          ? 'Sia blockchain and host explorer.'
-          : 'Zen testnet blockchain and host explorer.',
+          ? 'Siascan is a block explorer with host statistics and pricing details. Siascan is built for Sia, a decentralized storage network.'
+          : 'Siascan Zen is a block explorer with host statistics and pricing details. Siascan Zen is built for the Sia Zen Testnet.',
       values: values.length ? values : undefined,
     },
     size

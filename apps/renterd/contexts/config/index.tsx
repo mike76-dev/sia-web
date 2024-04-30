@@ -9,10 +9,9 @@ import {
 } from '@siafoundation/design-system'
 import { useCallback, useMemo } from 'react'
 import { SettingsData } from './types'
-import { transformDown } from './transform'
+import { transformDown } from './transformDown'
 import { useResources } from './useResources'
 import { useOnValid } from './useOnValid'
-import { useEstimates } from './useEstimates'
 import { useForm } from './useForm'
 import {
   checkIfAllResourcesLoaded,
@@ -21,9 +20,9 @@ import {
 
 export function useConfigMain() {
   const {
+    autopilotState,
     autopilot,
     contractSet,
-    display,
     gouging,
     redundancy,
     uploadPacking,
@@ -34,25 +33,13 @@ export function useConfigMain() {
     isAutopilotEnabled,
   } = useResources()
 
-  const {
-    form,
-    maxStoragePriceTBMonth,
-    maxDownloadPriceTB,
-    maxUploadPriceTB,
-    storageTB,
-    downloadTBMonth,
-    uploadTBMonth,
-    includeRedundancyMaxStoragePrice,
-    includeRedundancyMaxUploadPrice,
-    redundancyMultiplier,
-    fields,
-    showAdvanced,
-    setShowAdvanced,
-  } = useForm()
-
   // resources required to intialize form
   const resources = useMemo(
     () => ({
+      autopilotState: {
+        data: autopilotState.data,
+        error: autopilotState.error,
+      },
       autopilot: {
         data: autopilot.data,
         error: autopilot.error,
@@ -73,10 +60,6 @@ export function useConfigMain() {
         data: redundancy.data,
         error: redundancy.error,
       },
-      display: {
-        data: display.data,
-        error: display.error,
-      },
       averages: {
         data: averages.data,
         error: averages.error,
@@ -88,6 +71,8 @@ export function useConfigMain() {
       },
     }),
     [
+      autopilotState.data,
+      autopilotState.error,
       autopilot.data,
       autopilot.error,
       contractSet.data,
@@ -98,26 +83,35 @@ export function useConfigMain() {
       gouging.error,
       redundancy.data,
       redundancy.error,
-      display.data,
-      display.error,
       averages.data,
       averages.error,
       appSettings.settings.siaCentral,
     ]
   )
 
+  const {
+    form,
+    storageTB,
+    estimates,
+    evaluation,
+    redundancyMultiplier,
+    fields,
+    showAdvanced,
+    setShowAdvanced,
+  } = useForm({ resources })
+
   const remoteValues: SettingsData = useMemo(() => {
     if (!checkIfAllResourcesLoaded(resources)) {
       return null
     }
     return transformDown({
+      hasBeenConfigured: resources.autopilotState.data?.configured,
       autopilot: resources.autopilot.data,
       contractSet: resources.contractSet.data,
       uploadPacking: resources.uploadPacking.data,
       gouging: resources.gouging.data,
       averages: resources.averages.data,
       redundancy: resources.redundancy.data,
-      display: resources.display.data,
     })
   }, [resources])
 
@@ -128,36 +122,36 @@ export function useConfigMain() {
 
   const revalidateAndResetForm = useCallback(async () => {
     // these do not seem to throw on errors, just return undefined
+    const _autopilotState = await autopilotState.mutate()
     const _autopilot = isAutopilotEnabled ? await autopilot.mutate() : undefined
     const _contractSet = await contractSet.mutate()
     const _gouging = await gouging.mutate()
     const _redundancy = await redundancy.mutate()
     const _uploadPacking = await uploadPacking.mutate()
-    const _display = await display.mutate()
     if (!gouging || !redundancy) {
-      triggerErrorToast('Error fetching settings.')
+      triggerErrorToast({ title: 'Error fetching settings' })
       return null
     }
     form.reset(
       transformDown({
+        hasBeenConfigured: _autopilotState.configured,
         autopilot: _autopilot,
         contractSet: _contractSet,
         uploadPacking: _uploadPacking,
         gouging: _gouging,
         averages: averages.data,
         redundancy: _redundancy,
-        display: _display,
       })
     )
   }, [
     form,
+    autopilotState,
     isAutopilotEnabled,
     autopilot,
     contractSet,
     gouging,
     uploadPacking,
     redundancy,
-    display,
     averages.data,
   ])
 
@@ -171,23 +165,9 @@ export function useConfigMain() {
   })
   const { changeCount } = useFormChangeCount({ form })
 
-  const { canEstimate, estimatedSpendingPerMonth, estimatedSpendingPerTB } =
-    useEstimates({
-      isAutopilotEnabled,
-      includeRedundancyMaxStoragePrice,
-      includeRedundancyMaxUploadPrice,
-      redundancyMultiplier,
-      maxStoragePriceTBMonth,
-      storageTB,
-      maxDownloadPriceTB,
-      downloadTBMonth,
-      maxUploadPriceTB,
-      uploadTBMonth,
-    })
-
   const onValid = useOnValid({
     resources,
-    estimatedSpendingPerMonth,
+    estimatedSpendingPerMonth: estimates.estimatedSpendingPerMonth,
     showAdvanced,
     isAutopilotEnabled,
     revalidateAndResetForm,
@@ -219,9 +199,7 @@ export function useConfigMain() {
     form,
     fields,
     changeCount,
-    canEstimate,
-    estimatedSpendingPerMonth,
-    estimatedSpendingPerTB,
+    estimates,
     redundancyMultiplier,
     storageTB,
     shouldSyncDefaultContractSet,
@@ -231,6 +209,7 @@ export function useConfigMain() {
     remoteError,
     configRef,
     takeScreenshot,
+    evaluation,
   }
 }
 

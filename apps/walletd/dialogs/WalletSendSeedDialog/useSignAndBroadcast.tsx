@@ -1,8 +1,9 @@
 import {
   useConsensusNetwork,
-  useWalletOutputs,
+  useWalletOutputsSiacoin,
   useConsensusTipState,
-} from '@siafoundation/react-walletd'
+  useWalletOutputsSiafund,
+} from '@siafoundation/walletd-react'
 import { useWallets } from '../../contexts/wallets'
 import { useCallback } from 'react'
 import { signTransactionSeed } from '../../lib/signSeed'
@@ -13,10 +14,16 @@ import { useCancel } from '../_sharedWalletSend/useCancel'
 import { useFund } from '../_sharedWalletSend/useFund'
 
 export function useSignAndBroadcast() {
-  const { wallet, saveWalletSeed } = useWallets()
+  const { wallet, cacheWalletMnemonic } = useWallets()
   const walletId = wallet?.id
 
-  const outputs = useWalletOutputs({
+  const siacoinOutputs = useWalletOutputsSiacoin({
+    disabled: !walletId,
+    params: {
+      id: walletId,
+    },
+  })
+  const siafundOutputs = useWalletOutputsSiafund({
     disabled: !walletId,
     params: {
       id: walletId,
@@ -30,9 +37,11 @@ export function useSignAndBroadcast() {
   const broadcast = useBroadcast({ cancel })
 
   return useCallback(
-    async ({ seed, params }: { seed: string; params: SendParams }) => {
+    async ({ mnemonic, params }: { mnemonic: string; params: SendParams }) => {
       if (!addresses) {
-        return
+        return {
+          error: 'No addresses found',
+        }
       }
 
       // fund
@@ -47,17 +56,16 @@ export function useSignAndBroadcast() {
           error: fundingError,
         }
       }
-      const { signedTransaction, error: signingError } =
-        await signTransactionSeed({
-          seed,
-          transaction: fundedTransaction,
-          toSign,
-          cs: cs.data,
-          cn: cn.data,
-          addresses,
-          siacoinOutputs: outputs.data?.siacoinOutputs,
-          siafundOutputs: outputs.data?.siafundOutputs,
-        })
+      const { signedTransaction, error: signingError } = signTransactionSeed({
+        mnemonic,
+        transaction: fundedTransaction,
+        toSign,
+        consensusState: cs.data,
+        consensusNetwork: cn.data,
+        addresses,
+        siacoinOutputs: siacoinOutputs.data,
+        siafundOutputs: siafundOutputs.data,
+      })
       if (signingError) {
         cancel(fundedTransaction)
         return {
@@ -66,7 +74,7 @@ export function useSignAndBroadcast() {
       }
 
       // if successfully signed cache the seed
-      saveWalletSeed(walletId, seed)
+      cacheWalletMnemonic(walletId, mnemonic)
 
       // broadcast
       return broadcast({ signedTransaction })
@@ -78,8 +86,9 @@ export function useSignAndBroadcast() {
       walletId,
       cs.data,
       cn.data,
-      outputs.data,
-      saveWalletSeed,
+      siacoinOutputs.data,
+      siafundOutputs.data,
+      cacheWalletMnemonic,
       broadcast,
     ]
   )

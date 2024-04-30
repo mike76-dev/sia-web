@@ -8,6 +8,7 @@ import { ConfigStats } from './ConfigStats'
 import { ConfigActions } from './ConfigActions'
 import { ConfigNav } from './ConfigNav'
 import { StateConnError } from './StateConnError'
+import { Recommendations } from './Recommendations'
 
 export function Config() {
   const { openDialog } = useDialog()
@@ -22,14 +23,13 @@ export function Config() {
       stats={<ConfigStats />}
       actions={<ConfigActions />}
       openSettings={() => openDialog('settings')}
+      size="3"
     >
+      <Recommendations />
       {remoteError ? (
         <StateConnError />
       ) : (
-        <div
-          ref={configRef}
-          className="px-5 py-6 flex flex-col gap-16 max-w-screen-xl"
-        >
+        <div ref={configRef} className="px-5 py-6 flex flex-col gap-16">
           <ConfigurationPanel
             title="Storage"
             category="storage"

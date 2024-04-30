@@ -1,5 +1,5 @@
 import { Transaction } from '@siafoundation/types'
-import { useTxPoolBroadcast } from '@siafoundation/react-walletd'
+import { useTxPoolBroadcast } from '@siafoundation/walletd-react'
 import { useCallback } from 'react'
 
 export function useBroadcast({ cancel }: { cancel: (t: Transaction) => void }) {
@@ -16,7 +16,7 @@ export function useBroadcast({ cancel }: { cancel: (t: Transaction) => void }) {
       const broadcastResponse = await txPoolBroadcast.post({
         payload: {
           transactions: [signedTransaction],
-          v2Transactions: [],
+          v2transactions: [],
         },
       })
       if (broadcastResponse.error) {

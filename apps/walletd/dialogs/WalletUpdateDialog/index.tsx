@@ -9,21 +9,33 @@ import {
   Label,
   useDialogFormHelpers,
 } from '@siafoundation/design-system'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useWalletAdd } from '@siafoundation/react-walletd'
+import { useWalletUpdate } from '@siafoundation/walletd-react'
 import { useWallets } from '../../contexts/wallets'
+import { WalletData } from '../../contexts/wallets/types'
 
 const defaultValues = {
   name: '',
   description: '',
 }
 
+function getDefaultValues(wallet: WalletData) {
+  return wallet
+    ? {
+        name: wallet.name,
+        description: wallet.description,
+      }
+    : defaultValues
+}
+
+type Values = typeof defaultValues
+
 function getFields({
   walletNames,
 }: {
   walletNames: string[]
-}): ConfigFields<typeof defaultValues, never> {
+}): ConfigFields<Values, never> {
   return {
     name: {
       type: 'text',
@@ -69,31 +81,17 @@ export function WalletUpdateDialog({
   const { walletId } = params || {}
   const { dataset } = useWallets()
   const wallet = dataset?.find((d) => d.id === walletId)
-  const walletAdd = useWalletAdd()
+  const walletUpdate = useWalletUpdate()
+  const defaultValues = getDefaultValues(wallet)
   const form = useForm({
     mode: 'all',
     defaultValues,
   })
-  const { closeAndReset } = useDialogFormHelpers({
+  const { handleOpenChange, closeAndReset } = useDialogFormHelpers({
     form,
     onOpenChange,
     defaultValues,
   })
-  useEffect(() => {
-    // timeout 0 gets around a react-hook-form glitch where both fields
-    // do not get initialized.
-    setTimeout(() => {
-      form.reset(
-        wallet
-          ? {
-              name: wallet.name,
-              description: wallet.description,
-            }
-          : defaultValues
-      )
-    }, 0)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletId])
 
   const walletNames = useMemo(
     () =>
@@ -107,24 +105,27 @@ export function WalletUpdateDialog({
   )
   const fields = getFields({ walletNames })
   const onSubmit = useCallback(
-    async (values) => {
-      const response = await walletAdd.put({
+    async (values: Values) => {
+      const response = await walletUpdate.post({
         params: {
           id: walletId,
         },
         payload: {
-          ...wallet,
+          ...wallet.raw,
           name: values.name,
           description: values.description,
         },
       })
       if (response.error) {
-        triggerErrorToast(response.error)
+        triggerErrorToast({
+          title: 'Error updating wallet',
+          body: response.error,
+        })
       } else {
         closeAndReset()
       }
     },
-    [walletId, walletAdd, wallet, closeAndReset]
+    [walletId, walletUpdate, wallet, closeAndReset]
   )
 
   return (
@@ -132,7 +133,7 @@ export function WalletUpdateDialog({
       title={`${wallet?.name}`}
       trigger={trigger}
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       contentVariants={{
         className: 'w-[400px]',
       }}
@@ -150,7 +151,7 @@ export function WalletUpdateDialog({
         <div className="flex flex-col gap-1">
           <Label>Type</Label>
           <div>
-            <Badge>{wallet?.type}</Badge>
+            <Badge>{wallet?.metadata.type}</Badge>
           </div>
         </div>
         <FieldText name="name" form={form} fields={fields} />

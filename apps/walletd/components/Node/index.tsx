@@ -3,7 +3,7 @@ import {
   useConsensusTip,
   useSyncerPeers,
   useTxPoolTransactions,
-} from '@siafoundation/react-walletd'
+} from '@siafoundation/walletd-react'
 import { routes } from '../../config/routes'
 import { useDialog } from '../../contexts/dialog'
 import { WalletdSidenav } from '../WalletdSidenav'
@@ -28,7 +28,8 @@ export function Node() {
   const { openDialog } = useDialog()
 
   const transactionCount = txPool.data
-    ? txPool.data.transactions.length + txPool.data.v2Transactions.length
+    ? (txPool.data.transactions?.length || 0) +
+      (txPool.data.v2transactions?.length || 0)
     : 0
 
   return (

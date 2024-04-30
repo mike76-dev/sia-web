@@ -1,9 +1,11 @@
-import { busStateKey } from '@siafoundation/react-renterd'
+import { busStateRoute } from '@siafoundation/renterd-types'
 
 export const routes = {
   home: '/',
-  files: {
-    index: '/files',
+  buckets: {
+    index: '/buckets',
+    files: '/buckets/[bucket]/files/[path]',
+    uploads: '/buckets/[bucket]/uploads',
   },
   config: {
     index: '/config',
@@ -27,6 +29,9 @@ export const routes = {
   keys: {
     index: '/keys',
   },
+  alerts: {
+    index: '/alerts',
+  },
   node: {
     index: '/node',
   },
@@ -36,4 +41,4 @@ export const routes = {
   login: '/login',
 }
 
-export const connectivityRoute = busStateKey
+export const connectivityRoute = busStateRoute

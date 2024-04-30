@@ -10,7 +10,7 @@ import {
   triggerErrorToast,
   stripPrefix,
 } from '@siafoundation/design-system'
-import { useWalletAddressDelete } from '@siafoundation/react-walletd'
+import { useWalletAddressDelete } from '@siafoundation/walletd-react'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDialog } from '../contexts/dialog'
@@ -72,9 +72,12 @@ export function AddressRemoveDialog({
       },
     })
     if (response.error) {
-      triggerErrorToast(response.error)
+      triggerErrorToast({
+        title: 'Error removing address',
+        body: response.error,
+      })
     } else {
-      triggerSuccessToast('Address permanently removed.')
+      triggerSuccessToast({ title: 'Address permanently removed' })
       form.reset()
       closeDialog()
     }

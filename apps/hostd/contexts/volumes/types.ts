@@ -1,4 +1,4 @@
-import { VolumeStatus } from '@siafoundation/react-hostd'
+import { VolumeStatus } from '@siafoundation/hostd-types'
 import BigNumber from 'bignumber.js'
 
 export type VolumeData = {

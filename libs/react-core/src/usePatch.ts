@@ -9,23 +9,28 @@ import {
   InternalCallbackArgs,
   InternalHookArgsCallback,
   mergeInternalCallbackArgs,
-  RequestParams,
   Response,
   mergeInternalHookArgsCallback,
   getPathFromKey,
   After,
   InternalHookArgsWithPayloadSwr,
   mergeInternalHookArgsSwr,
+  InternalHookArgsSwr,
 } from './request'
 import { useAppSettings } from './useAppSettings'
 import { useMemo } from 'react'
 import { keyOrNull } from './utils'
 import { SWRError } from './types'
+import { RequestParams } from '@siafoundation/request'
 
 export function usePatchSwr<Params extends RequestParams, Payload, Result>(
   args: InternalHookArgsWithPayloadSwr<Params, Payload, Result>
 ) {
-  const hookArgs = useMemo(() => mergeInternalHookArgsSwr(args), [args])
+  const hookArgs: InternalHookArgsSwr<
+    Record<string, string | number | boolean | string[]>,
+    Result
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  > = useMemo(() => mergeInternalHookArgsSwr(args as any), [args])
   const { settings, passwordProtectRequestHooks } = useAppSettings()
   const reqRoute = buildRouteWithParams(
     settings,
@@ -154,6 +159,7 @@ export function usePatchFunc<Params extends RequestParams, Payload, Result>(
         return {
           status: response.status,
           data: response.data,
+          headers: response.headers,
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {

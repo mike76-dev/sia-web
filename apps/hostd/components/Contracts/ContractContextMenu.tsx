@@ -11,11 +11,9 @@ import {
   Tooltip,
   Text,
 } from '@siafoundation/design-system'
-import { Draggable16, DataCheck16 } from '@siafoundation/react-icons'
-import {
-  ContractStatus,
-  useContractsIntegrityCheck,
-} from '@siafoundation/react-hostd'
+import { CaretDown16, DataCheck16 } from '@siafoundation/react-icons'
+import { ContractStatus } from '@siafoundation/hostd-types'
+import { useContractsIntegrityCheck } from '@siafoundation/hostd-react'
 import { useDialog } from '../../contexts/dialog'
 import { useCallback } from 'react'
 
@@ -41,19 +39,25 @@ export function ContractContextMenu({
       },
     })
     if (response.error) {
-      triggerErrorToast(response.error)
+      triggerErrorToast({
+        title: 'Error starting integrity check',
+        body: response.error,
+      })
     } else {
-      triggerSuccessToast(
-        <>
-          Integrity check successfully started, depending on contract data size
-          this operation can take a while. Check <Code>hostd</Code>{' '}
-          <Link onClick={() => openDialog('alerts')}>alerts</Link> for status
-          updates.
-        </>,
-        {
+      triggerSuccessToast({
+        title: 'Integrity check started',
+        body: (
+          <>
+            Depending on contract data size this operation can take a while.
+            Check <Code>hostd</Code>{' '}
+            <Link onClick={() => openDialog('alerts')}>alerts</Link> for status
+            updates.
+          </>
+        ),
+        options: {
           duration: 12_000,
-        }
-      )
+        },
+      })
     }
   }, [id, integrityCheck, openDialog])
 
@@ -62,7 +66,7 @@ export function ContractContextMenu({
     <DropdownMenu
       trigger={
         <Button variant="ghost" icon="hover" {...buttonProps}>
-          <Draggable16 />
+          <CaretDown16 />
         </Button>
       }
       contentProps={{ align: 'start', ...contentProps }}

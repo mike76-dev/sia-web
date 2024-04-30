@@ -8,12 +8,12 @@ import {
   ValueSf,
   ValueScFiat,
 } from '@siafoundation/design-system'
-import { Locked16, Unlocked16, Draggable16 } from '@siafoundation/react-icons'
+import { Locked16, Unlocked16, CaretDown16 } from '@siafoundation/react-icons'
 import { humanDate } from '@siafoundation/units'
 import { humanTimeAndUnits } from '../../lib/time'
 import { walletTypes } from '../../config/walletTypes'
 import { WalletData, TableColumnId } from './types'
-import { useWalletBalance } from '@siafoundation/react-walletd'
+import { useWalletBalance } from '@siafoundation/walletd-react'
 import BigNumber from 'bignumber.js'
 import { WalletContextMenu } from '../../components/WalletContextMenu'
 
@@ -36,7 +36,7 @@ export const columns: WalletsTableColumn[] = [
       <WalletContextMenu
         trigger={
           <Button variant="ghost" icon="hover">
-            <Draggable16 />
+            <CaretDown16 />
           </Button>
         }
         contentProps={{ align: 'start' }}
@@ -105,7 +105,11 @@ export const columns: WalletsTableColumn[] = [
     id: 'type',
     label: 'type',
     category: 'general',
-    render: ({ data: { type } }) => {
+    render: ({
+      data: {
+        metadata: { type },
+      },
+    }) => {
       return (
         <Tooltip content={walletTypes[type]?.title}>
           <Badge interactive={false} className="flex gap-0.5 items-center">
@@ -123,9 +127,12 @@ export const columns: WalletsTableColumn[] = [
     label: 'status',
     category: 'general',
     render: ({
-      data: { type, status, activityAt, unlock, lock },
+      data,
       context: { walletAutoLockEnabled, walletAutoLockTimeout },
     }) => {
+      const { type } = data.metadata
+      const { status, activityAt } = data.state
+      const { unlock, lock } = data.actions
       if (type === 'seed') {
         const sinceActivityMs = new Date().getTime() - activityAt
         const remainingMs = Math.max(walletAutoLockTimeout - sinceActivityMs, 0)

@@ -1,5 +1,35 @@
 # @siafoundation/units
 
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [1b1952e5]
+- Updated dependencies [0d7249a4]
+- Updated dependencies [a12625e7]
+  - @siafoundation/react-core@1.2.0
+  - @siafoundation/sia-central-types@0.1.0
+
+## 3.0.0
+
+### Minor Changes
+
+- ea9c20d2: humanTime now supports up to days and long and abbreviated formatting.
+
+### Patch Changes
+
+- Updated dependencies [40e402ad]
+  - @siafoundation/react-core@1.1.0
+
+## 2.0.3
+
+### Patch Changes
+
+- b3e12c99: The package has been updated to use Next 14.
+- Updated dependencies [b3e12c99]
+  - @siafoundation/react-core@1.0.3
+  - @siafoundation/sia-central@0.3.3
+
 ## 2.0.2
 
 ### Patch Changes

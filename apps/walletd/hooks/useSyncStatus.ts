@@ -1,11 +1,11 @@
 import { hoursInMilliseconds } from '@siafoundation/design-system'
 import { useAppSettings } from '@siafoundation/react-core'
+import { ConsensusState } from '@siafoundation/types'
 import {
-  ConsensusState,
   useConsensusTip,
   useConsensusTipState,
   useEstimatedNetworkBlockHeight,
-} from '@siafoundation/react-walletd'
+} from '@siafoundation/walletd-react'
 
 export function useSyncStatus() {
   const { isUnlockedAndAuthedRoute } = useAppSettings()

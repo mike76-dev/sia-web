@@ -70,6 +70,14 @@ export const Dialog = React.forwardRef<
       onOpenChange: _onOpenChange,
     })
 
+    // The dialog itself only triggers on internal open state change
+    useEffect(() => {
+      if (open) {
+        onOpenChange(open)
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
+
     return (
       <DialogPrimitive.Root
         open={open}
@@ -123,7 +131,7 @@ export function DialogClose({ className }: { className?: string }) {
   return (
     <DialogPrimitive.Close asChild type="button">
       <div className={cx('appearance-none', className)}>
-        <Button size="small" variant="ghost" type="button">
+        <Button size="small" variant="ghost" type="button" aria-label="close">
           <Close24 />
         </Button>
       </div>

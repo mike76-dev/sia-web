@@ -1,5 +1,38 @@
 # @siafoundation/react-core
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [3a983801]
+  - @siafoundation/request@0.2.0
+
+## 1.2.0
+
+### Minor Changes
+
+- 1b1952e5: Libraries now follow new naming scheme.
+- 0d7249a4: Peer dependencies now limited to react and next.
+
+### Patch Changes
+
+- Updated dependencies [b3a08031]
+  - @siafoundation/request@0.1.0
+
+## 1.1.0
+
+### Minor Changes
+
+- 40e402ad: Hook request functions now return headers.
+
+## 1.0.3
+
+### Patch Changes
+
+- b3e12c99: The package has been updated to use Next 14.
+- Updated dependencies [b3e12c99]
+  - @siafoundation/next@0.1.3
+
 ## 1.0.2
 
 ### Patch Changes
@@ -88,7 +121,7 @@
 - 30493f4: useSettingUpdate now automatically revalidates any corresponding useSetting hooks.
 - 2a0a714: The revalidation dependencies have been refactored into a more extensible after function.
 - 2a0a714: Add generic workflow tracking provider.
-- 67d0113: The renterd React API now lives in react-renterd.
+- 67d0113: The renterd React API now lives in renterd-react.
 
 ## 0.7.0
 

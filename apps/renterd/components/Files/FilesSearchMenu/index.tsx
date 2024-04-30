@@ -8,21 +8,23 @@ import {
 import { Command } from 'cmdk'
 import { useCallback, useState } from 'react'
 import { useDialog } from '../../../contexts/dialog'
-import { useRouter } from 'next/router'
+import { useAppRouter, usePathname } from '@siafoundation/next'
 import { routes } from '../../../config/routes'
-import { useContracts } from '../../../contexts/contracts'
-import { FilesSearchCmd, filesSearchPage } from '../FilesCmd/FilesSearchCmd'
+import {
+  FilesSearchCmd,
+  filesSearchPage,
+} from '../../Files/FilesCmd/FilesSearchCmd'
 import { useDebounce } from 'use-debounce'
-import { FileSearchEmpty } from '../FilesCmd/FilesSearchCmd/FileSearchEmpty'
+import { FileSearchEmpty } from '../../Files/FilesCmd/FilesSearchCmd/FileSearchEmpty'
 
 type Props = {
   panel?: boolean
 }
 
 export function FilesSearchMenu({ panel }: Props) {
-  const { resetFilters } = useContracts()
   const { closeDialog } = useDialog()
-  const router = useRouter()
+  const router = useAppRouter()
+  const pathname = usePathname()
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebounce(search, 500)
 
@@ -58,11 +60,10 @@ export function FilesSearchMenu({ panel }: Props) {
             currentPage={filesSearchPage}
             beforeSelect={() => {
               beforeSelect()
-              resetFilters()
             }}
             afterSelect={() => {
-              if (!router.pathname.startsWith(routes.files.index)) {
-                router.push(routes.files.index)
+              if (!pathname.startsWith(routes.buckets.index)) {
+                router.push(routes.buckets.index)
               }
             }}
           />

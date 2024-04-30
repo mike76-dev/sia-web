@@ -5,13 +5,11 @@ import {
   triggerSuccessToast,
   ValueCopyable,
 } from '@siafoundation/design-system'
-import {
-  AlertSeverity,
-  useAlerts,
-  useAlertsDismiss,
-} from '@siafoundation/react-hostd'
+import { AlertSeverity } from '@siafoundation/hostd-types'
+import { useAlerts, useAlertsDismiss } from '@siafoundation/hostd-react'
 import { humanTime } from '@siafoundation/units'
 import { useCallback } from 'react'
+import { defaultDatasetRefreshInterval } from '../config/swr'
 
 type Props = {
   open: boolean
@@ -19,7 +17,13 @@ type Props = {
 }
 
 export function AlertsDialog({ open, onOpenChange }: Props) {
-  const alerts = useAlerts()
+  const alerts = useAlerts({
+    config: {
+      swr: {
+        refreshInterval: defaultDatasetRefreshInterval,
+      },
+    },
+  })
   const dismiss = useAlertsDismiss()
 
   const dismissOne = useCallback(
@@ -28,9 +32,12 @@ export function AlertsDialog({ open, onOpenChange }: Props) {
         payload: [id],
       })
       if (response.error) {
-        triggerErrorToast('Error dismissing alert.')
+        triggerErrorToast({
+          title: 'Error dismissing alert',
+          body: response.error,
+        })
       } else {
-        triggerSuccessToast('Alert has been dismissed.')
+        triggerSuccessToast({ title: 'Alert has been dismissed' })
       }
     },
     [dismiss]
@@ -45,17 +52,18 @@ export function AlertsDialog({ open, onOpenChange }: Props) {
         payload: ids,
       })
       if (response.error) {
-        triggerErrorToast(
-          filter
-            ? `Error dismissing all ${filter} alerts.`
-            : 'Error dismissing all alerts.'
-        )
+        triggerErrorToast({
+          title: filter
+            ? `Error dismissing all ${filter} alerts`
+            : 'Error dismissing all alerts',
+          body: response.error,
+        })
       } else {
-        triggerSuccessToast(
-          filter
-            ? `All ${filter} alerts have been dismissed.`
-            : 'All alerts have been dismissed.'
-        )
+        triggerSuccessToast({
+          title: filter
+            ? `All ${filter} alerts have been dismissed`
+            : 'All alerts have been dismissed',
+        })
       }
     },
     [dismiss, alerts]

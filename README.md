@@ -8,55 +8,63 @@ Web packages for the Sia project and ecosystem.
 
 User interfaces for the Sia software. The latest Sia software takes a modular approach, with separate daemons and user interfaces for renting, hosting, the explorer, and advanced wallet functionality.
 
-### [renterd](apps/renterd)
-
-![stability-beta](https://img.shields.io/badge/stability-beta-yellow.svg)
-
-The [`renterd`](https://github.com/siafoundation/renterd) user interface, focused on renting functionality.
-
-### [hostd](apps/hostd)
-
-![stability-beta](https://img.shields.io/badge/stability-beta-yellow.svg)
-
-The [`hostd`](https://github.com/siafoundation/hostd) user interface, focused on hosting functionality.
-
-### [walletd](apps/walletd)
-
-![stability-alpha](https://img.shields.io/badge/stability-alpha-orange.svg)
-
-The [`walletd`](https://github.com/siafoundation/walletd) user interface, includes a wallet with support for hot, cold, and hardware wallets.
-
-### [explorer](apps/explorer)
-
-![stability-mature](https://img.shields.io/badge/stability-mature-008000.svg)
-
-The `explorer` user interface, a Sia blockchain explorer interface that powers [siascan.com](https://siascan.com) and [zen.siascan.com](https://zen.siascan.com).
+- [renterd](apps/renterd) - The [`renterd`](https://github.com/siafoundation/renterd) user interface, focused on renting functionality.
+- [hostd](apps/hostd) - The [`hostd`](https://github.com/siafoundation/hostd) user interface, focused on hosting functionality.
+- [walletd](apps/walletd) - The [`walletd`](https://github.com/siafoundation/walletd) user interface, includes a wallet with support for hot, cold, and hardware wallets.
+- [explorer](apps/explorer) - The `explorer` user interface, a Sia blockchain explorer interface that powers [siascan.com](https://siascan.com) and [zen.siascan.com](https://zen.siascan.com).
 
 ## Libraries
 
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-orange.svg)
+![stability-beta](https://img.shields.io/badge/stability-beta-yellow.svg)
 
-> ⚠️ Please note that all libraries are currently unstable and subject to change or completely move. Do not depend on these libraries until version 1.0.0.
+### TypeScript
 
 The Sia web libraries provide developers with convenient TypeScript SDKs for using Sia core types, blockchain utilities, data fetching, daemon-specific React hooks, and components for common functionality such as Siacoin/fiat input fields, transaction lists, files, and more.
 
-- [@siafoundation/react-core](libs/react-core) - Core library for building React hooks for interacting with a Sia daemon.
-- [@siafoundation/react-renterd](libs/react-renterd) - React hooks for interacting with `renterd`.
-- [@siafoundation/react-hostd](libs/react-hostd) - React hooks for interacting with `hostd`.
-- [@siafoundation/react-walletd](libs/react-walletd) - React hooks for interacting with `walletd`.
-- [@siafoundation/react-sia-central](libs/react-sia-central) - React hooks for interacting with the Sia Central API.
-- [@siafoundation/sia-central](libs/sia-central) - Methods and types for interacting with the Sia Central API.
+- [@siafoundation/sdk](libs/sdk) - SDK for interacting directly with the Sia network from browsers and web clients.
+- [@siafoundation/renterd-types](libs/renterd-types) - Types for `renterd`.
+- [@siafoundation/renterd-js](libs/renterd-js) - SDK for interacting with `renterd`.
+- [@siafoundation/renterd-react](libs/renterd-react) - React hooks for interacting with `renterd`.
+- [@siafoundation/hostd-types](libs/hostd-types) - Types for `hostd`.
+- [@siafoundation/hostd-react](libs/hostd-react) - React hooks for interacting with `hostd`.
+- [@siafoundation/walletd-types](libs/walletd-types) - Types for `walletd`.
+- [@siafoundation/walletd-react](libs/walletd-react) - React hooks for interacting with `walletd`.
 - [@siafoundation/design-system](libs/design-system) - React-based design system used across Sia apps and websites.
-- [@siafoundation/data-sources](libs/data-sources) - Data sources used for stats on the website.
-- [@siafoundation/fonts](libs/fonts) - Next font configuration for use across apps.
+- [@siafoundation/sia-central-types](libs/sia-central-types) - Types for the Sia Central API.
+- [@siafoundation/sia-central-js](libs/sia-central-js) - SDK for interacting with the Sia Central API.
+- [@siafoundation/sia-central-react](libs/sia-central-react) - React hooks for interacting with the Sia Central API.
 - [@siafoundation/units](libs/units) - Methods and types for converting and displaying units.
 - [@siafoundation/types](libs/types) - Core Sia types and library methods.
+- [@siafoundation/react-core](libs/react-core) - Core library for building React hooks for interacting with a Sia daemon.
+
+### Go
+
+- [go.sia.tech/web/sdk](sdk) - SDK for signing transactions, encoding RPCs, computing merkle roots, and more. Compiled with WASM for use in the TypeScript SDK.
+- [go.sia.tech/web/ui](ui) - Library for embedding NextJS applications in Go.
+- [go.sia.tech/web/walletd](walletd) - HTTP handler with embedded `walletd` application.
+- [go.sia.tech/web/renterd](renterd) - HTTP handler with embedded `renterd` application.
+- [go.sia.tech/web/hostd](hostd) - HTTP handler with embedded `hostd` application.
 
 ## Internal
+
+### Apps
 
 - [website](apps/website) - The main [sia.tech](https://sia.tech) website with information on the Sia project and the Sia Foundation.
 - [assets](apps/assets) - Powers [api.sia.tech](https://api.sia.tech) and all downloadable assets on [sia.tech](https://sia.tech) such as the Sia software releases.
 - [crons](apps/crons) - Background tasks for [api.sia.tech](https://api.sia.tech) and [sia.tech](https://sia.tech).
+
+### Libraries
+
+- [@siafoundation/request](libs/request) - Core library for building request APIs.
+- [@siafoundation/react-icons](libs/react-icons) - React-based icons used across Sia apps and websites.
+- [@siafoundation/data-sources](libs/data-sources) - Data sources used for stats on the website.
+- [@siafoundation/fonts](libs/fonts) - Next font configuration for use across apps.
+
+### Testing
+
+- [walletd-e2e](walletd-e2e) - App for testing walletd.
+- [@siafoundation/walletd-mock](walletd-mock) - `walletd` data and API mock library for testing.
+- [@siafoundation/sia-central-mock](sia-central-mock) - Sia Central data and API mock library for testing.
 
 ## Development
 

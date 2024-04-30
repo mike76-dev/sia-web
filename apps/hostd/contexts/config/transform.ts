@@ -4,7 +4,7 @@ import {
   DNSDuckDNSOptions,
   DNSNoIPOptions,
   HostSettings,
-} from '@siafoundation/react-hostd'
+} from '@siafoundation/hostd-types'
 import {
   bytesToMB,
   MBToBytes,
@@ -97,9 +97,6 @@ export function transformUp(
         .times(1_000_000_000) // seconds to nanoseconds
         .toFixed(0)
     ),
-
-    // Registry settings
-    maxRegistryEntries: Number(values.maxRegistryEntries.toFixed(0)),
 
     // RHP3 settings
     accountExpiry: Number(
@@ -201,9 +198,6 @@ export function transformDown({
     priceTableValidity: new BigNumber(settings.priceTableValidity)
       .div(1_000_000_000) // nanoseconds to seconds
       .div(60), // seconds to minutes
-
-    // Registry settings
-    maxRegistryEntries: new BigNumber(settings.maxRegistryEntries),
 
     // RHP3 settings
     accountExpiry: new BigNumber(settings.accountExpiry)

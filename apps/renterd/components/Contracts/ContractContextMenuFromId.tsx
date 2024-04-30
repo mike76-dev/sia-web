@@ -1,39 +1,54 @@
-import { Button } from '@siafoundation/design-system'
-import { Draggable16 } from '@siafoundation/react-icons'
-import { useContract } from '@siafoundation/react-renterd'
-import { ContractContextMenu } from './ContractContextMenu'
+import { Button, DropdownMenu } from '@siafoundation/design-system'
+import { CaretDown16 } from '@siafoundation/react-icons'
+import { useContract } from '@siafoundation/renterd-react'
+import { ContractContextMenuContent } from './ContractContextMenu'
 
 type Props = {
   id: string
-  contentProps?: React.ComponentProps<
-    typeof ContractContextMenu
-  >['contentProps']
+  trigger?: React.ReactNode
+  contentProps?: React.ComponentProps<typeof DropdownMenu>['contentProps']
   buttonProps?: React.ComponentProps<typeof Button>
 }
 
 export function ContractContextMenuFromId({
   id,
+  trigger,
   contentProps,
   buttonProps,
 }: Props) {
+  return (
+    <DropdownMenu
+      trigger={
+        trigger || (
+          <Button variant="ghost" icon="hover" {...buttonProps}>
+            <CaretDown16 />
+          </Button>
+        )
+      }
+      contentProps={{
+        align: 'start',
+        ...contentProps,
+        onClick: (e) => {
+          e.stopPropagation()
+        },
+      }}
+    >
+      <ContractContextMenuFromIdContent id={id} />
+    </DropdownMenu>
+  )
+}
+
+// Only trigger a fetch when the dropdown is opened
+function ContractContextMenuFromIdContent({ id }: Props) {
   const contract = useContract({
     params: { id },
   })
 
-  if (!contract.data) {
-    return (
-      <Button variant="ghost" icon="hover" state="waiting" {...buttonProps}>
-        <Draggable16 />
-      </Button>
-    )
-  }
   return (
-    <ContractContextMenu
+    <ContractContextMenuContent
       id={id}
-      address={contract.data.hostIP}
-      publicKey={contract.data.hostKey}
-      contentProps={contentProps}
-      buttonProps={buttonProps}
+      hostAddress={contract.data?.hostIP}
+      hostKey={contract.data?.hostKey}
     />
   )
 }

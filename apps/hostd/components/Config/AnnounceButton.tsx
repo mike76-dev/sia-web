@@ -12,7 +12,7 @@ import {
   useSettingsAnnounce,
   useStateHost,
   useTxPoolFee,
-} from '@siafoundation/react-hostd'
+} from '@siafoundation/hostd-react'
 import { humanSiacoin } from '@siafoundation/units'
 import { useCallback } from 'react'
 import BigNumber from 'bignumber.js'
@@ -61,10 +61,12 @@ export function AnnounceButton() {
           const response = await settingsAnnounce.post({})
 
           if (response.error) {
-            triggerErrorToast('Error announcing host.')
+            triggerErrorToast({ title: 'Error announcing host' })
             return
           }
-          triggerSuccessToast('Successfully broadcast host announcement.')
+          triggerSuccessToast({
+            title: 'Successfully broadcast host announcement',
+          })
         },
       }),
     [openConfirmDialog, settingsAnnounce, txpoolFee]

@@ -8,7 +8,7 @@ import {
   copyToClipboard,
 } from '@siafoundation/design-system'
 import {
-  Draggable16,
+  CaretDown16,
   ListChecked16,
   Filter16,
   Copy16,
@@ -17,7 +17,7 @@ import {
 import {
   useHostsAllowlist,
   useHostsBlocklist,
-} from '@siafoundation/react-renterd'
+} from '@siafoundation/renterd-react'
 import { routes } from '../../config/routes'
 import { useRouter } from 'next/router'
 import { useContracts } from '../../contexts/contracts'
@@ -30,19 +30,56 @@ import { useContractConfirmDelete } from './useContractConfirmDelete'
 
 type Props = {
   id: string
-  address: string
-  publicKey: string
+  trigger?: React.ReactNode
+  hostAddress: string
+  hostKey: string
   contentProps?: React.ComponentProps<typeof DropdownMenu>['contentProps']
   buttonProps?: React.ComponentProps<typeof Button>
 }
 
 export function ContractContextMenu({
   id,
-  address,
-  publicKey,
+  trigger,
+  hostAddress,
+  hostKey,
   contentProps,
   buttonProps,
 }: Props) {
+  return (
+    <DropdownMenu
+      trigger={
+        trigger || (
+          <Button variant="ghost" icon="hover" {...buttonProps}>
+            <CaretDown16 />
+          </Button>
+        )
+      }
+      contentProps={{
+        align: 'start',
+        ...contentProps,
+        onClick: (e) => {
+          e.stopPropagation()
+        },
+      }}
+    >
+      <ContractContextMenuContent
+        id={id}
+        hostAddress={hostAddress}
+        hostKey={hostKey}
+      />
+    </DropdownMenu>
+  )
+}
+
+export function ContractContextMenuContent({
+  id,
+  hostAddress,
+  hostKey,
+}: {
+  id: string
+  hostAddress?: string
+  hostKey?: string
+}) {
   const router = useRouter()
   const { setFilter: setHostsFilter, resetFilters: resetHostsFilters } =
     useHosts()
@@ -54,33 +91,21 @@ export function ContractContextMenu({
   const allowlistUpdate = useAllowlistUpdate()
   const contractConfirmDelete = useContractConfirmDelete()
   return (
-    <DropdownMenu
-      trigger={
-        <Button variant="ghost" icon="hover" {...buttonProps}>
-          <Draggable16 />
-        </Button>
-      }
-      contentProps={{
-        align: 'start',
-        ...contentProps,
-        onClick: (e) => {
-          e.stopPropagation()
-        },
-      }}
-    >
+    <>
       <div className="px-1.5 py-1">
         <Text size="14" weight="medium" color="subtle">
-          Contract {publicKey.slice(0, 24)}...
+          Contract {id.slice(0, 24)}...
         </Text>
       </div>
       <DropdownMenuLabel>Filters</DropdownMenuLabel>
       <DropdownMenuItem
+        disabled={!hostAddress}
         onSelect={() => {
           resetHostsFilters()
           setHostsFilter({
             id: 'addressContains',
-            value: address,
-            label: `Address contains ${address}`,
+            value: hostAddress,
+            label: `Address contains ${hostAddress}`,
           })
           router.push(routes.hosts.index)
         }}
@@ -91,9 +116,10 @@ export function ContractContextMenu({
         Filter hosts by host address
       </DropdownMenuItem>
       <DropdownMenuItem
+        disabled={!hostAddress}
         onSelect={() => {
           resetContractsFilters()
-          setContractsFilter(addressContainsFilter(address))
+          setContractsFilter(addressContainsFilter(hostAddress))
           router.push(routes.contracts.index)
         }}
       >
@@ -103,9 +129,10 @@ export function ContractContextMenu({
         Filter contracts by host address
       </DropdownMenuItem>
       <DropdownMenuItem
+        disabled={!hostKey}
         onSelect={() => {
           resetContractsFilters()
-          setContractsFilter(publicKeyContainsFilter(publicKey))
+          setContractsFilter(publicKeyContainsFilter(hostKey))
           router.push(routes.contracts.index)
         }}
       >
@@ -115,30 +142,42 @@ export function ContractContextMenu({
         Filter contracts by host public key
       </DropdownMenuItem>
       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      {blocklist.data?.find((l) => l === address) ? (
-        <DropdownMenuItem onSelect={() => blocklistUpdate([], [address])}>
+      {blocklist.data?.find((l) => l === hostAddress) ? (
+        <DropdownMenuItem
+          disabled={!hostAddress}
+          onSelect={() => blocklistUpdate([], [hostAddress])}
+        >
           <DropdownMenuLeftSlot>
             <ListChecked16 />
           </DropdownMenuLeftSlot>
           Remove host address from blocklist
         </DropdownMenuItem>
       ) : (
-        <DropdownMenuItem onSelect={() => blocklistUpdate([address], [])}>
+        <DropdownMenuItem
+          disabled={!hostAddress}
+          onSelect={() => blocklistUpdate([hostAddress], [])}
+        >
           <DropdownMenuLeftSlot>
             <ListChecked16 />
           </DropdownMenuLeftSlot>
           Add host address to blocklist
         </DropdownMenuItem>
       )}
-      {allowlist.data?.find((l) => l === publicKey) ? (
-        <DropdownMenuItem onSelect={() => allowlistUpdate([], [publicKey])}>
+      {allowlist.data?.find((l) => l === hostKey) ? (
+        <DropdownMenuItem
+          disabled={!hostKey}
+          onSelect={() => allowlistUpdate([], [hostKey])}
+        >
           <DropdownMenuLeftSlot>
             <ListChecked16 />
           </DropdownMenuLeftSlot>
           Remove host public key from allowlist
         </DropdownMenuItem>
       ) : (
-        <DropdownMenuItem onSelect={() => allowlistUpdate([publicKey], [])}>
+        <DropdownMenuItem
+          disabled={!hostKey}
+          onSelect={() => allowlistUpdate([hostKey], [])}
+        >
           <DropdownMenuLeftSlot>
             <ListChecked16 />
           </DropdownMenuLeftSlot>
@@ -159,7 +198,8 @@ export function ContractContextMenu({
         Contract ID
       </DropdownMenuItem>
       <DropdownMenuItem
-        onSelect={() => copyToClipboard(publicKey, 'host public key')}
+        disabled={!hostKey}
+        onSelect={() => copyToClipboard(hostKey, 'host public key')}
       >
         <DropdownMenuLeftSlot>
           <Copy16 />
@@ -167,13 +207,14 @@ export function ContractContextMenu({
         Host public key
       </DropdownMenuItem>
       <DropdownMenuItem
-        onSelect={() => copyToClipboard(address, 'host address')}
+        disabled={!hostAddress}
+        onSelect={() => copyToClipboard(hostAddress, 'host address')}
       >
         <DropdownMenuLeftSlot>
           <Copy16 />
         </DropdownMenuLeftSlot>
         Host address
       </DropdownMenuItem>
-    </DropdownMenu>
+    </>
   )
 }

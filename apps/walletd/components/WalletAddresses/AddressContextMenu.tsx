@@ -9,7 +9,7 @@ import {
   stripPrefix,
 } from '@siafoundation/design-system'
 import { Delete16 } from '@siafoundation/react-icons'
-import { useWalletAddressDelete } from '@siafoundation/react-walletd'
+import { useWalletAddressDelete } from '@siafoundation/walletd-react'
 import { AddressData } from '../../contexts/addresses/types'
 import { useDialog } from '../../contexts/dialog'
 
@@ -18,7 +18,7 @@ type Props = {
 } & Omit<React.ComponentProps<typeof DropdownMenu>, 'children'>
 
 export function AddressContextMenu({
-  address: { walletId, id, index },
+  address: { walletId, id, metadata },
   ...props
 }: Props) {
   const { openDialog } = useDialog()
@@ -31,8 +31,8 @@ export function AddressContextMenu({
         onSelect={() =>
           openDialog('confirm', {
             title:
-              index !== undefined
-                ? `Remove address ${index}`
+              metadata.index !== undefined
+                ? `Remove address ${metadata.index}`
                 : 'Remove address',
             action: 'Remove',
             variant: 'red',
@@ -54,13 +54,17 @@ export function AddressContextMenu({
                 },
               })
               if (response.error) {
-                triggerErrorToast(`Failed to delete address: ${response.error}`)
+                triggerErrorToast({
+                  title: 'Error deleting address',
+                  body: response.error,
+                })
               } else {
-                triggerSuccessToast(
-                  index !== undefined
-                    ? `Address ${index} removed.`
-                    : 'Address removed.'
-                )
+                triggerSuccessToast({
+                  title:
+                    metadata.index !== undefined
+                      ? `Address ${metadata.index} removed`
+                      : 'Address removed',
+                })
               }
             },
           })

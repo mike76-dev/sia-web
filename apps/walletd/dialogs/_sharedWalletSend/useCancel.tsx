@@ -1,5 +1,5 @@
 import { Transaction } from '@siafoundation/types'
-import { useWalletRelease } from '@siafoundation/react-walletd'
+import { useWalletRelease } from '@siafoundation/walletd-react'
 import { useWallets } from '../../contexts/wallets'
 import { useCallback } from 'react'
 import { triggerErrorToast } from '@siafoundation/design-system'
@@ -25,7 +25,10 @@ export function useCancel() {
         },
       })
       if (response.error) {
-        triggerErrorToast(response.error)
+        triggerErrorToast({
+          title: 'Error canceling transaction',
+          body: response.error,
+        })
       }
     },
     [walletId, walletRelease]

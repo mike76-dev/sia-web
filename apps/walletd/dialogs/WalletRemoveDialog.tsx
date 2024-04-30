@@ -9,7 +9,7 @@ import {
   Code,
   triggerErrorToast,
 } from '@siafoundation/design-system'
-import { useWalletDelete } from '@siafoundation/react-walletd'
+import { useWalletDelete } from '@siafoundation/walletd-react'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -74,9 +74,12 @@ export function WalletRemoveDialog({
       },
     })
     if (response.error) {
-      triggerErrorToast(response.error)
+      triggerErrorToast({
+        title: 'Error removing wallet',
+        body: response.error,
+      })
     } else {
-      triggerSuccessToast('Wallet permanently removed.')
+      triggerSuccessToast({ title: 'Wallet permanently removed' })
       form.reset()
       closeDialog()
       router.push(routes.home)

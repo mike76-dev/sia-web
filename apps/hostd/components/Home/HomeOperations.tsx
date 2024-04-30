@@ -23,7 +23,7 @@ export function HomeOperations() {
             defaultMode="total"
             isLoading={operations.isLoading}
             enabledModes={['total', 'average', 'latest']}
-            format={humanNumber}
+            valueFormat={humanNumber}
           />
           <DatumCardConfigurable
             category="operations"
@@ -33,11 +33,11 @@ export function HomeOperations() {
             defaultMode="total"
             isLoading={operations.isLoading}
             enabledModes={['total', 'average', 'latest']}
-            format={humanNumber}
+            valueFormat={humanNumber}
           />
         </DatumScrollArea>
         <ChartXY
-          id="operations"
+          id="hostd/v0/metrics/graphs/operations"
           height={300}
           data={operations.data}
           config={operations.config}

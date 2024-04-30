@@ -6,7 +6,7 @@ import {
   Paragraph,
   Button,
 } from '@siafoundation/design-system'
-import { Draggable16 } from '@siafoundation/react-icons'
+import { CaretDown16 } from '@siafoundation/react-icons'
 import { AddressContextMenu } from '../../components/WalletAddresses/AddressContextMenu'
 import { AddressData, CellContext, TableColumnId } from './types'
 
@@ -29,7 +29,7 @@ export const columns: AddressesTableColumn[] = [
       <AddressContextMenu
         trigger={
           <Button variant="ghost" icon="hover">
-            <Draggable16 />
+            <CaretDown16 />
           </Button>
         }
         contentProps={{ align: 'start' }}
@@ -72,13 +72,13 @@ export const columns: AddressesTableColumn[] = [
     id: 'index',
     label: 'index',
     category: 'general',
-    render: ({ data: { index } }) => {
-      if (index === undefined) {
+    render: ({ data: { metadata } }) => {
+      if (metadata.index === undefined) {
         return null
       }
       return (
         <div className="flex flex-col gap-2">
-          <Text>{index.toLocaleString()}</Text>
+          <Text>{metadata.index.toLocaleString()}</Text>
         </div>
       )
     },

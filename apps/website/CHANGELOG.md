@@ -1,5 +1,23 @@
 # website
 
+## 0.50.0
+
+### Minor Changes
+
+- 8e2d3999: The site now uses the updated Sia Central SDK.
+
+## 0.49.1
+
+### Patch Changes
+
+- fa3f89ed: Fixed an issue where the host map could not refresh its data.
+
+## 0.49.0
+
+### Minor Changes
+
+- 7ef30999: The website now includes the contact email in the footer.
+
 ## 0.48.0
 
 ### Minor Changes

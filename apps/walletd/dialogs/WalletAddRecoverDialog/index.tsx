@@ -12,13 +12,13 @@ import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDialog } from '../../contexts/dialog'
 import { useWallets } from '../../contexts/wallets'
-import { v4 as uuidv4 } from 'uuid'
-import { useWalletAdd } from '@siafoundation/react-walletd'
+import { WalletMetadata } from '@siafoundation/walletd-types'
+import { useWalletAdd } from '@siafoundation/walletd-react'
 import { blake2bHex } from 'blakejs'
 import { SeedLayout } from '../SeedLayout'
 import { SeedIcon } from '@siafoundation/react-icons'
 import { walletAddTypes } from '../../config/walletTypes'
-import { getWalletWasm } from '../../lib/wasm'
+import { getSDK } from '@siafoundation/sdk'
 
 const defaultValues = {
   name: '',
@@ -26,11 +26,13 @@ const defaultValues = {
   mnemonic: '',
 }
 
+type Values = typeof defaultValues
+
 function getFields({
   walletNames,
 }: {
   walletNames: string[]
-}): ConfigFields<typeof defaultValues, never> {
+}): ConfigFields<Values, never> {
   return {
     name: {
       type: 'text',
@@ -62,7 +64,7 @@ function getFields({
         required: 'required',
         validate: {
           valid: (value: string) => {
-            const { error } = getWalletWasm().seedFromPhrase(value)
+            const { error } = getSDK().wallet.keyPairFromSeedPhrase(value, 0)
             return !error || 'seed should be 12 word BIP39 mnemonic'
           },
         },
@@ -93,27 +95,28 @@ export function WalletAddRecoverDialog({ trigger, open, onOpenChange }: Props) {
   const walletAdd = useWalletAdd()
 
   const onSubmit = useCallback(
-    async (values) => {
-      const id = uuidv4()
-      const { seed } = getWalletWasm().seedFromPhrase(values.mnemonic)
-      const seedHash = blake2bHex(seed)
-      const response = await walletAdd.put({
-        params: {
-          id,
-        },
+    async (values: Values) => {
+      const mnemonic = values.mnemonic.trim()
+      const mnemonicHash = blake2bHex(mnemonic)
+      const metadata: WalletMetadata = {
+        type: 'seed',
+        mnemonicHash,
+      }
+      const response = await walletAdd.post({
         payload: {
-          type: 'seed',
-          seedHash,
           name: values.name,
-          createdAt: new Date().getTime(),
           description: values.description,
+          metadata,
         },
       })
       if (response.error) {
-        triggerErrorToast(response.error)
+        triggerErrorToast({
+          title: 'Error adding wallet',
+          body: response.error,
+        })
       } else {
         openDialog('walletAddressesGenerate', {
-          walletId: id,
+          walletId: response.data.id,
         })
         form.reset(defaultValues)
       }

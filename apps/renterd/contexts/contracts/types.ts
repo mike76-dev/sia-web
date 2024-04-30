@@ -1,4 +1,4 @@
-import { ContractState } from '@siafoundation/react-renterd'
+import { ContractState } from '@siafoundation/renterd-types'
 import BigNumber from 'bignumber.js'
 
 export type ContractData = {

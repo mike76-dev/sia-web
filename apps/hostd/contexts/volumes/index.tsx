@@ -3,14 +3,13 @@ import {
   useDatasetEmptyState,
   secondsInMilliseconds,
 } from '@siafoundation/design-system'
-import {
-  VolumeMeta,
-  useVolumes as useVolumesData,
-} from '@siafoundation/react-hostd'
+import { VolumeMeta } from '@siafoundation/hostd-types'
+import { useVolumes as useVolumesData } from '@siafoundation/hostd-react'
 import { createContext, useContext, useMemo } from 'react'
 import { columnsDefaultVisible, TableColumnId } from './types'
 import { columns } from './columns'
 import { useDataset } from './dataset'
+import { defaultDatasetRefreshInterval } from '../../config/swr'
 
 function useVolumesMain() {
   const {
@@ -36,7 +35,7 @@ function useVolumesMain() {
         refreshInterval: (data) =>
           data?.find((v) => isOperationInProgress(v))
             ? secondsInMilliseconds(5)
-            : secondsInMilliseconds(60),
+            : defaultDatasetRefreshInterval,
       },
     },
   })

@@ -1,13 +1,14 @@
 import { minutesInMilliseconds } from '@siafoundation/design-system'
-import { useAutopilotConfig } from '@siafoundation/react-renterd'
+import {
+  useAutopilotConfig,
+  useSettingContractSet,
+  useSettingGouging,
+  useSettingRedundancy,
+  useSettingUploadPacking,
+} from '@siafoundation/renterd-react'
 import { useSyncContractSet } from './useSyncContractSet'
 import { useAppSettings } from '@siafoundation/react-core'
-import { useContractSetSettings } from '../../hooks/useContractSetSettings'
-import { useConfigDisplaySettings } from '../../hooks/useConfigDisplaySettings'
-import { useGougingSettings } from '../../hooks/useGougingSettings'
-import { useRedundancySettings } from '../../hooks/useRedundancySettings'
-import { useUploadPackingSettings } from '../../hooks/useUploadPackingSettings'
-import { useSiaCentralHostsNetworkAverages } from '@siafoundation/react-sia-central'
+import { useSiaCentralHostsNetworkAverages } from '@siafoundation/sia-central-react'
 import { useApp } from '../app'
 
 export function useResources() {
@@ -22,15 +23,7 @@ export function useResources() {
       },
     },
   })
-  const contractSet = useContractSetSettings({
-    config: {
-      swr: {
-        errorRetryCount: 0,
-        refreshInterval: minutesInMilliseconds(1),
-      },
-    },
-  })
-  const display = useConfigDisplaySettings({
+  const contractSet = useSettingContractSet({
     config: {
       swr: {
         errorRetryCount: 0,
@@ -39,28 +32,27 @@ export function useResources() {
     },
   })
   // settings with initial defaults
-  const gouging = useGougingSettings({
+  const gouging = useSettingGouging({
     config: {
       swr: {
         refreshInterval: minutesInMilliseconds(1),
       },
     },
   })
-  const redundancy = useRedundancySettings({
+  const redundancy = useSettingRedundancy({
     config: {
       swr: {
         refreshInterval: minutesInMilliseconds(1),
       },
     },
   })
-  const uploadPacking = useUploadPackingSettings({
+  const uploadPacking = useSettingUploadPacking({
     config: {
       swr: {
         refreshInterval: minutesInMilliseconds(1),
       },
     },
   })
-
   const averages = useSiaCentralHostsNetworkAverages({
     config: {
       swr: {
@@ -77,9 +69,9 @@ export function useResources() {
   const appSettings = useAppSettings()
 
   return {
+    autopilotState: app.autopilot.state,
     autopilot,
     contractSet,
-    display,
     gouging,
     redundancy,
     uploadPacking,

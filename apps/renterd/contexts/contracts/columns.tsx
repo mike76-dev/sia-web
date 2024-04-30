@@ -15,7 +15,7 @@ import { ArrowUpLeft16, CheckmarkFilled16 } from '@siafoundation/react-icons'
 import { humanBytes, humanDate } from '@siafoundation/units'
 import { ContractData, TableColumnId } from './types'
 import { ContractContextMenu } from '../../components/Contracts/ContractContextMenu'
-import { ContractState } from '@siafoundation/react-renterd'
+import { ContractState } from '@siafoundation/renterd-types'
 import { cx } from 'class-variance-authority'
 
 type Context = {
@@ -44,7 +44,7 @@ export const columns: ContractsTableColumn[] = [
     fixed: true,
     cellClassName: 'w-[50px] !pl-2 !pr-4 [&+*]:!pl-0',
     render: ({ data: { id, hostIp, hostKey } }) => (
-      <ContractContextMenu id={id} address={hostIp} publicKey={hostKey} />
+      <ContractContextMenu id={id} hostAddress={hostIp} hostKey={hostKey} />
     ),
   },
   {

@@ -10,19 +10,19 @@ import {
   truncate,
 } from '@siafoundation/design-system'
 import {
-  Draggable16,
+  CaretDown16,
   Ruler16,
   Delete16,
   Locked16,
   Edit16,
   Close16,
 } from '@siafoundation/react-icons'
+import { VolumeStatus } from '@siafoundation/hostd-types'
 import {
-  VolumeStatus,
   useVolume,
   useVolumeCancel,
   useVolumeUpdate,
-} from '@siafoundation/react-hostd'
+} from '@siafoundation/hostd-react'
 import { useDialog } from '../../contexts/dialog'
 
 type Props = {
@@ -47,7 +47,7 @@ export function VolumeContextMenu({ id, contentProps, buttonProps }: Props) {
     <DropdownMenu
       trigger={
         <Button variant="ghost" icon="hover" {...buttonProps}>
-          <Draggable16 />
+          <CaretDown16 />
         </Button>
       }
       contentProps={{ align: 'start', ...contentProps }}
@@ -68,15 +68,15 @@ export function VolumeContextMenu({ id, contentProps, buttonProps }: Props) {
               },
             })
             if (response.error) {
-              triggerErrorToast(
-                `Error canceling volume ${getActiveOperationLabel(status)}.`
-              )
-            } else {
-              triggerSuccessToast(
-                `Successfully canceled volume ${getActiveOperationLabel(
+              triggerErrorToast({
+                title: `Error canceling volume ${getActiveOperationLabel(
                   status
-                )}.`
-              )
+                )}`,
+              })
+            } else {
+              triggerSuccessToast({
+                title: `Canceled volume ${getActiveOperationLabel(status)}`,
+              })
             }
           }}
         >
@@ -100,17 +100,17 @@ export function VolumeContextMenu({ id, contentProps, buttonProps }: Props) {
               },
             })
             if (response.error) {
-              triggerErrorToast(
-                nextReadOnly
-                  ? 'Error setting volume to read-only.'
-                  : 'Error setting volume to read/write.'
-              )
+              triggerErrorToast({
+                title: nextReadOnly
+                  ? 'Error setting volume to read-only'
+                  : 'Error setting volume to read/write',
+              })
             } else {
-              triggerSuccessToast(
-                nextReadOnly
-                  ? 'Volume set to read-only.'
-                  : 'Volume set to read/write.'
-              )
+              triggerSuccessToast({
+                title: nextReadOnly
+                  ? 'Volume set to read-only'
+                  : 'Volume set to read/write',
+              })
             }
           }}
         >

@@ -6,8 +6,8 @@ import {
 import { Delete16 } from '@siafoundation/react-icons'
 import { useDialog } from '../../contexts/dialog'
 import { useCallback } from 'react'
-import { useObjectDelete } from '@siafoundation/react-renterd'
-import { bucketAndKeyParamsFromPath } from '../../contexts/files/paths'
+import { useObjectDelete } from '@siafoundation/renterd-react'
+import { bucketAndKeyParamsFromPath } from '../../lib/paths'
 
 export function useFileDelete() {
   const { openConfirmDialog } = useDialog()
@@ -40,9 +40,12 @@ export function useFileDelete() {
           })
 
           if (response.error) {
-            triggerErrorToast('Error deleting file.')
+            triggerErrorToast({
+              title: 'Error deleting file',
+              body: response.error,
+            })
           }
-          triggerSuccessToast('Successfully deleted file.')
+          triggerSuccessToast({ title: 'Deleted file' })
         },
       }),
     [openConfirmDialog, deleteObject]

@@ -1,15 +1,6 @@
-import { useDatasetEmptyState } from '@siafoundation/design-system'
-import { useWalletAddresses as useData } from '@siafoundation/react-walletd'
-import { useMemo } from 'react'
-
-type AddressData = {
-  id: string
-  address: string
-  description?: string
-  publicKey?: string
-  index?: number
-  walletId: string
-}
+import { useWalletAddresses as useWalletAddressData } from '@siafoundation/walletd-react'
+import { defaultDatasetRefreshInterval } from '../config/swr'
+import { useDataset } from '../contexts/addresses/dataset'
 
 const filters = []
 
@@ -17,41 +8,23 @@ const filters = []
 // is based on the active wallet, this hook can be used in wallet specific
 // dialogs regardless of the active wallet.
 export function useWalletAddresses({ id }: { id: string }) {
-  const response = useData({
+  const response = useWalletAddressData({
     disabled: !id,
     params: {
       id,
     },
+    config: {
+      swr: {
+        refreshInterval: defaultDatasetRefreshInterval,
+      },
+    },
   })
 
-  const dataset = useMemo<AddressData[] | null>(() => {
-    if (!response.data) {
-      return null
-    }
-    const data: AddressData[] = Object.entries(response.data || {}).map(
-      ([address, meta]) => ({
-        id: address,
-        address,
-        description: meta.description as string,
-        publicKey: meta.publicKey as string,
-        index: meta.index as number,
-        walletId: id,
-      })
-    )
-    return data
-  }, [response.data, id])
-
-  const dataState = useDatasetEmptyState(
-    dataset,
-    response.isValidating,
-    response.error,
-    filters
-  )
-
-  const lastIndex = (dataset || []).reduce(
-    (highest, { index }) => (index > highest ? index : highest),
-    -1
-  )
+  const { dataset, dataState, lastIndex } = useDataset({
+    walletId: id,
+    response,
+    filters,
+  })
 
   return {
     dataState,

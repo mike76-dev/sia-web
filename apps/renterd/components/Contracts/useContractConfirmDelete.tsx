@@ -6,7 +6,7 @@ import {
 import { Delete16 } from '@siafoundation/react-icons'
 import { useDialog } from '../../contexts/dialog'
 import { useCallback } from 'react'
-import { useContractDelete } from '@siafoundation/react-renterd'
+import { useContractDelete } from '@siafoundation/renterd-react'
 
 export function useContractConfirmDelete() {
   const { openConfirmDialog } = useDialog()
@@ -39,9 +39,12 @@ export function useContractConfirmDelete() {
           })
 
           if (response.error) {
-            triggerErrorToast('Error deleting contract.')
+            triggerErrorToast({
+              title: 'Error deleting contract',
+              body: response.error,
+            })
           }
-          triggerSuccessToast('Successfully deleted contract.')
+          triggerSuccessToast({ title: 'Deleted contract' })
         },
       }),
     [openConfirmDialog, deleteContract]

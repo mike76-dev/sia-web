@@ -1,17 +1,23 @@
-export type WalletType = 'seed' | 'watch' | 'ledger'
+import { Wallet, WalletMetadata } from '@siafoundation/walletd-types'
 
 export type WalletData = {
   id: string
   name?: string
   description?: string
-  type?: WalletType
-  seed?: string
-  activityAt?: number
-  status: 'unlocked' | 'locked'
-  seedHash?: string
   createdAt?: number
-  unlock: () => void
-  lock: () => void
+  updatedAt?: number
+  metadata: WalletMetadata
+  state: {
+    mnemonic?: string
+    activityAt?: number
+    status: 'unlocked' | 'locked'
+  }
+  actions: {
+    unlock: () => void
+    lock: () => void
+  }
+  raw?: Wallet
+  onClick?: () => void
 }
 
 export type TableColumnId =

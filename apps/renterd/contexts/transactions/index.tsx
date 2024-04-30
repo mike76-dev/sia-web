@@ -2,7 +2,6 @@ import {
   TxType,
   daysInMilliseconds,
   getTransactionType,
-  secondsInMilliseconds,
   stripPrefix,
   useDatasetEmptyState,
 } from '@siafoundation/design-system'
@@ -10,13 +9,14 @@ import {
   useMetricsWallet,
   useWalletPending,
   useWalletTransactions,
-} from '@siafoundation/react-renterd'
+} from '@siafoundation/renterd-react'
 import { createContext, useContext, useMemo } from 'react'
 import { useDialog } from '../dialog'
 import BigNumber from 'bignumber.js'
 import { useRouter } from 'next/router'
 import { useSiascanUrl } from '../../hooks/useSiascanUrl'
 import { Transaction } from '@siafoundation/types'
+import { defaultDatasetRefreshInterval } from '../../config/swr'
 
 const defaultLimit = 50
 const filters = []
@@ -49,13 +49,12 @@ function useTransactionsMain() {
   const offset = Number(router.query.offset || 0)
   const transactions = useWalletTransactions({
     params: {
-      // Endpoint currently returns wrong end of txn list
       limit,
       offset,
     },
     config: {
       swr: {
-        refreshInterval: secondsInMilliseconds(60),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })
@@ -63,7 +62,7 @@ function useTransactionsMain() {
   const pending = useWalletPending({
     config: {
       swr: {
-        refreshInterval: secondsInMilliseconds(60),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })

@@ -1,16 +1,16 @@
 import { useMemo } from 'react'
 import BigNumber from 'bignumber.js'
 import { HostData } from './types'
+import { Host } from '@siafoundation/renterd-types'
 import {
-  Host,
   useAutopilotHostsSearch,
   useHostsAllowlist,
   useHostsBlocklist,
   useHostsSearch,
-} from '@siafoundation/react-renterd'
+} from '@siafoundation/renterd-react'
 import { ContractData } from '../contracts/types'
 import { useApp } from '../app'
-import { SiaCentralHost } from '@siafoundation/sia-central'
+import { SiaCentralHost } from '@siafoundation/sia-central-types'
 
 export function useDataset({
   autopilotStatus,

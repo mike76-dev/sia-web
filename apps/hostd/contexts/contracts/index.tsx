@@ -3,13 +3,10 @@ import {
   useDatasetEmptyState,
   useServerFilters,
   getContractsTimeRangeBlockHeight,
-  secondsInMilliseconds,
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
-import {
-  ContractStatus,
-  useContracts as useContractsData,
-} from '@siafoundation/react-hostd'
+import { ContractStatus } from '@siafoundation/hostd-types'
+import { useContracts as useContractsData } from '@siafoundation/hostd-react'
 import { createContext, useContext, useMemo } from 'react'
 import {
   columnsDefaultVisible,
@@ -22,6 +19,7 @@ import { columns } from './columns'
 import { useDataset } from './dataset'
 import { useSyncStatus } from '../../hooks/useSyncStatus'
 import { useSiascanUrl } from '../../hooks/useSiascanUrl'
+import { defaultDatasetRefreshInterval } from '../../config/swr'
 
 const defaultLimit = 50
 
@@ -67,7 +65,7 @@ function useContractsMain() {
     },
     config: {
       swr: {
-        refreshInterval: secondsInMilliseconds(60),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })

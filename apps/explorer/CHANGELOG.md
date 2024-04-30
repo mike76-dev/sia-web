@@ -1,5 +1,34 @@
 # explorer
 
+## 0.15.0
+
+### Minor Changes
+
+- 8e2d3999: The site now uses the updated Sia Central SDK.
+
+## 0.14.0
+
+### Minor Changes
+
+- 5bafe41e: The explorer now features a host revenue calculator tool.
+- 1f5d3436: Toast notifications can now be dismissed. Closes https://github.com/SiaFoundation/web/issues/542
+
+## 0.13.0
+
+### Minor Changes
+
+- 4fa7d882: Update title and description on manifest, og images, and generated metadata.
+
+### Patch Changes
+
+- 4ed40994: Add detailed labels to contract proof outputs explaining what each output is for.
+
+## 0.12.0
+
+### Minor Changes
+
+- efc40ebb: Fixed an error where looking up a host was showing an error page for unscanned hosts.
+
 ## 0.11.0
 
 ### Minor Changes

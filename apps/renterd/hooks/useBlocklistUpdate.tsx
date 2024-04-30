@@ -3,7 +3,7 @@ import {
   triggerToast,
   truncate,
 } from '@siafoundation/design-system'
-import { useHostsBlocklistUpdate } from '@siafoundation/react-renterd'
+import { useHostsBlocklistUpdate } from '@siafoundation/renterd-react'
 import { useCallback } from 'react'
 
 export function useBlocklistUpdate() {
@@ -19,20 +19,27 @@ export function useBlocklistUpdate() {
           },
         })
         if (response.error) {
-          triggerErrorToast(response.error)
+          triggerErrorToast({
+            title: 'Error updating blocklist',
+            body: response.error,
+          })
           return false
         } else {
           if (add.length) {
-            triggerToast(
-              `${add.map((i) => truncate(i, 20)).join(', ')} added to blocklist`
-            )
+            triggerToast({
+              title: 'Blocklist updated',
+              body: `${add
+                .map((i) => truncate(i, 20))
+                .join(', ')} added to blocklist.`,
+            })
           }
           if (remove.length) {
-            triggerToast(
-              `${remove
+            triggerToast({
+              title: 'Blocklist updated',
+              body: `${remove
                 .map((i) => truncate(i, 20))
-                .join(', ')} removed from blocklist`
-            )
+                .join(', ')} removed from blocklist.`,
+            })
           }
           return true
         }

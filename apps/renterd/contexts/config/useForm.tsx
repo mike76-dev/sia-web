@@ -1,14 +1,17 @@
 import { useMemo } from 'react'
 import { defaultValues, getAdvancedDefaults } from './types'
-import { getRedundancyMultiplier } from './transform'
+import { getRedundancyMultiplier } from './utils'
 import { useForm as useHookForm } from 'react-hook-form'
 import { useAverages } from './useAverages'
-import { useBusState } from '@siafoundation/react-renterd'
+import { useBusState } from '@siafoundation/renterd-react'
 import { getFields } from './fields'
 import { useApp } from '../app'
 import useLocalStorageState from 'use-local-storage-state'
+import { useAutopilotEvaluations } from './useAutopilotEvaluations'
+import { useEstimates } from './useEstimates'
+import { Resources } from './resources'
 
-export function useForm() {
+export function useForm({ resources }: { resources: Resources }) {
   const form = useHookForm({
     mode: 'all',
     defaultValues,
@@ -21,12 +24,6 @@ export function useForm() {
   const uploadTBMonth = form.watch('uploadTBMonth')
   const minShards = form.watch('minShards')
   const totalShards = form.watch('totalShards')
-  const includeRedundancyMaxStoragePrice = form.watch(
-    'includeRedundancyMaxStoragePrice'
-  )
-  const includeRedundancyMaxUploadPrice = form.watch(
-    'includeRedundancyMaxUploadPrice'
-  )
   const redundancyMultiplier = useMemo(
     () => getRedundancyMultiplier(minShards, totalShards),
     [minShards, totalShards]
@@ -38,12 +35,7 @@ export function useForm() {
     uploadAverage,
     downloadAverage,
     contractAverage,
-  } = useAverages({
-    minShards,
-    totalShards,
-    includeRedundancyMaxStoragePrice,
-    includeRedundancyMaxUploadPrice,
-  })
+  } = useAverages()
 
   const app = useApp()
   const isAutopilotEnabled = app.autopilot.status === 'on'
@@ -54,32 +46,64 @@ export function useForm() {
     }
   )
 
+  const estimates = useEstimates({
+    isAutopilotEnabled,
+    redundancyMultiplier,
+    maxStoragePriceTBMonth,
+    storageTB,
+    maxDownloadPriceTB,
+    downloadTBMonth,
+    maxUploadPriceTB,
+    uploadTBMonth,
+  })
+  const { estimatedSpendingPerMonth } = estimates
+
+  const evaluation = useAutopilotEvaluations({
+    form,
+    resources,
+    isAutopilotEnabled,
+    showAdvanced,
+    estimatedSpendingPerMonth,
+  })
+
   const renterdState = useBusState()
   const fields = useMemo(() => {
     const advancedDefaults = renterdState.data
       ? getAdvancedDefaults(renterdState.data.network)
       : undefined
+    const recommendations = evaluation.recommendations.reduce((acc, rec) => {
+      return {
+        ...acc,
+        [rec.key]: rec,
+      }
+    }, {})
     if (averages.data) {
       return getFields({
         advancedDefaults,
         isAutopilotEnabled,
         showAdvanced,
+        maxStoragePriceTBMonth,
+        maxUploadPriceTB,
         redundancyMultiplier,
-        includeRedundancyMaxStoragePrice,
-        includeRedundancyMaxUploadPrice,
         storageAverage,
         uploadAverage,
         downloadAverage,
         contractAverage,
+        minShards,
+        totalShards,
+        recommendations,
       })
     }
     return getFields({
       advancedDefaults,
       isAutopilotEnabled,
       showAdvanced,
+      maxStoragePriceTBMonth,
+      maxUploadPriceTB,
       redundancyMultiplier,
-      includeRedundancyMaxStoragePrice,
-      includeRedundancyMaxUploadPrice,
+      minShards,
+      totalShards,
+      recommendations,
     })
   }, [
     renterdState.data,
@@ -91,13 +115,18 @@ export function useForm() {
     downloadAverage,
     contractAverage,
     redundancyMultiplier,
-    includeRedundancyMaxStoragePrice,
-    includeRedundancyMaxUploadPrice,
+    maxStoragePriceTBMonth,
+    maxUploadPriceTB,
+    minShards,
+    totalShards,
+    evaluation,
   ])
 
   return {
     form,
     fields,
+    estimates,
+    evaluation,
     maxStoragePriceTBMonth,
     maxDownloadPriceTB,
     maxUploadPriceTB,
@@ -106,8 +135,6 @@ export function useForm() {
     uploadTBMonth,
     minShards,
     totalShards,
-    includeRedundancyMaxStoragePrice,
-    includeRedundancyMaxUploadPrice,
     redundancyMultiplier,
     showAdvanced,
     setShowAdvanced,

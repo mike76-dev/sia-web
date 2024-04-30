@@ -1,3 +1,8 @@
+import {
+  WalletAddress,
+  WalletAddressMetadata,
+} from '@siafoundation/walletd-types'
+
 export type CellContext = {
   siascanUrl: string
 }
@@ -6,9 +11,11 @@ export type AddressData = {
   id: string
   address: string
   description?: string
-  publicKey?: string
-  index?: number
+  spendPolicy?: string
+  metadata: WalletAddressMetadata
   walletId: string
+  raw?: WalletAddress
+  onClick?: () => void
 }
 
 export type TableColumnId = 'actions' | 'address' | 'index'

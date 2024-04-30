@@ -43,14 +43,14 @@ export const columns: EventsTableColumn[] = [
     id: 'transactionId',
     label: 'transaction ID',
     category: 'general',
-    render: ({ data: { transactionId }, context }) => {
-      if (!transactionId) {
+    render: ({ data: { id }, context }) => {
+      if (!id) {
         return null
       }
       return (
         <ValueCopyable
           size="12"
-          value={transactionId}
+          value={id}
           label="transaction ID"
           type="transaction"
           siascanUrl={context.siascanUrl}
@@ -122,7 +122,7 @@ export const columns: EventsTableColumn[] = [
         return null
       }
       return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 items-end">
           {!amountSc.isZero() && (
             <ValueScFiat displayBoth size="12" value={amountSc} />
           )}

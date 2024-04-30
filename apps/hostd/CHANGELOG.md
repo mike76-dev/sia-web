@@ -1,5 +1,54 @@
 # hostd
 
+## 0.40.2
+
+### Patch Changes
+
+- a9560ff4: Fixed an issue where volume resize and delete dialogs were not loading the volumes data. Closes https://github.com/SiaFoundation/hostd/issues/371
+
+## 0.40.1
+
+### Patch Changes
+
+- 856b738a: Fixed an issue where the daemon would panic trying to read the embedded UI files on Windows. Closes https://github.com/SiaFoundation/web/issues/599
+
+## 0.40.0
+
+### Minor Changes
+
+- 1f5d3436: Toast notifications can now be dismissed. Closes https://github.com/SiaFoundation/web/issues/542
+- 1053c506: Context menus now all use a caret icon.
+
+### Patch Changes
+
+- c5e00b05: The configuration panel is now centered on larger screens. Closes https://github.com/SiaFoundation/web/issues/543
+
+## 0.39.0
+
+### Minor Changes
+
+- d4fcadf8: Siacoin metric cards now show the dynamic units with two decimal places. Closes https://github.com/SiaFoundation/hostd/issues/217
+- 805f32e0: All graphs now remember any chart configuration that the user has selected.
+
+## 0.38.0
+
+### Minor Changes
+
+- 4506593d: Integrity check alert sector data will now update when there is an ongoing integrity check.
+- 4506593d: All app data will now refresh more frequently.
+- c98f1941: The node profile details now include uptime. Closes https://github.com/SiaFoundation/hostd/issues/92
+
+### Patch Changes
+
+- fdcfcb6d: The bandwidth settings for egress and ingress now have clearer descriptions.
+- bbbe56a8: The contract timeline labels have been darkened to increase contrast and readability.
+
+## 0.37.0
+
+### Minor Changes
+
+- 90813d49: Removed the maximum registry size configuration option.
+
 ## 0.36.0
 
 ### Minor Changes

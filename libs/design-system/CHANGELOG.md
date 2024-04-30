@@ -1,5 +1,81 @@
 # Changelog
 
+## 4.1.0
+
+### Minor Changes
+
+- 23168c6e: Added async defaultValues support to useDialogFormHelpers via initKey prop.
+- 0d7249a4: Peer dependencies now limited to react and next.
+
+### Patch Changes
+
+- 23168c6e: Fixed an issue where Dialog and useDialogFormHelpers were not calling onOpenChange on open events.
+- Updated dependencies [1b1952e5]
+- Updated dependencies [0d7249a4]
+  - @siafoundation/react-core@1.2.0
+  - @siafoundation/sia-central-react@3.1.0
+  - @siafoundation/units@3.0.1
+
+## 4.0.0
+
+### Minor Changes
+
+- 1f5d3436: Toasts can not be dismissed and now use separate title and body props.
+- 1053c506: Table now has row specific cell class name props that do not apply to the table header.
+
+### Patch Changes
+
+- Updated dependencies [e2b8f950]
+  - @siafoundation/types@0.2.0
+
+## 3.1.0
+
+### Minor Changes
+
+- dddc110a: Added a rowSize auto variant to Table.
+- dddc110a: Added a custom contextMenu prop to ValueCopyable.
+- dddc110a: Added a subtle variant to Panel.
+- 805f32e0: ChartXY now remembers any chart configuration that the user has selected per unique chart.
+
+### Patch Changes
+
+- 4fa7d882: Add use client / RSC support to Table.
+- 4ed40994: Fix flex layout and add a title tooltip to EntityListItem.
+
+## 3.0.0
+
+### Patch Changes
+
+- bbbe56a8: The contract timeline labels have been darkened to increase contrast and readability.
+- Updated dependencies [ea9c20d2]
+- Updated dependencies [40e402ad]
+  - @siafoundation/units@3.0.0
+  - @siafoundation/react-core@1.1.0
+  - @siafoundation/sia-central-react@3.0.0
+
+## 2.2.0
+
+### Minor Changes
+
+- e253b3e6: The Table now supports drag and drop on rows.
+
+### Patch Changes
+
+- b3e12c99: The package has been updated to use Next 14.
+- Updated dependencies [b3e12c99]
+  - @siafoundation/next@0.1.3
+  - @siafoundation/react-core@1.0.3
+  - @siafoundation/react-icons@0.2.3
+  - @siafoundation/sia-central-react@2.0.3
+  - @siafoundation/types@0.1.3
+  - @siafoundation/units@2.0.3
+
+## 2.1.0
+
+### Minor Changes
+
+- 48682ca5: Add missing dependency @react-spring/web.
+
 ## 2.0.5
 
 ### Patch Changes
@@ -21,7 +97,7 @@
   - @siafoundation/next@0.1.2
   - @siafoundation/react-core@1.0.2
   - @siafoundation/react-icons@0.2.2
-  - @siafoundation/react-sia-central@2.0.2
+  - @siafoundation/sia-central-react@2.0.2
   - @siafoundation/types@0.1.2
   - @siafoundation/units@2.0.2
 
@@ -34,7 +110,7 @@
   - @siafoundation/next@0.1.1
   - @siafoundation/react-core@1.0.1
   - @siafoundation/react-icons@0.2.1
-  - @siafoundation/react-sia-central@2.0.1
+  - @siafoundation/sia-central-react@2.0.1
   - @siafoundation/types@0.1.1
   - @siafoundation/units@2.0.1
 
@@ -50,7 +126,7 @@
   - @siafoundation/next@0.1.0
   - @siafoundation/react-core@1.0.0
   - @siafoundation/react-icons@0.2.0
-  - @siafoundation/react-sia-central@2.0.0
+  - @siafoundation/sia-central-react@2.0.0
   - @siafoundation/types@0.1.0
   - @siafoundation/units@2.0.0
 
@@ -69,7 +145,7 @@
   - @siafoundation/next@0.0.6
   - @siafoundation/react-core@0.16.11
   - @siafoundation/react-icons@0.1.6
-  - @siafoundation/react-sia-central@1.0.6
+  - @siafoundation/sia-central-react@1.0.6
   - @siafoundation/types@0.0.7
   - @siafoundation/units@1.0.6
 
@@ -83,7 +159,7 @@
 
 - Updated dependencies [d0c8a592]
   - @siafoundation/react-core@0.16.0
-  - @siafoundation/react-sia-central@1.0.0
+  - @siafoundation/sia-central-react@1.0.0
   - @siafoundation/units@1.0.0
 
 ## 0.63.0
@@ -133,7 +209,7 @@
 - Updated dependencies [1c376d0e]
   - @siafoundation/react-icons@0.1.0
   - @siafoundation/sia-js@0.11.0
-  - @siafoundation/react-sia-central@0.0.3
+  - @siafoundation/sia-central-react@0.0.3
 
 ## 0.58.0
 
@@ -145,7 +221,7 @@
 
 - Updated dependencies [21972d75]
   - @siafoundation/react-core@0.15.0
-  - @siafoundation/react-sia-central@0.0.2
+  - @siafoundation/sia-central-react@0.0.2
 
 ## 0.57.0
 

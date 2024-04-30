@@ -4,16 +4,17 @@ import {
   useServerFilters,
   triggerErrorToast,
   truncate,
-  minutesInMilliseconds,
 } from '@siafoundation/design-system'
 import {
   HostsSearchFilterMode,
   HostsUsabilityMode,
+} from '@siafoundation/renterd-types'
+import {
   useAutopilotHostsSearch,
   useHostsAllowlist,
   useHostsBlocklist,
   useHostsSearch,
-} from '@siafoundation/react-renterd'
+} from '@siafoundation/renterd-react'
 import {
   createContext,
   useCallback,
@@ -36,8 +37,9 @@ import { useDataset } from './dataset'
 import { useApp } from '../app'
 import { useAppSettings } from '@siafoundation/react-core'
 import { Commands, emptyCommands } from '../../components/Hosts/HostMap/Globe'
-import { useSiaCentralHosts } from '@siafoundation/react-sia-central'
+import { useSiaCentralHosts } from '@siafoundation/sia-central-react'
 import { useSiascanUrl } from '../../hooks/useSiascanUrl'
+import { defaultDatasetRefreshInterval } from '../../config/swr'
 
 const defaultLimit = 50
 
@@ -83,7 +85,7 @@ function useHostsMain() {
       swr: {
         // before autopilot is configured this will repeatedly 500
         errorRetryInterval: 20_000,
-        refreshInterval: minutesInMilliseconds(1),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })
@@ -103,7 +105,7 @@ function useHostsMain() {
     },
     config: {
       swr: {
-        refreshInterval: minutesInMilliseconds(1),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })
@@ -179,9 +181,10 @@ function useHostsMain() {
       if (location) {
         cmdRef.current.moveToLocation(location)
       } else {
-        triggerErrorToast(
-          `Geographic location is unknown for host ${truncate(publicKey, 20)}`
-        )
+        triggerErrorToast({
+          title: 'Geographic location is unknown for host',
+          body: truncate(publicKey, 20),
+        })
       }
       scrollToHost(publicKey)
     },

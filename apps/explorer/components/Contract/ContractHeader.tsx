@@ -4,14 +4,12 @@ import {
   LinkButton,
 } from '@siafoundation/design-system'
 import { ArrowLeft16, ArrowRight16 } from '@siafoundation/react-icons'
-import {
-  SiaCentralContract,
-  getSiaCentralBlockLatest,
-} from '@siafoundation/sia-central'
+import { SiaCentralContract } from '@siafoundation/sia-central-types'
 import { lowerCase } from '@technically/lodash'
 import { routes } from '../../config/routes'
 import { EntityHeading } from '../EntityHeading'
-import { siaCentralApi } from '../../config'
+import { siaCentral } from '../../config/siaCentral'
+import { to } from '@siafoundation/request'
 
 type Props = {
   contract: SiaCentralContract
@@ -25,13 +23,9 @@ export async function ContractHeader({
   renewedToId,
 }: Props) {
   const { id } = contract
-  const { data: latest, error } = await getSiaCentralBlockLatest({
-    config: {
-      api: siaCentralApi,
-    },
-  })
+  const [latest, error] = await to(siaCentral.blockLatest())
   if (error) {
-    console.error(new Error(error).stack)
+    console.error(error.stack)
   }
   return (
     <div className="flex flex-col gap-x-4 gap-y-4 pb-4">
@@ -72,7 +66,7 @@ export async function ContractHeader({
           )}
         </div>
       </div>
-      {latest && (
+      {latest?.block && (
         <div className="px-1">
           <ContractTimeline
             currentHeight={latest.block.height || 0}

@@ -1,5 +1,17 @@
 # @siafoundation/types
 
+## 0.2.0
+
+### Minor Changes
+
+- e2b8f950: The library now includes v2 types.
+
+## 0.1.3
+
+### Patch Changes
+
+- b3e12c99: The package has been updated to use Next 14.
+
 ## 0.1.2
 
 ### Patch Changes

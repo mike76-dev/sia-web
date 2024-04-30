@@ -1,15 +1,20 @@
 import { Button } from '@siafoundation/design-system'
-import { ArrowUpRight16, Settings16 } from '@siafoundation/react-icons'
+import {
+  ArrowDownLeft16,
+  ArrowUpRight16,
+  Settings16,
+} from '@siafoundation/react-icons'
 import { useSyncStatus } from '../../hooks/useSyncStatus'
 import BigNumber from 'bignumber.js'
 import { AddressesButton } from './AddressesButton'
 import { EventsViewDropdownMenu } from './EventsViewDropdownMenu'
-import { useWalletBalance } from '@siafoundation/react-walletd'
+import { useWalletBalance } from '@siafoundation/walletd-react'
 import { useRouter } from 'next/router'
 import { useWallets } from '../../contexts/wallets'
 import { useDialog } from '../../contexts/dialog'
 import { WalletContextMenu } from '../WalletContextMenu'
 import { WalletBalanceWithSf } from './WalletBalanceWithSf'
+import { useAddresses } from '../../contexts/addresses'
 
 export function WalletActionsMenu() {
   const status = useSyncStatus()
@@ -22,6 +27,7 @@ export function WalletActionsMenu() {
     },
   })
   const { wallet } = useWallets()
+  const { dataset } = useAddresses()
   return (
     <div className="flex gap-2">
       <WalletBalanceWithSf
@@ -30,25 +36,45 @@ export function WalletActionsMenu() {
         isSynced={status.isSynced}
       />
       <AddressesButton />
-      {wallet?.type !== 'watch' && (
-        <Button
-          size="small"
-          variant="accent"
-          onClick={() => {
-            if (wallet?.type === 'seed') {
-              openDialog('walletSendSeed', {
-                walletId,
+      {wallet?.metadata.type !== 'watch' && (
+        <>
+          <Button
+            aria-label="receive"
+            size="small"
+            variant="accent"
+            onClick={() => {
+              const addressLowestIndex = dataset?.sort((a, b) =>
+                a.metadata.index > b.metadata.index ? 1 : -1
+              )[0]?.address
+              openDialog('addressUpdate', {
+                walletId: walletId,
+                address: addressLowestIndex,
               })
-            } else if (wallet?.type === 'ledger') {
-              openDialog('walletSendLedger', {
-                walletId,
-              })
-            }
-          }}
-        >
-          <ArrowUpRight16 />
-          Send
-        </Button>
+            }}
+          >
+            <ArrowDownLeft16 />
+            Receive
+          </Button>
+          <Button
+            aria-label="send"
+            size="small"
+            variant="accent"
+            onClick={() => {
+              if (wallet?.metadata.type === 'seed') {
+                openDialog('walletSendSeed', {
+                  walletId,
+                })
+              } else if (wallet?.metadata.type === 'ledger') {
+                openDialog('walletSendLedger', {
+                  walletId,
+                })
+              }
+            }}
+          >
+            <ArrowUpRight16 />
+            Send
+          </Button>
+        </>
       )}
       <EventsViewDropdownMenu />
       {wallet && (

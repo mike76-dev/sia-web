@@ -6,21 +6,21 @@ import {
   WalletSingleAddressDetailsDialog,
 } from '@siafoundation/design-system'
 import { CmdKDialog } from '../components/CmdKDialog'
-import { FilesCreateDirectoryDialog } from '../components/Files/FilesCreateDirectoryDialog'
+import { FilesCreateDirectoryDialog } from '../dialogs/FilesCreateDirectoryDialog'
 import { HostsAllowBlockDialog } from '../components/Hosts/HostsAllowBlockDialog'
 import { HostsFilterAddressDialog } from '../components/Hosts/HostsFilterAddressDialog'
 import { ContractsFilterAddressDialog } from '../components/Contracts/ContractsFilterAddressDialog'
 import { ContractsFilterPublicKeyDialog } from '../components/Contracts/ContractsFilterPublicKeyDialog'
 import { ContractsFilterContractSetDialog } from '../components/Contracts/ContractsFilterContractSetDialog'
-import { FilesSearchDialog } from '../components/Files/FilesSearchDialog'
-import { useSyncerConnect, useWallet } from '@siafoundation/react-renterd'
+import { FilesSearchDialog } from '../dialogs/FilesSearchDialog'
+import { useSyncerConnect, useWallet } from '@siafoundation/renterd-react'
 import { RenterdSendSiacoinDialog } from '../dialogs/RenterdSendSiacoinDialog'
 import { RenterdTransactionDetailsDialog } from '../dialogs/RenterdTransactionDetailsDialog'
-import { AlertsDialog } from '../dialogs/AlertsDialog'
 import { HostsFilterPublicKeyDialog } from '../components/Hosts/HostsFilterPublicKeyDialog'
-import { FilesBucketDeleteDialog } from '../components/Files/FilesBucketDeleteDialog'
-import { FilesBucketPolicyDialog } from '../components/Files/FilesBucketPolicyDialog'
-import { FilesBucketCreateDialog } from '../components/Files/FilesBucketCreateDialog'
+import { FilesBucketDeleteDialog } from '../dialogs/FilesBucketDeleteDialog'
+import { FilesBucketPolicyDialog } from '../dialogs/FilesBucketPolicyDialog'
+import { FilesBucketCreateDialog } from '../dialogs/FilesBucketCreateDialog'
+import { FileRenameDialog } from '../dialogs/FileRenameDialog'
 import { KeysCreateDialog } from '../components/Keys/KeysCreateDialog'
 
 export type DialogType =
@@ -44,8 +44,8 @@ export type DialogType =
   | 'filesCreateDirectory'
   | 'filesBucketPolicy'
   | 'filesSearch'
+  | 'fileRename'
   | 'keysCreate'
-  | 'alerts'
   | 'confirm'
 
 type ConfirmProps = {
@@ -121,6 +121,7 @@ export function DialogProvider({ children }: Props) {
 
 export function Dialogs() {
   const {
+    id,
     dialog,
     openDialog,
     onOpenChange,
@@ -180,6 +181,11 @@ export function Dialogs() {
         open={dialog === 'filesSearch'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
+      <FileRenameDialog
+        id={id}
+        open={dialog === 'fileRename'}
+        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+      />
       <HostsAllowBlockDialog
         open={dialog === 'hostsManageAllowBlock'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
@@ -202,10 +208,6 @@ export function Dialogs() {
       />
       <ContractsFilterPublicKeyDialog
         open={dialog === 'contractsFilterPublicKey'}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
-      />
-      <AlertsDialog
-        open={dialog === 'alerts'}
         onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
       />
       <KeysCreateDialog

@@ -12,13 +12,18 @@ import {
 } from '@siafoundation/design-system'
 import { useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { useWalletAdd, useWalletAddressAdd } from '@siafoundation/react-walletd'
+import {
+  WalletAddressMetadata,
+  WalletMetadata,
+} from '@siafoundation/walletd-types'
+import { useWalletAdd, useWalletAddressAdd } from '@siafoundation/walletd-react'
 import { useDialog } from '../../contexts/dialog'
 import { useWallets } from '../../contexts/wallets'
-import { v4 as uuidv4 } from 'uuid'
 import { walletAddTypes } from '../../config/walletTypes'
 import { DeviceConnectForm } from '../DeviceConnectForm'
 import { useLedger } from '../../contexts/ledger'
+import { UnlockConditions } from '@siafoundation/types'
+import { getSDK } from '@siafoundation/sdk'
 
 const defaultValues = {
   name: '',
@@ -26,11 +31,13 @@ const defaultValues = {
   ledgerConnectedAndVerified: false,
 }
 
+type Values = typeof defaultValues
+
 function getFields({
   walletNames,
 }: {
   walletNames: string[]
-}): ConfigFields<typeof defaultValues, never> {
+}): ConfigFields<Values, never> {
   return {
     name: {
       type: 'text',
@@ -123,20 +130,28 @@ export function WalletAddLedgerDialog({ trigger, open, onOpenChange }: Props) {
   const addAddress0 = useCallback(
     async (
       walletId: string,
-      { publicKey, address }: { publicKey: string; address: string }
+      {
+        unlockConditions,
+        address,
+      }: { unlockConditions: UnlockConditions; address: string }
     ) => {
+      const metadata: WalletAddressMetadata = {
+        index: 0,
+        unlockConditions,
+      }
       const response = await addressAdd.put({
         params: {
           id: walletId,
-          addr: address,
         },
         payload: {
-          index: 0,
-          publicKey,
+          address,
+          description: '',
+          // TODO: add spendPolicy?
+          metadata,
         },
       })
       if (response.error) {
-        triggerErrorToast('Error saving address.')
+        triggerErrorToast({ title: 'Error saving address' })
         return
       }
     },
@@ -144,36 +159,40 @@ export function WalletAddLedgerDialog({ trigger, open, onOpenChange }: Props) {
   )
 
   const onSubmit = useCallback(
-    async (values: typeof defaultValues) => {
+    async (values: Values) => {
       if (!values.ledgerConnectedAndVerified) {
         return
       }
       if (!device.publicKey0 || !device.address0) {
         return
       }
-      const id = uuidv4()
-      const response = await walletAdd.put({
-        params: {
-          id,
-        },
+      const metadata: WalletMetadata = {
+        type: 'ledger',
+        publicKey0: device.publicKey0,
+        address0: device.address0,
+      }
+      const response = await walletAdd.post({
         payload: {
-          type: 'ledger',
-          publicKey0: device.publicKey0,
-          address0: device.address0,
           name: values.name,
-          createdAt: new Date().getTime(),
           description: values.description,
+          metadata,
         },
       })
       if (response.error) {
-        triggerErrorToast(response.error)
-      } else {
-        addAddress0(id, {
-          publicKey: device.publicKey0,
-          address: device.address0,
+        triggerErrorToast({
+          title: 'Error saving wallet',
+          body: response.error,
         })
+      } else {
+        const uc = getSDK().wallet.standardUnlockConditions(device.publicKey0)
+        if (!uc.error) {
+          addAddress0(response.data.id, {
+            unlockConditions: uc.unlockConditions,
+            address: device.address0,
+          })
+        }
         openDialog('walletLedgerAddressGenerate', {
-          walletId: id,
+          walletId: response.data.id,
           walletJustCreated: true,
         })
         form.reset(defaultValues)

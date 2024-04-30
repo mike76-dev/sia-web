@@ -1,4 +1,4 @@
-import { DNSProvider } from '@siafoundation/react-hostd'
+import { DNSProvider } from '@siafoundation/hostd-types'
 import BigNumber from 'bignumber.js'
 
 export const scDecimalPlaces = 6
@@ -44,9 +44,6 @@ export const initialValues = {
   ingressPrice: undefined as BigNumber | undefined,
 
   priceTableValidity: undefined as BigNumber | undefined,
-
-  // Registry settings
-  maxRegistryEntries: undefined as BigNumber | undefined,
 
   // RHP3 settings
   accountExpiry: undefined as BigNumber | undefined,

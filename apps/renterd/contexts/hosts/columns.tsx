@@ -22,10 +22,10 @@ import { HostContextMenu } from '../../components/Hosts/HostContextMenu'
 import { useWorkflows } from '@siafoundation/react-core'
 import {
   AutopilotHost,
-  RhpScanRequest,
-  useHostsAllowlist,
+  RhpScanPayload,
   workerRhpScanRoute,
-} from '@siafoundation/react-renterd'
+} from '@siafoundation/renterd-types'
+import { useHostsAllowlist } from '@siafoundation/renterd-react'
 import BigNumber from 'bignumber.js'
 import React, { memo } from 'react'
 
@@ -215,7 +215,7 @@ export const columns: HostsTableColumn[] = (
       render: function LastScan({ data }) {
         const { workflows } = useWorkflows()
         const isPending = workflows.find(
-          (wf: { path?: string; payload?: RhpScanRequest }) =>
+          (wf: { path?: string; payload?: RhpScanPayload }) =>
             wf.path.startsWith(workerRhpScanRoute) &&
             wf.payload?.hostKey === data.publicKey
         )

@@ -6,9 +6,9 @@ import {
 import { Delete16 } from '@siafoundation/react-icons'
 import { useDialog } from '../../contexts/dialog'
 import { useCallback } from 'react'
-import { useObjectDelete } from '@siafoundation/react-renterd'
+import { useObjectDelete } from '@siafoundation/renterd-react'
 import { humanBytes } from '@siafoundation/units'
-import { bucketAndKeyParamsFromPath } from '../../contexts/files/paths'
+import { bucketAndKeyParamsFromPath } from '../../lib/paths'
 
 export function useDirectoryDelete() {
   const { openConfirmDialog } = useDialog()
@@ -42,9 +42,12 @@ export function useDirectoryDelete() {
           })
 
           if (response.error) {
-            triggerErrorToast('Error deleting directory.')
+            triggerErrorToast({
+              title: 'Error deleting directory',
+              body: response.error,
+            })
           }
-          triggerSuccessToast('Successfully deleted directory.')
+          triggerSuccessToast({ title: 'Deleted directory' })
         },
       }),
     [openConfirmDialog, deleteObject]

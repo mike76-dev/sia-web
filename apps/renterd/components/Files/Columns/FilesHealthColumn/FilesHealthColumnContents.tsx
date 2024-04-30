@@ -4,13 +4,13 @@ import {
   Separator,
   Text,
 } from '@siafoundation/design-system'
-import { useObject } from '@siafoundation/react-renterd'
+import { useObject } from '@siafoundation/renterd-react'
 import { cx } from 'class-variance-authority'
 import { sortBy } from '@technically/lodash'
-import { computeSlabContractSetShards } from '../../../../contexts/files/health'
-import { ObjectData } from '../../../../contexts/files/types'
+import { computeSlabContractSetShards } from '../../../../lib/health'
+import { ObjectData } from '../../../../contexts/filesManager/types'
 import { useHealthLabel } from '../../../../hooks/useHealthLabel'
-import { bucketAndKeyParamsFromPath } from '../../../../contexts/files/paths'
+import { bucketAndKeyParamsFromPath } from '../../../../lib/paths'
 
 export function FilesHealthColumnContents({
   path,
@@ -55,8 +55,14 @@ export function FilesHealthColumnContents({
   }
 
   const slabs = sortBy(
-    obj.data.object.slabs.map((s) => ({
+    obj.data.object.slabs?.map((s) => ({
       ...s.slab,
+      // id is for use as a unique React key.
+      // slab key is not necessarily unique. e.g. an object uploaded with tiny
+      // multipart uploads might reference the same slab over and over but at
+      // different offsets and lengths. So we should not assume that they are
+      // always unique.
+      id: `${s.offset}${s.length}${s.slab.key}`,
       isPartialSlab: !!s.slab.shards,
       contractSetShards: s.slab.shards?.length
         ? computeSlabContractSetShards({
@@ -65,7 +71,7 @@ export function FilesHealthColumnContents({
             health: s.slab.health,
           })
         : 0,
-    })),
+    })) || [],
     'contractSetShards'
   )
 
@@ -78,7 +84,7 @@ export function FilesHealthColumnContents({
       totalShards={slabs.find((s) => s.shards)?.shards.length}
     >
       {slabs.map((slab) => (
-        <div key={slab.key} className="flex justify-between gap-2">
+        <div key={slab.id} className="flex justify-between gap-2">
           <Text
             size="12"
             color="subtle"

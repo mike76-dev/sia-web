@@ -10,7 +10,7 @@ import {
   ConfigFields,
   useOnInvalid,
 } from '@siafoundation/design-system'
-import { useSystemDirectory, useVolumeCreate } from '@siafoundation/react-hostd'
+import { useSystemDirectory, useVolumeCreate } from '@siafoundation/hostd-react'
 import { bytesToGB, GBToBytes, humanBytes } from '@siafoundation/units'
 import BigNumber from 'bignumber.js'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -136,9 +136,12 @@ export function VolumeCreateDialog({ trigger, open, onOpenChange }: Props) {
         },
       })
       if (response.error) {
-        triggerErrorToast(response.error)
+        triggerErrorToast({
+          title: 'Error creating volume',
+          body: response.error,
+        })
       } else {
-        triggerSuccessToast('New volume created.')
+        triggerSuccessToast({ title: 'New volume created' })
         form.reset(defaultValues)
         closeDialog()
       }

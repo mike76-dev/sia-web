@@ -1,5 +1,23 @@
 # @siafoundation/fonts
 
+## 0.5.0
+
+### Minor Changes
+
+- 0d7249a4: Peer dependencies now limited to react and next.
+
+## 0.4.1
+
+### Patch Changes
+
+- b3e12c99: The package has been updated to use Next 14.
+
+## 0.4.0
+
+### Minor Changes
+
+- 2f89ffd7: Add missing font assets.
+
 ## 0.3.2
 
 ### Patch Changes

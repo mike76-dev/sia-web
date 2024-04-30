@@ -2,10 +2,10 @@ import { blocksToMonths } from '@siafoundation/units'
 import { ConfigFields } from '@siafoundation/design-system'
 import BigNumber from 'bignumber.js'
 import { dnsProviderOptions, initialValues, scDecimalPlaces } from './types'
-import { SiaCentralExchangeRates } from '@siafoundation/sia-central'
+import { SiaCentralExchangeRates } from '@siafoundation/sia-central-types'
 import { calculateMaxCollateral } from './transform'
 
-type Categories = 'host' | 'pricing' | 'DNS' | 'bandwidth' | 'registry' | 'RHP3'
+type Categories = 'host' | 'pricing' | 'DNS' | 'bandwidth' | 'RHP3'
 
 type GetFields = {
   showAdvanced: boolean
@@ -87,7 +87,9 @@ export function getFields({
       suggestion: rates ? usdInScRoundedToNearestTen(10, rates) : undefined,
       suggestionTip:
         'The suggested egress price in siacoins for egress per TB.',
-      description: <>{`The host's egress price in siacoins per TB.`}</>,
+      description: (
+        <>{`The host's egress price in siacoins per TB. Egress means bandwidth usage by outgoing download traffic.`}</>
+      ),
       validation: {
         required: 'required',
       },
@@ -100,7 +102,9 @@ export function getFields({
       suggestion: rates ? usdInScRoundedToNearestTen(0.05, rates) : undefined,
       suggestionTip: 'The suggested ingress price in siacoins per TB.',
       decimalsLimitSc: scDecimalPlaces,
-      description: <>{`The host's ingress price in siacoins per TB.`}</>,
+      description: (
+        <>{`The host's ingress price in siacoins per TB. Ingress means bandwidth usage by incoming upload traffic.`}</>
+      ),
       validation: {
         required: 'required',
       },
@@ -194,24 +198,6 @@ export function getFields({
       suggestionTip: 'The suggested price table validity.',
       description: (
         <>{`How long a renter's registered price table remains valid.`}</>
-      ),
-      hidden: !showAdvanced,
-      validation: {
-        required: 'required',
-      },
-    },
-
-    // Registry
-    maxRegistryEntries: {
-      title: 'Maximum registry size',
-      type: 'number',
-      category: 'registry',
-      units: 'entries',
-      suggestion: new BigNumber(1_000),
-      suggestionTip: 'The suggested maximum registry size.',
-      decimalsLimit: 0,
-      description: (
-        <>{`The maximum number of registry entries that the host will store. Each registry entry is up to 113 bytes.`}</>
       ),
       hidden: !showAdvanced,
       validation: {

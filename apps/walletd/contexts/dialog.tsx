@@ -5,7 +5,7 @@ import {
   SyncerConnectPeerDialog,
   SyncerConnectPeerDialogParams,
 } from '@siafoundation/design-system'
-import { useSyncerConnect } from '@siafoundation/react-walletd'
+import { useSyncerConnect } from '@siafoundation/walletd-react'
 import {
   WalletAddTypeDialog,
   WalletAddTypeDialogParams,
@@ -70,9 +70,13 @@ import {
   WalletAddressesGenerateLedgerDialog,
   WalletAddressesGenerateLedgerDialogParams,
 } from '../dialogs/WalletAddressesGenerateLedgerDialog'
+import {
+  WalletsRescanDialogParams,
+  WalletsRescanDialog,
+} from '../dialogs/WalletsRescanDialog'
 // import { CmdKDialog } from '../components/CmdKDialog'
 
-type DialogParams = {
+export type DialogParams = {
   cmdk?: void
   settings?: WalletdSettingsDialogParams
   walletSendSeed?: WalletSendSeedDialogParams
@@ -82,6 +86,7 @@ type DialogParams = {
   addressRemove?: AddressRemoveDialogParams
   connectPeer?: SyncerConnectPeerDialogParams
   confirm?: ConfirmDialogParams
+  walletsRescan?: WalletsRescanDialogParams
   walletAddType?: WalletAddTypeDialogParams
   walletAddNew?: WalletAddNewDialogParams
   walletAddRecover?: WalletAddRecoverDialogParams
@@ -95,13 +100,18 @@ type DialogParams = {
   walletUnlock?: WalletUnlockDialogParams
 }
 
-type DialogType = keyof DialogParams
+export type OpenDialog = <D extends DialogType>(
+  type: D,
+  params?: DialogParams[D]
+) => void
+
+export type DialogType = keyof DialogParams
 
 function useDialogMain() {
   const [dialog, setDialog] = useState<DialogType>()
   const [params, setParams] = useState<DialogParams>({})
 
-  const openDialog = useCallback(
+  const openDialog = useCallback<OpenDialog>(
     <D extends DialogType>(type: D, params?: DialogParams[D]) => {
       setParams((p) => ({
         ...p,
@@ -208,42 +218,69 @@ export function Dialogs() {
       <WalletAddressesGenerateSeedDialog
         open={dialog === 'walletAddressesGenerate'}
         params={params['walletAddressesGenerate']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val
+            ? openDialog(dialog, params['walletAddressesGenerate'])
+            : closeDialog()
+        }
       />
       <WalletAddressesGenerateLedgerDialog
         open={dialog === 'walletLedgerAddressGenerate'}
         params={params['walletLedgerAddressGenerate']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val
+            ? openDialog(dialog, params['walletLedgerAddressGenerate'])
+            : closeDialog()
+        }
       />
       <WalletAddressesAddDialog
         open={dialog === 'walletAddressesAdd'}
         params={params['walletAddressesAdd']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['walletAddressesAdd']) : closeDialog()
+        }
       />
       <WalletRemoveDialog
         open={dialog === 'walletRemove'}
         params={params['walletRemove']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['walletRemove']) : closeDialog()
+        }
       />
       <WalletUpdateDialog
         open={dialog === 'walletUpdate'}
         params={params['walletUpdate']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['walletUpdate']) : closeDialog()
+        }
       />
       <WalletUnlockDialog
         open={dialog === 'walletUnlock'}
         params={params['walletUnlock']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['walletUnlock']) : closeDialog()
+        }
+      />
+      <WalletsRescanDialog
+        open={dialog === 'walletsRescan'}
+        params={params['walletsRescan']}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['walletsRescan']) : closeDialog()
+        }
       />
       <AddressUpdateDialog
         open={dialog === 'addressUpdate'}
         params={params['addressUpdate']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['addressUpdate']) : closeDialog()
+        }
       />
       <AddressRemoveDialog
         open={dialog === 'addressRemove'}
         params={params['addressRemove']}
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['addressRemove']) : closeDialog()
+        }
       />
       <SyncerConnectPeerDialog
         open={dialog === 'connectPeer'}
@@ -253,7 +290,9 @@ export function Dialogs() {
             payload: address,
           })
         }
-        onOpenChange={(val) => (val ? openDialog(dialog) : closeDialog())}
+        onOpenChange={(val) =>
+          val ? openDialog(dialog, params['connectPeer']) : closeDialog()
+        }
       />
       <WalletSendSeedDialog
         open={dialog === 'walletSendSeed'}

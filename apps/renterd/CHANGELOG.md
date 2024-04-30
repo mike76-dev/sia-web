@@ -1,5 +1,113 @@
 # renterd
 
+## 0.51.2
+
+### Patch Changes
+
+- 703761a2: Fixed an issue where file health slab keys were showing up as repeated and incorrect. Closes https://github.com/SiaFoundation/web/issues/596
+
+## 0.51.1
+
+### Patch Changes
+
+- 856b738a: Fixed an issue where the daemon would panic trying to read the embedded UI files on Windows. Closes https://github.com/SiaFoundation/web/issues/599
+
+## 0.51.0
+
+### Minor Changes
+
+- 424636ad: The configuration now includes the min protocol version option, the value defaults to 1.6.0 when using simple configuration mode. Closes https://github.com/SiaFoundation/renterd/issues/1141 Closes https://github.com/SiaFoundation/web/issues/573
+
+## 0.50.0
+
+### Minor Changes
+
+- 1f5d3436: Toast notifications can now be dismissed. Closes https://github.com/SiaFoundation/web/issues/542
+- 1053c506: Account alerts now feature an accounts context menu with the option to reset account drift. Closes https://github.com/SiaFoundation/web/issues/524
+- 1053c506: Context menus now all use a caret icon.
+- 1053c506: The contract set change alert data fields are now displayed as one field that shows additions and removals for each contract in one timeline.
+- afc6f047: The lost sector alert now shows the number of lost sectors. Closes https://github.com/SiaFoundation/renterd/issues/1080
+- 3a1b3d4f: Removed the min max collateral configuration setting. Closes https://github.com/SiaFoundation/renterd/issues/1079
+- 1053c506: Alert table row cell content is now aligned to the top of each row.
+
+### Patch Changes
+
+- 9fdea398: Fixed an issue where the max RPC price configuration would round decimal values to 0. Closes https://github.com/SiaFoundation/renterd/issues/1050
+- 1053c506: Fixed an issue where the alerts list would trigger an excessive number of API calls to fetch contract and host metadata.
+- 58a4d3e8: Fixed a typo in the alerts empty state. Closes https://github.com/SiaFoundation/web/issues/567
+- c5e00b05: The configuration panel is now centered on larger screens. Closes https://github.com/SiaFoundation/web/issues/543
+
+## 0.49.0
+
+### Minor Changes
+
+- 5477362e: Directory and global file explorers now show upload progress inline.
+- 5477362e: Uploads now support aborting the entire visible page of active uploads.
+
+### Patch Changes
+
+- 5477362e: Fixed a slow memory leak that became especially apparent during long running large uploads, memory usage is now minimal and stable over time.
+
+## 0.48.0
+
+### Minor Changes
+
+- 033b2f26: Uploads will now error and abort if responses are missing etags.
+
+### Patch Changes
+
+- ca00b44b: Fixed an issue navigating back to the active explorer mode from the uploads list.
+- 72237e68: Fixed an issue where the alert data fields showed the wrong dates.
+- 72237e68: Fixed an issue where the alert columns were not initially showing.
+
+## 0.47.0
+
+### Minor Changes
+
+- 5994c4e0: File uploads now use multipart uploads. Closes https://github.com/SiaFoundation/renterd/issues/975
+- d20d0637: The browser now warns the user if they have active uploads and try to close the tab.
+- 805f32e0: All graphs now remember any chart configuration that the user has selected.
+- 9deee11e: Buckets now have a third view for viewing all active uploads, both local and from other sessions.
+- 5994c4e0: File uploads now have a max concurrency and get queued.
+- dddc110a: Alerts now support pagination. Closes https://github.com/SiaFoundation/renterd/issues/1001 Closes https://github.com/SiaFoundation/renterd/issues/862
+- 9deee11e: Remote file uploads can now be aborted from the uploads explorer. Closes https://github.com/SiaFoundation/web/issues/429
+- 2d6a9c77: Storage and upload price settings no longer default to or have the option to include redundancy. The price with the configured redundancy is now always shown below.
+- 9deee11e: The transfers bar now only lists downloads and shows two buttons with one navigating to the new uploads list.
+- dddc110a: Alerts now support the accumulated churn alert. Closes https://github.com/SiaFoundation/renterd/issues/1005
+- dddc110a: Alerts now have a dedicated tab with a larger area for display and navigation.
+
+### Patch Changes
+
+- 984ed75a: Fixed an issue where hovering over the file health information would crash the app. Closes https://github.com/SiaFoundation/renterd/issues/997
+
+## 0.46.0
+
+### Minor Changes
+
+- 035f90e9: The host context menu now has an option to reset the lost sector count.
+- c98f1941: The node profile details now include uptime.
+- 1afac605: File explorer navigation actions now retain the active explorer mode.
+- 4506593d: All app data will now refresh more frequently.
+- 1afac605: The selected file explorer mode is now persisted between sessions.
+
+### Patch Changes
+
+- 1afac605: The file breadcrumb nav now shows the root as "Buckets".
+- bbbe56a8: The contract timeline labels have been darkened to increase contrast and readability.
+- 1afac605: The explorer mode switcher button is now disabled when viewing buckets. Closes https://github.com/SiaFoundation/renterd/issues/973
+
+## 0.45.0
+
+### Minor Changes
+
+- 43029e2e: Uploading nested directories now preserves structure rather than flattening files into current directory.
+- a4099d4b: Files can now be sorted by size. Closes https://github.com/SiaFoundation/renterd/issues/860
+- e253b3e6: Files can now be moved by dragging into or out of directories. Closes https://github.com/SiaFoundation/renterd/issues/418
+- 021568d1: The file explorer now has a global mode that shows a flat list of files from across all directories in a bucket.
+- 021568d1: The file health indicator now show the percentage inline.
+- e3a5929e: Files and directories can now be renamed via the context menu. Closes https://github.com/SiaFoundation/renterd/issues/418
+- 021568d1: The file explorer global mode now allows you to sort across all files in a bucket.
+
 ## 0.44.0
 
 ### Minor Changes

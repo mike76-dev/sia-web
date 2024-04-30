@@ -8,7 +8,6 @@ import {
   buildRouteWithParams,
   InternalCallbackArgs,
   mergeInternalCallbackArgs,
-  RequestParams,
   Response,
   InternalHookArgsCallback,
   mergeInternalHookArgsCallback,
@@ -16,6 +15,7 @@ import {
   getPathFromKey,
 } from './request'
 import { useAppSettings } from './useAppSettings'
+import { RequestParams } from '@siafoundation/request'
 
 type DeleteFunc<Params extends RequestParams, Result> = {
   delete: (
@@ -84,6 +84,7 @@ export function useDeleteFunc<Params extends RequestParams, Result>(
         return {
           status: response.status,
           data: response.data,
+          headers: response.headers,
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {

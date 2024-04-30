@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 import {
   ConfigFields,
   Dialog,
@@ -8,16 +7,23 @@ import {
   triggerSuccessToast,
   useDialogFormHelpers,
 } from '@siafoundation/design-system'
-import { useWalletAddressAdd } from '@siafoundation/react-walletd'
+import { WalletAddressMetadata } from '@siafoundation/walletd-types'
+import { useWalletAddressAdd } from '@siafoundation/walletd-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { getWalletWasm } from '../../lib/wasm'
 import { useWallets } from '../../contexts/wallets'
 import BigNumber from 'bignumber.js'
 import { getFieldMnemonic, MnemonicFieldType } from '../../lib/fieldMnemonic'
 import { FieldMnemonic } from '../FieldMnemonic'
-import { useWalletCachedSeed } from '../../hooks/useWalletCachedSeed'
 import { useWalletAddresses } from '../../hooks/useWalletAddresses'
+import { getSDK } from '@siafoundation/sdk'
+import {
+  FieldRescan,
+  getRescanFields,
+  getDefaultRescanValues,
+  useTriggerRescan,
+} from '../FieldRescan'
+import { useSyncStatus } from '../../hooks/useSyncStatus'
 
 export type WalletAddressesGenerateSeedDialogParams = {
   walletId: string
@@ -30,26 +36,35 @@ type Props = {
   onOpenChange: (val: boolean) => void
 }
 
-function getDefaultValues(lastIndex: number) {
+function getDefaultValues({
+  nextIndex,
+  currentHeight,
+}: {
+  nextIndex: number
+  currentHeight: number
+}) {
   return {
     mnemonic: '',
-    index: new BigNumber(lastIndex),
+    index: new BigNumber(nextIndex),
     count: new BigNumber(1),
+    ...getDefaultRescanValues({ rescanStartHeight: currentHeight }),
   }
 }
 
+type Values = ReturnType<typeof getDefaultValues>
+
 function getFields({
-  seedHash,
+  mnemonicHash,
   mnemonicFieldType,
   setMnemonicFieldType,
 }: {
-  seedHash?: string
+  mnemonicHash?: string
   mnemonicFieldType: MnemonicFieldType
   setMnemonicFieldType: (type: MnemonicFieldType) => void
-}): ConfigFields<ReturnType<typeof getDefaultValues>, never> {
+}): ConfigFields<Values, never> {
   return {
     mnemonic: getFieldMnemonic({
-      seedHash,
+      mnemonicHash,
       setMnemonicFieldType,
       mnemonicFieldType,
     }),
@@ -72,6 +87,7 @@ function getFields({
         max: 1000,
       },
     },
+    ...getRescanFields(),
   }
 }
 
@@ -83,10 +99,14 @@ export function WalletAddressesGenerateSeedDialog({
 }: Props) {
   const { walletId } = params || {}
   const { lastIndex } = useWalletAddresses({ id: walletId })
-  const { dataset, saveWalletSeed } = useWallets()
+  const { dataset, cacheWalletMnemonic } = useWallets()
   const wallet = dataset?.find((w) => w.id === walletId)
   const nextIndex = lastIndex + 1
-  const defaultValues = getDefaultValues(nextIndex)
+  const syncStatus = useSyncStatus()
+  const defaultValues = getDefaultValues({
+    nextIndex,
+    currentHeight: syncStatus.nodeBlockHeight,
+  })
   const [mnemonicFieldType, setMnemonicFieldType] =
     useState<MnemonicFieldType>('password')
   const form = useForm({
@@ -111,75 +131,92 @@ export function WalletAddressesGenerateSeedDialog({
   const mnemonic = form.watch('mnemonic')
   const index = form.watch('index')
   const count = form.watch('count')
+  const shouldRescan = form.watch('shouldRescan')
 
   const fields = getFields({
-    seedHash: wallet?.seedHash,
+    mnemonicHash: wallet?.metadata.mnemonicHash,
     mnemonicFieldType,
     setMnemonicFieldType,
   })
 
   const addressAdd = useWalletAddressAdd()
-  const { getSeedFromCacheOrForm } = useWalletCachedSeed(walletId)
   const generateAddresses = useCallback(
     async (mnemonic: string, index: number, count: number) => {
-      const seedResponse = getSeedFromCacheOrForm({ mnemonic })
-      if (seedResponse.error) {
-        triggerErrorToast(seedResponse.error)
-        return
+      function toastBatchError(count: number, i: number, body: string) {
+        triggerErrorToast({
+          title: 'Error generating addresses',
+          body:
+            i > 0
+              ? `${
+                  i + 1
+                }/${count} addresses were generated and saved. Batch failed on with: ${body}`
+              : body,
+        })
       }
-      const { seed } = seedResponse
       for (let i = index; i < index + count; i++) {
-        const pkResponse = getWalletWasm().publicKeyAndAddressFromSeed(seed, i)
-        if (pkResponse.error) {
-          triggerErrorToast('Error generating addresses.')
+        const kp = getSDK().wallet.keyPairFromSeedPhrase(mnemonic, i)
+        if (kp.error) {
+          toastBatchError(count, i, kp.error)
           return
+        }
+        const suh = getSDK().wallet.standardUnlockHash(kp.publicKey)
+        if (suh.error) {
+          toastBatchError(count, i, suh.error)
+          return
+        }
+        const uc = getSDK().wallet.standardUnlockConditions(kp.publicKey)
+        if (uc.error) {
+          toastBatchError(count, i, uc.error)
+          return
+        }
+        const metadata: WalletAddressMetadata = {
+          index: i,
+          unlockConditions: uc.unlockConditions,
         }
         const response = await addressAdd.put({
           params: {
             id: walletId,
-            addr: pkResponse.address,
           },
           payload: {
-            index: i,
-            publicKey: pkResponse.publicKey,
+            address: suh.address,
+            description: '',
+            // TODO: add spendPolicy?
+            metadata,
           },
         })
         if (response.error) {
-          if (count === 1) {
-            triggerErrorToast('Error saving address.')
-          } else {
-            triggerErrorToast(
-              `Error saving addresses. ${
-                i > 0 ? 'Not all addresses were saved.' : ''
-              }`
-            )
-          }
+          toastBatchError(count, i, response.error)
           return
         }
       }
       if (count === 1) {
-        triggerSuccessToast('Successfully generated 1 address.')
+        triggerSuccessToast({ title: 'Generated 1 address' })
       } else {
-        triggerSuccessToast(`Successfully generated ${count} addresses.`)
+        triggerSuccessToast({
+          title: `Generated ${count} addresses`,
+        })
       }
 
       // if successfully generated an address, cache the seed
-      saveWalletSeed(walletId, seed)
+      cacheWalletMnemonic(walletId, mnemonic)
 
       closeAndReset()
     },
-    [
-      getSeedFromCacheOrForm,
-      closeAndReset,
-      addressAdd,
-      walletId,
-      saveWalletSeed,
-    ]
+    [closeAndReset, addressAdd, walletId, cacheWalletMnemonic]
   )
 
-  const onSubmit = useCallback(() => {
-    return generateAddresses(mnemonic, index.toNumber(), count.toNumber())
-  }, [generateAddresses, mnemonic, index, count])
+  const triggerRescan = useTriggerRescan()
+  const onSubmit = useCallback(
+    async (values: Values) => {
+      await generateAddresses(
+        wallet.state.mnemonic || mnemonic,
+        index.toNumber(),
+        count.toNumber()
+      )
+      triggerRescan(values)
+    },
+    [generateAddresses, mnemonic, index, count, wallet, triggerRescan]
+  )
 
   return (
     <Dialog
@@ -193,8 +230,13 @@ export function WalletAddressesGenerateSeedDialog({
       onSubmit={form.handleSubmit(onSubmit)}
       controls={
         <div className="flex justify-end">
-          <FormSubmitButton form={form} variant="accent" size="medium">
-            Continue
+          <FormSubmitButton
+            form={form}
+            size="medium"
+            variant={shouldRescan ? 'red' : 'accent'}
+          >
+            Generate addresses
+            {shouldRescan ? ' and rescan' : ''}
           </FormSubmitButton>
         </div>
       }
@@ -214,6 +256,7 @@ export function WalletAddressesGenerateSeedDialog({
           <FieldNumber form={form} fields={fields} name="count" />
         </div>
       </div>
+      <FieldRescan form={form} fields={fields} />
     </Dialog>
   )
 }

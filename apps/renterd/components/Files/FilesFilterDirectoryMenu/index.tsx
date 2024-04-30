@@ -1,24 +1,31 @@
 import { Button, Separator, TextField } from '@siafoundation/design-system'
 import { useEffect, useState } from 'react'
-import { useFiles } from '../../../contexts/files'
 import { useDebounce } from 'use-debounce'
 import { Close16 } from '@siafoundation/react-icons'
+import { useFilesManager } from '../../../contexts/filesManager'
 
-export function FilesFilterDirectoryMenu() {
-  const { filters, setFilter, removeFilter } = useFiles()
-  const [search, setSearch] = useState('')
+type Props = {
+  placeholder?: string
+}
+
+export function FilesFilterDirectoryMenu({ placeholder }: Props) {
+  const { setFilter, removeFilter, fileNamePrefixFilter } = useFilesManager()
+  const [search, setSearch] = useState(fileNamePrefixFilter)
   const [debouncedSearch] = useDebounce(search, 500)
 
+  // Update search value directly when fileNamePrefixFilter changes
   useEffect(() => {
-    const fileNamePrefixFilter = filters.find((f) => f.id === 'fileNamePrefix')
-    const fileNamePrefix = fileNamePrefixFilter?.value || ''
-    if (fileNamePrefix !== search) {
-      setSearch(fileNamePrefix)
+    if (fileNamePrefixFilter !== search) {
+      setSearch(fileNamePrefixFilter)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSearch, filters])
+  }, [fileNamePrefixFilter])
 
+  // Update and trigger the server filter if the debounced search value changes
   useEffect(() => {
+    if (fileNamePrefixFilter === debouncedSearch) {
+      return
+    }
     if (debouncedSearch.length) {
       setFilter({
         id: 'fileNamePrefix',
@@ -36,7 +43,7 @@ export function FilesFilterDirectoryMenu() {
       <TextField
         variant="ghost"
         focus="none"
-        placeholder="Filter files in current directory"
+        placeholder={placeholder || 'Filter files in current directory'}
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
         className="w-full !pl-0"

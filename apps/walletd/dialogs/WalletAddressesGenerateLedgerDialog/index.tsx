@@ -11,7 +11,8 @@ import {
   triggerSuccessToast,
   useDialogFormHelpers,
 } from '@siafoundation/design-system'
-import { useWalletAddressAdd } from '@siafoundation/react-walletd'
+import { WalletAddressMetadata } from '@siafoundation/walletd-types'
+import { useWalletAddressAdd } from '@siafoundation/walletd-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useWallets } from '../../contexts/wallets'
@@ -20,6 +21,14 @@ import { DeviceConnectForm } from '../DeviceConnectForm'
 import { useLedger } from '../../contexts/ledger'
 import { LedgerAddress } from './LedgerAddress'
 import { useWalletAddresses } from '../../hooks/useWalletAddresses'
+import { getSDK } from '@siafoundation/sdk'
+import {
+  FieldRescan,
+  getRescanFields,
+  getDefaultRescanValues,
+  useTriggerRescan,
+} from '../FieldRescan'
+import { useSyncStatus } from '../../hooks/useSyncStatus'
 
 export type WalletAddressesGenerateLedgerDialogParams = {
   walletId: string
@@ -33,15 +42,24 @@ type Props = {
   onOpenChange: (val: boolean) => void
 }
 
-function getDefaultValues(lastIndex: number) {
+function getDefaultValues({
+  nextIndex,
+  rescanStartHeight,
+}: {
+  nextIndex: number
+  rescanStartHeight: number
+}) {
   return {
     ledgerConnected: false,
-    index: new BigNumber(lastIndex),
+    index: new BigNumber(nextIndex),
     count: new BigNumber(1),
+    ...getDefaultRescanValues({ rescanStartHeight }),
   }
 }
 
-function getFields(): ConfigFields<ReturnType<typeof getDefaultValues>, never> {
+type Values = ReturnType<typeof getDefaultValues>
+
+function getFields(): ConfigFields<Values, never> {
   return {
     ledgerConnected: {
       type: 'boolean',
@@ -72,6 +90,7 @@ function getFields(): ConfigFields<ReturnType<typeof getDefaultValues>, never> {
         max: 1000,
       },
     },
+    ...getRescanFields(),
   }
 }
 
@@ -103,10 +122,14 @@ export function WalletAddressesGenerateLedgerDialog({
     lastIndex,
     datasetCount,
   } = useWalletAddresses({ id: walletId })
+  const syncStatus = useSyncStatus()
   const { dataset } = useWallets()
   const wallet = dataset?.find((w) => w.id === walletId)
   const nextIndex = lastIndex + 1
-  const defaultValues = getDefaultValues(nextIndex)
+  const defaultValues = getDefaultValues({
+    nextIndex,
+    rescanStartHeight: syncStatus.nodeBlockHeight,
+  })
   const form = useForm({
     mode: 'all',
     defaultValues,
@@ -134,6 +157,7 @@ export function WalletAddressesGenerateLedgerDialog({
 
   const formIndex = form.watch('index')
   const formCount = form.watch('count')
+  const shouldRescan = form.watch('shouldRescan')
 
   const fields = getFields()
 
@@ -213,12 +237,15 @@ export function WalletAddressesGenerateLedgerDialog({
   const indiciesWithAddresses = useMemo(() => {
     const indiciesWithAddresses: Record<string, AddressMeta> = {}
     for (const [index, { address, publicKey }] of Object.entries(indices)) {
-      const existing = existingAddresses?.find((a) => a.index === Number(index))
+      const existing = existingAddresses?.find(
+        (a) => a.metadata.index === Number(index)
+      )
       indiciesWithAddresses[index] = {
         isNew: !existing,
         index: Number(index),
         address: existing?.address || address,
-        publicKey: existing?.publicKey || publicKey,
+        publicKey:
+          existing?.metadata.unlockConditions.publicKeys[0] || publicKey,
       }
     }
     return indiciesWithAddresses
@@ -234,37 +261,50 @@ export function WalletAddressesGenerateLedgerDialog({
 
   const saveAddresses = useCallback(async () => {
     const count = newGeneratedAddresses.length
+    function toastBatchError(count: number, i: number, body: string) {
+      triggerErrorToast({
+        title: 'Error generating addresses',
+        body:
+          i > 0
+            ? `${
+                i + 1
+              }/${count} addresses were generated and saved. Batch failed on with: ${body}`
+            : body,
+      })
+    }
     for (const [
       i,
       { address, publicKey, index },
     ] of newGeneratedAddresses.entries()) {
+      const uc = getSDK().wallet.standardUnlockConditions(publicKey)
+      if (uc.error) {
+        toastBatchError(count, i, uc.error)
+        return
+      }
+      const metadata: WalletAddressMetadata = {
+        index,
+        unlockConditions: uc.unlockConditions,
+      }
       const response = await addressAdd.put({
         params: {
           id: walletId,
-          addr: address,
         },
         payload: {
-          index,
-          publicKey,
+          address,
+          description: '',
+          // TODO: add spendPolicy?
+          metadata,
         },
       })
       if (response.error) {
-        if (count === 1) {
-          triggerErrorToast('Error saving address.')
-        } else {
-          triggerErrorToast(
-            `Error saving addresses. ${
-              i > 0 ? 'Not all addresses were saved.' : ''
-            }`
-          )
-        }
+        toastBatchError(count, i, response.error)
         return
       }
     }
     if (count === 1) {
-      triggerSuccessToast('Successfully added 1 address.')
+      triggerSuccessToast({ title: 'Added 1 address' })
     } else {
-      triggerSuccessToast(`Successfully added ${count} addresses.`)
+      triggerSuccessToast({ title: `Added ${count} addresses` })
     }
     return
   }, [addressAdd, walletId, newGeneratedAddresses])
@@ -278,16 +318,17 @@ export function WalletAddressesGenerateLedgerDialog({
     defaultValues,
   })
 
-  const onSubmit = useCallback(async () => {
-    if (newGeneratedAddresses.length === 0) {
-      triggerErrorToast(
-        'Add and generate addresses with your Ledger device to continue.'
-      )
-      return
-    }
-    await saveAddresses()
-    closeAndReset()
-  }, [newGeneratedAddresses, saveAddresses, closeAndReset])
+  const triggerRescan = useTriggerRescan()
+  const onSubmit = useCallback(
+    async (values: Values) => {
+      if (newGeneratedAddresses.length > 0) {
+        await saveAddresses()
+      }
+      await triggerRescan(values)
+      closeAndReset()
+    },
+    [newGeneratedAddresses, saveAddresses, closeAndReset, triggerRescan]
+  )
 
   return (
     <Dialog
@@ -304,10 +345,17 @@ export function WalletAddressesGenerateLedgerDialog({
           <Button size="medium" variant="gray" onClick={closeAndReset}>
             Close
           </Button>
-          {newGeneratedAddresses.length > 0 && (
-            <FormSubmitButton form={form} variant="accent" size="medium">
-              Save {newGeneratedAddresses.length}{' '}
-              {newGeneratedAddresses.length === 1 ? 'address' : 'addresses'}
+          {(newGeneratedAddresses.length > 0 || shouldRescan) && (
+            <FormSubmitButton
+              form={form}
+              size="medium"
+              variant={shouldRescan ? 'red' : 'accent'}
+            >
+              {newGeneratedAddresses.length > 0
+                ? `Save ${newGeneratedAddresses.length} ${
+                    newGeneratedAddresses.length === 1 ? 'address' : 'addresses'
+                  }${shouldRescan ? ' and rescan' : ''}`
+                : 'Rescan'}
             </FormSubmitButton>
           )}
         </div>
@@ -350,6 +398,7 @@ export function WalletAddressesGenerateLedgerDialog({
             )}
           </div>
         </div>
+        <FieldRescan form={form} fields={fields} />
       </div>
     </Dialog>
   )

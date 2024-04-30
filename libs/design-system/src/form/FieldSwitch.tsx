@@ -32,6 +32,7 @@ export function FieldSwitch<
   const el = (
     <div className="flex gap-1 items-center">
       <Switch
+        aria-label={name}
         name={name}
         size={size}
         checked={value}
@@ -54,7 +55,12 @@ export function FieldSwitch<
   )
   if (group) {
     return (
-      <FieldGroup title={field.title} name={name} form={form}>
+      <FieldGroup
+        title={field.title}
+        name={name}
+        form={form}
+        className="pb-[1.5px]"
+      >
         {el}
       </FieldGroup>
     )

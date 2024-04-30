@@ -19,7 +19,7 @@ export function HomeContracts() {
           label="Active contracts"
           color={contracts.config.data['active'].color}
           value={contracts.stats['active']}
-          format={(v) => v.toFixed(0)}
+          valueFormat={(v) => v.toFixed(0)}
           defaultMode="latest"
           isLoading={contracts.isLoading}
           enabledModes={['latest', 'average']}
@@ -29,7 +29,7 @@ export function HomeContracts() {
           label="Successful contracts"
           color={contracts.config.data['successful'].color}
           value={contracts.stats['successful']}
-          format={(v) => v.toFixed(0)}
+          valueFormat={(v) => v.toFixed(0)}
           defaultMode="latest"
           isLoading={contracts.isLoading}
           enabledModes={['latest', 'average']}
@@ -39,14 +39,14 @@ export function HomeContracts() {
           label="Failed contracts"
           color={contracts.config.data['failed'].color}
           value={contracts.stats['failed']}
-          format={(v) => v.toFixed(0)}
+          valueFormat={(v) => v.toFixed(0)}
           defaultMode="latest"
           isLoading={contracts.isLoading}
           enabledModes={['latest', 'average']}
         />
       </DatumScrollArea>
       <ChartXY
-        id="contracts"
+        id="hostd/v0/metrics/graphs/contracts"
         actionsLeft={
           <>
             <Text font="mono" weight="semibold">

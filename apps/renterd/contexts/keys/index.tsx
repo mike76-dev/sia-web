@@ -3,7 +3,6 @@ import {
   useDatasetEmptyState,
   useClientFilters,
   useClientFilteredDataset,
-  minutesInMilliseconds,
 } from '@siafoundation/design-system'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useMemo } from 'react'
@@ -14,7 +13,8 @@ import {
   sortOptions,
 } from './types'
 import { columns } from './columns'
-import { useS3AuthenticationSettings } from '../../hooks/useS3AuthenticationSettings'
+import { defaultDatasetRefreshInterval } from '../../config/swr'
+import { useSettingS3Authentication } from '@siafoundation/renterd-react'
 
 const defaultLimit = 50
 
@@ -22,10 +22,10 @@ function useKeysMain() {
   const router = useRouter()
   const limit = Number(router.query.limit || defaultLimit)
   const offset = Number(router.query.offset || 0)
-  const response = useS3AuthenticationSettings({
+  const response = useSettingS3Authentication({
     config: {
       swr: {
-        refreshInterval: minutesInMilliseconds(1),
+        refreshInterval: defaultDatasetRefreshInterval,
       },
     },
   })
@@ -34,7 +34,6 @@ function useKeysMain() {
     if (!response.data) {
       return null
     }
-    console.log(response.data?.v4Keypairs)
     const data: KeyData[] =
       Object.entries(response.data?.v4Keypairs || {}).map(([key, secret]) => {
         return {
