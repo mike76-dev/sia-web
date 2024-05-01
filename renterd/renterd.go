@@ -5,7 +5,8 @@ import (
 	"io/fs"
 	"net/http"
 
-	"go.sia.tech/web/internal/nextjs"
+	//"go.sia.tech/web/internal/nextjs"
+	"github.com/mike76-dev/sia-web/internal/nextjs"
 )
 
 //go:embed all:assets/*
