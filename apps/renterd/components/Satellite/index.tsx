@@ -279,9 +279,9 @@ import {
               },
             })
           }
-          triggerSuccessToast('Configuration has been saved.')
+          triggerSuccessToast({ title: 'Configuration has been saved.' })
         } catch (e) {
-          triggerErrorToast((e as Error).message)
+          triggerErrorToast({ title: (e as Error).message })
           console.log(e)
         }
       },
@@ -289,11 +289,11 @@ import {
     )
   
     const onInvalid = useCallback((errors: FieldErrors<typeof initialValues>) => {
-      triggerErrorToast(
+      triggerErrorToast({ title:
         entries(errors)
           .map(([key, e]) => `${fields[key].title}: ${e.message}`)
           .join(', ')
-      )
+      })
     }, [])
   
     const onSubmit = useMemo(
